@@ -57,3 +57,4 @@ Si vous hébergez cette application sur GitHub (HTTPS), le navigateur bloquera l
 
 **Pour tester en réel :**
 Configurez votre navigateur (Chrome/Edge) pour autoriser le "contenu non sécurisé" spécifiquement pour l'URL de votre déploiement.
+# Test workflow
