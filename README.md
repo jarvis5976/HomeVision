@@ -1,4 +1,5 @@
-# HomeSense Smart Dashboard
+
+# HomeVision Smart Dashboard
 
 Tableau de bord intelligent pour le suivi de l'énergie (Solaire, Batterie Victron, Tesla) et des capteurs domestiques.
 
@@ -12,17 +13,17 @@ Tableau de bord intelligent pour le suivi de l'énergie (Solaire, Batterie Victr
 
 ## Déploiement sur GitHub
 
-Pour envoyer ce code sur votre compte GitHub, suivez ces étapes :
+Pour envoyer ce code sur votre compte GitHub `jarvis5976/HomeVision`, suivez ces étapes :
 
-1. **Créez un dépôt sur GitHub** : Allez sur [github.com/new](https://github.com/new) et créez un nouveau dépôt public ou privé (ne l'initialisez pas avec un README ou une licence).
+1. **Créez un dépôt sur GitHub** : Allez sur [github.com/new](https://github.com/new) et créez un nouveau dépôt nommé `HomeVision`.
 2. **Ouvrez votre terminal** dans le dossier de ce projet.
 3. **Initialisez Git et envoyez le code** :
    ```bash
    git init
    git add .
-   git commit -m "Initial commit: HomeSense Dashboard"
+   git commit -m "Initial commit: HomeVision Dashboard"
    git branch -M main
-   git remote add origin https://github.com/VOTRE_NOM_UTILISATEUR/NOM_DU_DEPOT.git
+   git remote add origin https://github.com/jarvis5976/HomeVision.git
    git push -u origin main
    ```
 
