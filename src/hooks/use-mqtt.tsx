@@ -29,14 +29,14 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // Attempting to connect to the broker specified in the requirements.
-    // Note: For browser usage, the broker must support WebSockets on this address.
-    // Using a fallback for local dev if 192.168.0.3 is not reachable.
-    const brokerUrl = 'ws://192.168.0.3:1885'; // Assuming WS protocol for browser compatibility
+    // Note: Since this app is served over HTTPS, browsers require the use of WSS (Secure WebSockets).
+    // The broker at 192.168.0.3 must be configured to support SSL/TLS on port 1885.
+    const brokerUrl = 'wss://192.168.0.3:1885'; 
     
     const mqttClient = mqtt.connect(brokerUrl, {
       connectTimeout: 5000,
       reconnectPeriod: 1000,
-      // In a real environment, you might need authentication
+      rejectUnauthorized: false, // Often needed for local self-signed certificates in dev
     });
 
     mqttClient.on('connect', () => {
