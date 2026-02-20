@@ -2,13 +2,13 @@
 "use client";
 
 import Link from "next/link";
-import { LayoutDashboard, Settings, Activity, Shield, Home, Menu } from "lucide-react";
+import { LayoutDashboard, Settings, Activity, Shield, Home, AlertCircle } from "lucide-react";
 import { useMQTT } from "@/hooks/use-mqtt";
 import { StatusBadge } from "./StatusBadge";
 import { cn } from "@/lib/utils";
 
 export function Sidebar() {
-  const { connected } = useMQTT();
+  const { connected, error } = useMQTT();
 
   const navItems = [
     { name: "Overview", icon: LayoutDashboard, href: "/", active: true },
@@ -47,7 +47,17 @@ export function Sidebar() {
         </nav>
       </div>
 
-      <div className="mt-auto p-6 border-t border-border">
+      <div className="mt-auto p-6 border-t border-border space-y-4">
+        {error && (
+          <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-xl flex gap-2 items-start">
+            <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold text-destructive uppercase">Connection Error</p>
+              <p className="text-[10px] text-destructive/80 leading-tight mt-1">{error}</p>
+            </div>
+          </div>
+        )}
+
         <div className="bg-background rounded-xl p-4 border border-border">
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Broker Connection</p>
           <div className="flex items-center justify-between">

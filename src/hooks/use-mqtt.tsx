@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, createContext, useContext, useCallback } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import mqtt, { MqttClient } from 'mqtt';
 
 interface MQTTMessage {
@@ -17,6 +17,7 @@ interface MQTTContextType {
   addTopic: (topic: string) => void;
   removeTopic: (topic: string) => void;
   publish: (topic: string, message: string) => void;
+  error: string | null;
 }
 
 const MQTTContext = createContext<MQTTContextType | undefined>(undefined);
@@ -26,38 +27,52 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [connected, setConnected] = useState(false);
   const [messages, setMessages] = useState<MQTTMessage[]>([]);
   const [topics, setTopics] = useState<string[]>(['home/sensors/+', 'home/status/gate', 'home/livingroom/temp']);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Attempting to connect to the broker specified in the requirements.
-    // Note: Since this app is served over HTTPS, browsers require the use of WSS (Secure WebSockets).
-    // The broker at 192.168.0.3 must be configured to support SSL/TLS on port 1885.
-    const brokerUrl = 'wss://192.168.0.3:1885'; 
+    // Reverting to ws:// as requested. 
+    // NOTE: This will trigger a SecurityError in browsers if the page is HTTPS.
+    // Browsers require WSS (Secure WebSockets) for HTTPS pages.
+    const brokerUrl = 'ws://192.168.0.3:1885'; 
     
-    const mqttClient = mqtt.connect(brokerUrl, {
-      connectTimeout: 5000,
-      reconnectPeriod: 1000,
-      rejectUnauthorized: false, // Often needed for local self-signed certificates in dev
-    });
+    let mqttClient: MqttClient | null = null;
 
-    mqttClient.on('connect', () => {
-      setConnected(true);
-      topics.forEach(t => mqttClient.subscribe(t));
-    });
+    try {
+      mqttClient = mqtt.connect(brokerUrl, {
+        connectTimeout: 5000,
+        reconnectPeriod: 1000,
+        rejectUnauthorized: false,
+      });
 
-    mqttClient.on('message', (topic, payload) => {
-      setMessages(prev => [
-        { topic, message: payload.toString(), timestamp: new Date() },
-        ...prev.slice(0, 49) // Keep last 50 messages
-      ]);
-    });
+      mqttClient.on('connect', () => {
+        setConnected(true);
+        setError(null);
+        topics.forEach(t => mqttClient?.subscribe(t));
+      });
 
-    mqttClient.on('close', () => setConnected(false));
-    mqttClient.on('error', (err) => console.error('MQTT Error:', err));
+      mqttClient.on('message', (topic, payload) => {
+        setMessages(prev => [
+          { topic, message: payload.toString(), timestamp: new Date() },
+          ...prev.slice(0, 49)
+        ]);
+      });
 
-    setClient(mqttClient);
+      mqttClient.on('close', () => setConnected(false));
+      
+      mqttClient.on('error', (err) => {
+        console.error('MQTT Error:', err);
+        setError(err.message || "Connection error. Check browser console.");
+      });
+
+      setClient(mqttClient);
+    } catch (e: any) {
+      // Catch synchronous security errors (like HTTPS blocking WS)
+      console.error('MQTT Initialization Error:', e);
+      setError("Security Block: Browsers require WSS on HTTPS sites.");
+    }
 
     return () => {
-      mqttClient.end();
+      mqttClient?.end();
     };
   }, []);
 
@@ -85,7 +100,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <MQTTContext.Provider value={{ connected, messages, topics, addTopic, removeTopic, publish }}>
+    <MQTTContext.Provider value={{ connected, messages, topics, addTopic, removeTopic, publish, error }}>
       {children}
     </MQTTContext.Provider>
   );
