@@ -7,27 +7,48 @@ import { MetricCard } from "@/components/dashboard/MetricCard";
 import { SensorChart } from "@/components/dashboard/SensorChart";
 import { TopicManager } from "@/components/dashboard/TopicManager";
 import { AnomalyAlerter } from "@/components/dashboard/AnomalyAlerter";
-import { Thermometer, Droplets, Zap, Lock, Bell, Search, User } from "lucide-react";
+import { 
+  Zap, 
+  Battery, 
+  Car, 
+  Droplets, 
+  Sun, 
+  Home, 
+  Building2, 
+  Search, 
+  Bell, 
+  User, 
+  CloudSun,
+  Flame
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 function DashboardContent() {
-  const { messages } = useMQTT();
+  const { latestData, messages } = useMQTT();
 
-  // Mock data derivation from MQTT messages or static for visualization
-  const getLatestValue = (topicPart: string) => {
-    const msg = messages.find(m => m.topic.includes(topicPart));
-    return msg ? msg.message : "24.5"; // Fallback mock
-  };
+  // Deriving values from latestData provided in the user example
+  const gridPower = latestData?.grid?.watts ?? 0;
+  const solarProduction = latestData?.production?.total ?? 0;
+  const batterySoc = latestData?.battery?.soc ?? 0;
+  const batteryPower = latestData?.battery?.watts ?? 0;
+  const houseConsumption = latestData?.energy?.total?.maison ?? 0;
+  const annexeConsumption = latestData?.energy?.total?.annexe ?? 0;
+  const totalWater = latestData?.eau?.total ?? 0;
+  const teslaBattery = latestData?.voiture?.tesla?.battery_level ?? 0;
+  const teslaRange = latestData?.voiture?.tesla?.est_battery_range_km ?? 0;
 
   const chartData = [
-    { time: "00:00", value: 22 },
-    { time: "04:00", value: 21 },
-    { time: "08:00", value: 23 },
-    { time: "12:00", value: 26 },
-    { time: "16:00", value: 25 },
-    { time: "20:00", value: 24 },
-    { time: "23:59", value: 23.5 },
+    { time: "00:00", value: 2200 },
+    { time: "04:00", value: 1800 },
+    { time: "08:00", value: 3500 },
+    { time: "12:00", value: solarProduction > 0 ? -solarProduction : 4000 },
+    { time: "16:00", value: 4500 },
+    { time: "20:00", value: gridPower },
+    { time: "23:59", value: 2500 },
   ];
 
   return (
@@ -40,13 +61,18 @@ function DashboardContent() {
             <div className="relative w-full max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
-                placeholder="Search devices or sensors..." 
+                placeholder="Search metrics..." 
                 className="pl-9 bg-secondary border-none h-9 text-sm focus-visible:ring-1"
               />
             </div>
           </div>
           
           <div className="flex items-center gap-4">
+            {latestData?.zenFlex && (
+              <Badge className={`${latestData.zenFlex.contratColor} border-none text-white px-3 py-1`}>
+                {latestData.zenFlex.couleurJourJ}
+              </Badge>
+            )}
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="w-5 h-5 text-muted-foreground" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full border-2 border-white" />
@@ -55,7 +81,7 @@ function DashboardContent() {
             <div className="flex items-center gap-3">
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-bold leading-none">Home Admin</p>
-                <p className="text-[10px] text-muted-foreground mt-1">Primary Manager</p>
+                <p className="text-[10px] text-muted-foreground mt-1">Full Access</p>
               </div>
               <div className="w-9 h-9 bg-primary/10 rounded-full flex items-center justify-center overflow-hidden">
                 <User className="w-5 h-5 text-primary" />
@@ -69,79 +95,162 @@ function DashboardContent() {
           <section>
             <div className="flex justify-between items-end mb-6">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight text-foreground">Home Overview</h2>
-                <p className="text-sm text-muted-foreground">Real-time monitoring from your MQTT broker</p>
+                <h2 className="text-2xl font-bold tracking-tight text-foreground">Energy Center</h2>
+                <p className="text-sm text-muted-foreground">Real-time monitoring of your smart energy ecosystem</p>
               </div>
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                Generate Report
-              </Button>
+              <div className="flex gap-3">
+                 <Badge variant="outline" className="flex items-center gap-2 px-3 py-1 bg-white">
+                  <CloudSun className="w-3.5 h-3.5 text-orange-500" />
+                  Forecast Today: {latestData?.solCast?.today ?? 0} kWh
+                </Badge>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <MetricCard 
-                title="Temperature" 
-                value={getLatestValue('temp')} 
-                unit="°C" 
-                icon={Thermometer} 
-                trend={1.2} 
-              />
-              <MetricCard 
-                title="Humidity" 
-                value={getLatestValue('humidity') || "42"} 
-                unit="%" 
-                icon={Droplets} 
-                trend={-0.5} 
-              />
-              <MetricCard 
-                title="Power Usage" 
-                value="2.4" 
-                unit="kW" 
+                title="Grid Connection" 
+                value={gridPower} 
+                unit="W" 
                 icon={Zap} 
-                trend={15} 
-                status="alert"
+                status={gridPower > 6000 ? 'alert' : 'online'}
+                trend={latestData?.grid?.sens === 'Achat' ? 0 : 0} 
               />
               <MetricCard 
-                title="Gate Lock" 
-                value="Secure" 
-                icon={Lock} 
+                title="Solar Production" 
+                value={solarProduction} 
+                unit="W" 
+                icon={Sun} 
+              />
+              <MetricCard 
+                title="Battery" 
+                value={batterySoc} 
+                unit="%" 
+                icon={Battery} 
+                status={batterySoc < 20 ? 'alert' : 'online'}
+              />
+              <MetricCard 
+                title="Total Consumption" 
+                value={latestData?.energy?.total?.all ?? 0} 
+                unit="W" 
+                icon={Home} 
               />
             </div>
           </section>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
-              <SensorChart title="Ambient Temperature (24h)" data={chartData} />
+              <SensorChart title="Total Power Load (24h)" data={chartData} />
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <TopicManager />
+                {/* Detailed Consumption */}
+                <Card className="border-none shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-primary" />
+                      Detailed Consumption
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-medium">
+                        <span className="flex items-center gap-1.5"><Home className="w-3.5 h-3.5" /> Main House</span>
+                        <span>{houseConsumption} W</span>
+                      </div>
+                      <Progress value={(houseConsumption / (latestData?.energy?.total?.all || 1)) * 100} className="h-2" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-medium">
+                        <span className="flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5" /> Annexe</span>
+                        <span>{annexeConsumption} W</span>
+                      </div>
+                      <Progress value={(annexeConsumption / (latestData?.energy?.total?.all || 1)) * 100} className="h-2" />
+                    </div>
+                    <div className="pt-4 grid grid-cols-2 gap-4">
+                      <div className="p-3 bg-secondary rounded-xl">
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold">Water Heater</p>
+                        <p className="text-lg font-bold flex items-center gap-2">
+                          <Flame className="w-4 h-4 text-orange-500" />
+                          {latestData?.chauffeEau?.total ?? 0} W
+                        </p>
+                      </div>
+                      <div className="p-3 bg-secondary rounded-xl">
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold">Water Usage</p>
+                        <p className="text-lg font-bold flex items-center gap-2">
+                          <Droplets className="w-4 h-4 text-blue-500" />
+                          {totalWater} m³
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 <AnomalyAlerter />
               </div>
             </div>
 
             <aside className="space-y-8">
+              {/* Tesla Widget */}
+              <Card className="border-none shadow-sm overflow-hidden bg-primary/5 border-primary/10">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Car className="w-4 h-4 text-primary" />
+                    Tesla Model {latestData?.voiture?.tesla?.model ?? 'Y'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 pt-2">
+                  <div className="flex items-end justify-between mb-4">
+                    <div>
+                      <p className="text-3xl font-bold">{teslaBattery}%</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
+                        Estimated Range: {teslaRange} km
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-bold text-primary uppercase">
+                        {latestData?.voiture?.tesla?.charging_state}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">
+                        Plugged: {latestData?.voiture?.tesla?.plugged_in ? 'Yes' : 'No'}
+                      </p>
+                    </div>
+                  </div>
+                  <Progress value={teslaBattery} className="h-2.5 bg-primary/20" />
+                  <div className="mt-6 grid grid-cols-2 gap-3">
+                    <div className="text-center p-2 rounded-lg bg-white/50 border border-border/50">
+                      <p className="text-[10px] text-muted-foreground">Inside Temp</p>
+                      <p className="text-sm font-bold">{latestData?.voiture?.tesla?.inside_temp}°C</p>
+                    </div>
+                    <div className="text-center p-2 rounded-lg bg-white/50 border border-border/50">
+                      <p className="text-[10px] text-muted-foreground">Odometer</p>
+                      <p className="text-sm font-bold">{Math.round(latestData?.voiture?.tesla?.odometer ?? 0)} km</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* System Overview */}
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-border">
-                <h3 className="text-base font-bold mb-4">Live Activity</h3>
+                <h3 className="text-base font-bold mb-4">Battery Health</h3>
                 <div className="space-y-4">
-                  {messages.length > 0 ? (
-                    messages.slice(0, 6).map((msg, i) => (
-                      <div key={i} className="flex gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group">
-                        <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-                          <Activity className="w-5 h-5 text-accent" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-bold truncate">{msg.topic}</p>
-                          <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{msg.message}</p>
-                        </div>
-                        <span className="text-[10px] text-muted-foreground whitespace-nowrap pt-1">
-                          {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-center py-10 text-muted-foreground italic">
-                      Waiting for incoming MQTT messages...
-                    </p>
-                  )}
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 border border-border">
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase">Power Flow</p>
+                      <p className="text-sm font-bold">{batteryPower} W</p>
+                    </div>
+                    <Badge variant={batteryPower > 0 ? "default" : "secondary"} className="text-[10px]">
+                      {batteryPower > 0 ? 'Charging' : 'Discharging'}
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase">Voltage</p>
+                      <p className="text-sm font-bold">{latestData?.battery?.voltage ?? 0} V</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase">Temp</p>
+                      <p className="text-sm font-bold">{latestData?.battery?.temperature ?? 0} °C</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 

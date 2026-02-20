@@ -4,6 +4,19 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import mqtt, { MqttClient } from 'mqtt';
 
+export interface HomeDashboardData {
+  compteurEdf?: { conso_base: number; isousc: number };
+  eau?: { total: number; maison: number; annexe: number };
+  grid?: { watts: number; sens: string };
+  production?: { total: number; detail: any };
+  battery?: { watts: number; soc: number; stateLabel: string; voltage: number; temperature: number };
+  voiture?: { tesla: any };
+  energy?: { total: { all: number; maison: number; annexe: number }; detail: any };
+  zenFlex?: { couleurJourJ: string; couleurJourJ1: string; contratColor: string };
+  solCast?: { today: number; tomorrow: number };
+  chauffeEau?: { total: number };
+}
+
 interface MQTTMessage {
   topic: string;
   message: string;
@@ -13,6 +26,7 @@ interface MQTTMessage {
 interface MQTTContextType {
   connected: boolean;
   messages: MQTTMessage[];
+  latestData: HomeDashboardData | null;
   topics: string[];
   addTopic: (topic: string) => void;
   removeTopic: (topic: string) => void;
@@ -26,13 +40,13 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [client, setClient] = useState<MqttClient | null>(null);
   const [connected, setConnected] = useState(false);
   const [messages, setMessages] = useState<MQTTMessage[]>([]);
-  const [topics, setTopics] = useState<string[]>(['home/sensors/+', 'home/status/gate', 'home/livingroom/temp']);
+  const [latestData, setLatestData] = useState<HomeDashboardData | null>(null);
+  const [topics, setTopics] = useState<string[]>(['home/dashboard/data', 'home/sensors/#']);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Reverting to ws:// as requested. 
-    // NOTE: This will trigger a SecurityError in browsers if the page is HTTPS.
-    // Browsers require WSS (Secure WebSockets) for HTTPS pages.
+    // Note: ws:// is used as requested. 
+    // If the browser blocks this on an HTTPS page, it will trigger a SecurityError.
     const brokerUrl = 'ws://192.168.0.3:1885'; 
     
     let mqttClient: MqttClient | null = null;
@@ -51,8 +65,20 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       mqttClient.on('message', (topic, payload) => {
+        const msgStr = payload.toString();
+        
+        // Handle nested data objects if received on the main topic
+        if (topic === 'home/dashboard/data') {
+          try {
+            const parsed = JSON.parse(msgStr);
+            setLatestData(parsed);
+          } catch (e) {
+            console.error("Failed to parse dashboard data", e);
+          }
+        }
+
         setMessages(prev => [
-          { topic, message: payload.toString(), timestamp: new Date() },
+          { topic, message: msgStr, timestamp: new Date() },
           ...prev.slice(0, 49)
         ]);
       });
@@ -60,14 +86,11 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       mqttClient.on('close', () => setConnected(false));
       
       mqttClient.on('error', (err) => {
-        console.error('MQTT Error:', err);
-        setError(err.message || "Connection error. Check browser console.");
+        setError(err.message);
       });
 
       setClient(mqttClient);
     } catch (e: any) {
-      // Catch synchronous security errors (like HTTPS blocking WS)
-      console.error('MQTT Initialization Error:', e);
       setError("Security Block: Browsers require WSS on HTTPS sites.");
     }
 
@@ -83,9 +106,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [topics, client, connected]);
 
   const addTopic = (topic: string) => {
-    if (!topics.includes(topic)) {
-      setTopics([...topics, topic]);
-    }
+    if (!topics.includes(topic)) setTopics([...topics, topic]);
   };
 
   const removeTopic = (topic: string) => {
@@ -94,13 +115,11 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const publish = (topic: string, message: string) => {
-    if (client && connected) {
-      client.publish(topic, message);
-    }
+    if (client && connected) client.publish(topic, message);
   };
 
   return (
-    <MQTTContext.Provider value={{ connected, messages, topics, addTopic, removeTopic, publish, error }}>
+    <MQTTContext.Provider value={{ connected, messages, latestData, topics, addTopic, removeTopic, publish, error }}>
       {children}
     </MQTTContext.Provider>
   );
