@@ -70,20 +70,26 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchRealData = useCallback(async () => {
     try {
-      const response = await fetch('http://192.168.0.3/Dashboard/assets/instant_from_mqtt.php');
+      const response = await fetch('http://192.168.0.3/Dashboard/assets/instant_from_mqtt.php', {
+        // Adding a short timeout and cache settings to avoid hanging on blockages
+        signal: AbortSignal.timeout(3000)
+      });
+      
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
       setLatestData(data);
       setError(null);
       
-      // Log as a pseudo-message for the UI
       setMessages(prev => [
         { topic: 'api/poll', message: 'Data updated from endpoint', timestamp: new Date() },
         ...prev.slice(0, 9)
       ]);
     } catch (e: any) {
-      console.error("Polling error:", e);
-      setError(e.message || "Failed to fetch from local endpoint. Note: Browsers block HTTP on HTTPS pages (Mixed Content).");
+      // Don't log to console.error to avoid spamming the developer overlay
+      const errorMessage = e.name === 'TypeError' 
+        ? "Network error: Connection refused or Mixed Content block (HTTP on HTTPS)."
+        : e.message || "Failed to fetch from local endpoint.";
+      setError(errorMessage);
     }
   }, []);
 
@@ -124,7 +130,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isSimulated) {
       pollInterval.current = setInterval(runSimulation, 3000);
     } else {
-      fetchRealData(); // Initial fetch
+      fetchRealData(); 
       pollInterval.current = setInterval(fetchRealData, 5000);
     }
 

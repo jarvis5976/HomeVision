@@ -15,22 +15,17 @@ import {
   Sun, 
   Home, 
   Building2, 
-  Search, 
-  Bell, 
-  User, 
   CloudSun,
   Flame
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
 function DashboardContent() {
-  const { latestData, messages } = useMQTT();
+  const { latestData } = useMQTT();
 
-  // Deriving values from latestData provided in the user example
+  // Mapping actual values from the specific JSON structure provided
   const gridPower = latestData?.grid?.watts ?? 0;
   const solarProduction = latestData?.production?.total ?? 0;
   const batterySoc = latestData?.battery?.soc ?? 0;
@@ -38,14 +33,16 @@ function DashboardContent() {
   const houseConsumption = latestData?.energy?.total?.maison ?? 0;
   const annexeConsumption = latestData?.energy?.total?.annexe ?? 0;
   const totalWater = latestData?.eau?.total ?? 0;
+  
   const teslaBattery = latestData?.voiture?.tesla?.battery_level ?? 0;
   const teslaRange = latestData?.voiture?.tesla?.est_battery_range_km ?? 0;
 
+  // Mock chart data for visualization
   const chartData = [
     { time: "00:00", value: 2200 },
     { time: "04:00", value: 1800 },
     { time: "08:00", value: 3500 },
-    { time: "12:00", value: solarProduction > 0 ? -solarProduction : 4000 },
+    { time: "12:00", value: 4200 },
     { time: "16:00", value: 4500 },
     { time: "20:00", value: gridPower },
     { time: "23:59", value: 2500 },
@@ -55,38 +52,19 @@ function DashboardContent() {
     <div className="flex min-h-screen bg-background">
       <Sidebar />
       <main className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="h-16 bg-white border-b border-border flex items-center justify-between px-8 sticky top-0 z-10">
-          <div className="flex items-center gap-4 w-1/3">
-            <div className="relative w-full max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search metrics..." 
-                className="pl-9 bg-secondary border-none h-9 text-sm focus-visible:ring-1"
-              />
-            </div>
-          </div>
-          
+        {/* Simplified Header */}
+        <header className="h-16 bg-white border-b border-border flex items-center justify-end px-8 sticky top-0 z-10">
           <div className="flex items-center gap-4">
             {latestData?.zenFlex && (
-              <Badge className={`${latestData.zenFlex.contratColor} border-none text-white px-3 py-1`}>
+              <Badge className={`${latestData.zenFlex.contratColor} border-none text-white px-3 py-1 font-bold`}>
                 {latestData.zenFlex.couleurJourJ}
               </Badge>
             )}
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-5 h-5 text-muted-foreground" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full border-2 border-white" />
-            </Button>
-            <div className="h-8 w-px bg-border mx-2" />
-            <div className="flex items-center gap-3">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold leading-none">Home Admin</p>
-                <p className="text-[10px] text-muted-foreground mt-1">Full Access</p>
-              </div>
-              <div className="w-9 h-9 bg-primary/10 rounded-full flex items-center justify-center overflow-hidden">
-                <User className="w-5 h-5 text-primary" />
-              </div>
-            </div>
+            {latestData?.zenFlex?.couleurJourJ1 && (
+              <Badge variant="outline" className="border-primary/20 text-primary px-3 py-1 font-medium bg-primary/5">
+                {latestData.zenFlex.couleurJourJ1}
+              </Badge>
+            )}
           </div>
         </header>
 
@@ -113,7 +91,6 @@ function DashboardContent() {
                 unit="W" 
                 icon={Zap} 
                 status={gridPower > 6000 ? 'alert' : 'online'}
-                trend={latestData?.grid?.sens === 'Achat' ? 0 : 0} 
               />
               <MetricCard 
                 title="Solar Production" 
@@ -202,7 +179,7 @@ function DashboardContent() {
                     <div>
                       <p className="text-3xl font-bold">{teslaBattery}%</p>
                       <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
-                        Estimated Range: {teslaRange} km
+                        Est. Range: {teslaRange} km
                       </p>
                     </div>
                     <div className="text-right">
