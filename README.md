@@ -12,25 +12,25 @@ Tableau de bord intelligent pour le suivi de l'énergie (Solaire, Batterie Victr
 
 ## Déploiement sur GitHub
 
-Pour envoyer ce code sur votre compte GitHub :
+Pour envoyer ce code sur votre compte GitHub, suivez ces étapes :
 
-1. Créez un nouveau dépôt vide sur GitHub.
-2. Ouvrez votre terminal dans le dossier du projet.
-3. Exécutez les commandes suivantes :
-
-```bash
-git init
-git add .
-git commit -m "Initial commit: HomeSense Dashboard"
-git branch -M main
-git remote add origin https://github.com/VOTRE_NOM_UTILISATEUR/VOTRE_DEPOT.git
-git push -u origin main
-```
+1. **Créez un dépôt sur GitHub** : Allez sur [github.com/new](https://github.com/new) et créez un nouveau dépôt public ou privé (ne l'initialisez pas avec un README ou une licence).
+2. **Ouvrez votre terminal** dans le dossier de ce projet.
+3. **Initialisez Git et envoyez le code** :
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit: HomeSense Dashboard"
+   git branch -M main
+   git remote add origin https://github.com/VOTRE_NOM_UTILISATEUR/NOM_DU_DEPOT.git
+   git push -u origin main
+   ```
 
 ## Note importante sur les données réelles
 L'application tente de contacter un endpoint local (`192.168.0.3`). 
-Si vous hébergez cette application sur une URL sécurisée (**HTTPS**), le navigateur bloquera les requêtes vers l'IP locale en **HTTP** (Mixed Content Error). 
+Si vous hébergez cette application sur GitHub Pages ou un service Cloud (**HTTPS**), le navigateur bloquera par défaut les requêtes vers l'IP locale en **HTTP** (Erreur Mixed Content). 
 
-Pour utiliser les données réelles en ligne, vous devrez :
-1. Soit sécuriser votre serveur local avec un certificat SSL (**HTTPS**).
-2. Soit utiliser un tunnel (type Cloudflare Tunnel ou ngrok) pour exposer votre API locale en HTTPS.
+**Solutions possibles :**
+1. Utiliser un tunnel sécurisé (type Cloudflare Tunnel ou ngrok) pour exposer votre API locale en HTTPS.
+2. Configurer votre navigateur pour autoriser le "contenu non sécurisé" sur votre domaine de déploiement.
+3. Utiliser le mode **Simulation** pour la démonstration.
