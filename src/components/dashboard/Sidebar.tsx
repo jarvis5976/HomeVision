@@ -4,7 +4,6 @@
 import Link from "next/link";
 import { LayoutDashboard, Settings, Activity, Shield, Home, AlertCircle, PlayCircle, Radio } from "lucide-react";
 import { useMQTT } from "@/hooks/use-mqtt";
-import { StatusBadge } from "./StatusBadge";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -85,14 +84,6 @@ export function Sidebar() {
             </div>
           </div>
         )}
-
-        <div className="bg-background rounded-xl p-4 border border-border">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">System Integrity</p>
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium">Core Engine</span>
-            <StatusBadge status={!error ? 'online' : 'alert'} />
-          </div>
-        </div>
       </div>
     </div>
   );

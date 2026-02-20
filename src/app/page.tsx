@@ -5,8 +5,6 @@ import { MQTTProvider, useMQTT } from "@/hooks/use-mqtt";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { SensorChart } from "@/components/dashboard/SensorChart";
-import { TopicManager } from "@/components/dashboard/TopicManager";
-import { AnomalyAlerter } from "@/components/dashboard/AnomalyAlerter";
 import { 
   Zap, 
   Battery, 
@@ -69,7 +67,7 @@ function DashboardContent() {
         </header>
 
         {/* Dashboard Body */}
-        <div className="p-8 max-w-7xl mx-auto w-full space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+        <div className="p-8 max-w-7xl mx-auto w-full space-y-8 animate-in fade-in slide-up duration-500">
           <section>
             <div className="flex justify-between items-end mb-6">
               <div>
@@ -118,7 +116,7 @@ function DashboardContent() {
             <div className="lg:col-span-2 space-y-8">
               <SensorChart title="Total Power Load (24h)" data={chartData} />
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 gap-8">
                 {/* Detailed Consumption */}
                 <Card className="border-none shadow-sm">
                   <CardHeader>
@@ -160,8 +158,6 @@ function DashboardContent() {
                     </div>
                   </CardContent>
                 </Card>
-
-                <AnomalyAlerter />
               </div>
             </div>
 
@@ -228,18 +224,6 @@ function DashboardContent() {
                       <p className="text-sm font-bold">{latestData?.battery?.temperature ?? 0} °C</p>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              <div className="relative rounded-2xl overflow-hidden aspect-[4/3] group shadow-lg">
-                <img 
-                  src="https://picsum.photos/seed/smarthome-sidebar/400/300" 
-                  alt="Home Status" 
-                  className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-5">
-                  <p className="text-white font-bold">System Integrity</p>
-                  <p className="text-white/70 text-xs">All components operational</p>
                 </div>
               </div>
             </aside>
