@@ -7,31 +7,39 @@ Tableau de bord intelligent pour le suivi de l'énergie (Solaire, Batterie Victr
 
 - **Energy Center** : Monitoring en temps réel (Grille, Solaire, Batterie).
 - **Détails de consommation** : Répartition Maison vs Annexe.
-- **Widget Tesla** : État de la batterie, autonomie et charge.
+- **Widget Tesla** : État de la batterie, autonomie et charge (Modèle Y).
 - **Analyse IA** : Détection d'anomalies via Genkit.
-- **Mode Simulation** : Pour tester l'interface sans connexion réelle.
+- **Mode Simulation/Réel** : Basculez entre des données simulées et votre endpoint local.
 
 ## Déploiement sur GitHub
 
-Pour envoyer ce code sur votre compte GitHub `jarvis5976/HomeVision`, suivez ces étapes :
+Pour envoyer ce code sur votre compte GitHub `jarvis5976/HomeVision`, exécutez ces commandes dans votre terminal :
 
-1. **Créez un dépôt sur GitHub** : Allez sur [github.com/new](https://github.com/new) et créez un nouveau dépôt nommé `HomeVision`.
-2. **Ouvrez votre terminal** dans le dossier de ce projet.
-3. **Initialisez Git et envoyez le code** :
+1. **Initialisez Git** (si ce n'est pas déjà fait) :
    ```bash
    git init
+   ```
+2. **Ajoutez les fichiers** :
+   ```bash
    git add .
-   git commit -m "Initial commit: HomeVision Dashboard"
+   ```
+3. **Créez le commit** :
+   ```bash
+   git commit -m "Initial commit: HomeVision Dashboard complete"
+   ```
+4. **Configurez le dépôt distant** :
+   ```bash
    git branch -M main
    git remote add origin https://github.com/jarvis5976/HomeVision.git
+   ```
+5. **Envoyez le code** :
+   ```bash
    git push -u origin main
    ```
 
-## Note importante sur les données réelles
-L'application tente de contacter un endpoint local (`192.168.0.3`). 
-Si vous hébergez cette application sur GitHub Pages ou un service Cloud (**HTTPS**), le navigateur bloquera par défaut les requêtes vers l'IP locale en **HTTP** (Erreur Mixed Content). 
+## Note sur les données réelles (HTTP vs HTTPS)
+L'application tente de contacter `http://192.168.0.3`. 
+Si vous hébergez cette application sur GitHub (HTTPS), le navigateur bloquera la requête par défaut ("Mixed Content"). 
 
-**Solutions possibles :**
-1. Utiliser un tunnel sécurisé (type Cloudflare Tunnel ou ngrok) pour exposer votre API locale en HTTPS.
-2. Configurer votre navigateur pour autoriser le "contenu non sécurisé" sur votre domaine de déploiement.
-3. Utiliser le mode **Simulation** pour la démonstration.
+**Pour tester en réel :**
+Configurez votre navigateur (Chrome/Edge) pour autoriser le "contenu non sécurisé" spécifiquement pour l'URL de votre déploiement.

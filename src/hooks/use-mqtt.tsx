@@ -5,15 +5,17 @@ import { useState, useEffect, createContext, useContext, useRef, useCallback } f
 
 export interface HomeDashboardData {
   compteurEdf?: { conso_base: number; isousc: number };
-  eau?: { total: number; maison: number; annexe: number };
-  grid?: { watts: number; sens: string };
+  eau?: { total: number; maison: number; annexe: number; compteur: number };
+  grid?: { watts: number; sens: string; arrow: string };
   production?: { total: number; detail: any };
-  battery?: { watts: number; soc: number; stateLabel: string; voltage: number; temperature: number };
+  battery?: { watts: number; soc: number; stateLabel: string; voltage: number; temperature: number; state: number };
+  victron?: { batteryTitle: string; EssState: any };
   voiture?: { tesla: any };
   energy?: { total: { all: number; maison: number; annexe: number }; detail: any };
   zenFlex?: { couleurJourJ: string; couleurJourJ1: string; contratColor: string };
   solCast?: { today: number; tomorrow: number };
-  chauffeEau?: { total: number };
+  chauffeEau?: { total: number; maison: number; annexe: number };
+  borne?: { watts: number; total: number };
 }
 
 interface MQTTMessage {
@@ -33,14 +35,39 @@ interface MQTTContextType {
 
 const MQTTContext = createContext<MQTTContextType | undefined>(undefined);
 
+// Accurate mock data based on the user's provided JSON
 const BASE_MOCK_DATA: HomeDashboardData = {
   compteurEdf: { isousc: 60, conso_base: 102752909 },
-  eau: { total: 1127.65, maison: 796.81, annexe: 330.84 },
-  grid: { watts: 3365, sens: "Achat" },
-  production: { total: 32 },
-  battery: { watts: 2647, soc: 83, temperature: 20.2, voltage: 50.63, stateLabel: "charging" },
-  energy: { total: { all: 4686, maison: 3365, annexe: 1289 } },
-  chauffeEau: { total: 1255.2 },
+  eau: { total: 1127.65, maison: 796.81, annexe: 330.84, compteur: 1214.91 },
+  grid: { watts: 7301, sens: "Achat", arrow: "dist/img/Arrow_Right_to_Left_R.svg" },
+  production: { 
+    total: 32,
+    detail: {
+      solarEdge: 0,
+      apSystems: 32,
+      apsAnnexe: 32
+    }
+  },
+  battery: { 
+    watts: 2647, 
+    soc: 83, 
+    temperature: 20.2, 
+    voltage: 50.63, 
+    stateLabel: "charging",
+    state: 1
+  },
+  victron: {
+    batteryTitle: "En charge",
+    EssState: { label: "Optimized mode w/o BatteryLife" }
+  },
+  energy: { 
+    total: { all: 4686, maison: 3365, annexe: 1289 },
+    detail: {
+      maison: { cumulus: 1253, chauffage: 1466 },
+      annexe: { cumulus: 2.2, chauffage: 1010.9 }
+    }
+  },
+  chauffeEau: { total: 1255.2, maison: 1253, annexe: 2.2 },
   voiture: {
     tesla: {
       battery_level: 80,
@@ -49,7 +76,8 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       odometer: 63294.17,
       charging_state: "Complete",
       plugged_in: true,
-      model: "Y"
+      model: "Y",
+      display_name: "E-Ty"
     }
   },
   zenFlex: {
@@ -71,8 +99,8 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchRealData = useCallback(async () => {
     try {
       const response = await fetch('http://192.168.0.3/Dashboard/assets/instant_from_mqtt.php', {
-        // Adding a short timeout and cache settings to avoid hanging on blockages
-        signal: AbortSignal.timeout(3000)
+        signal: AbortSignal.timeout(3000),
+        cache: 'no-store'
       });
       
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -85,9 +113,8 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...prev.slice(0, 9)
       ]);
     } catch (e: any) {
-      // Don't log to console.error to avoid spamming the developer overlay
       const errorMessage = e.name === 'TypeError' 
-        ? "Network error: Connection refused or Mixed Content block (HTTP on HTTPS)."
+        ? "Network error: Local endpoint (192.168.0.3) unreachable or Mixed Content block."
         : e.message || "Failed to fetch from local endpoint.";
       setError(errorMessage);
     }
@@ -99,12 +126,12 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const fluctuate = (val: number, range: number = 10) => val + (Math.random() * range - range/2);
       return {
         ...prev,
-        grid: { ...prev.grid, watts: Math.round(fluctuate(prev.grid?.watts || 3000, 100)) } as any,
-        production: { ...prev.production, total: Math.round(fluctuate(prev.production?.total || 30, 5)) } as any,
+        grid: { ...prev.grid, watts: Math.round(fluctuate(prev.grid?.watts || 7300, 150)) } as any,
+        production: { ...prev.production, total: Math.round(Math.max(0, fluctuate(prev.production?.total || 32, 5))) } as any,
         battery: { 
           ...prev.battery, 
           watts: Math.round(fluctuate(prev.battery?.watts || 2600, 50)),
-          soc: Math.max(0, Math.min(100, Math.round(fluctuate(prev.battery?.soc || 83, 1))))
+          soc: Math.max(0, Math.min(100, Math.round(fluctuate(prev.battery?.soc || 83, 0.5))))
         } as any,
         energy: {
           total: {
@@ -116,8 +143,8 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
         voiture: {
           tesla: {
             ...prev.voiture?.tesla,
-            battery_level: Math.round(fluctuate(prev.voiture?.tesla?.battery_level || 80, 0.5)),
-            inside_temp: Math.round(fluctuate(prev.voiture?.tesla?.inside_temp || 12, 1)),
+            battery_level: Math.round(fluctuate(prev.voiture?.tesla?.battery_level || 80, 0.1)),
+            inside_temp: Math.round(fluctuate(prev.voiture?.tesla?.inside_temp || 12, 0.5)),
           }
         } as any
       };
