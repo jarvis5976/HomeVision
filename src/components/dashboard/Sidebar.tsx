@@ -2,13 +2,15 @@
 "use client";
 
 import Link from "next/link";
-import { LayoutDashboard, Settings, Activity, Shield, Home, AlertCircle, PlayCircle } from "lucide-react";
+import { LayoutDashboard, Settings, Activity, Shield, Home, AlertCircle, PlayCircle, Radio } from "lucide-react";
 import { useMQTT } from "@/hooks/use-mqtt";
 import { StatusBadge } from "./StatusBadge";
 import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 export function Sidebar() {
-  const { connected, error, isSimulated } = useMQTT();
+  const { isSimulated, setIsSimulated, error } = useMQTT();
 
   const navItems = [
     { name: "Overview", icon: LayoutDashboard, href: "/", active: true },
@@ -48,31 +50,47 @@ export function Sidebar() {
       </div>
 
       <div className="mt-auto p-6 border-t border-border space-y-4">
-        {isSimulated && (
-          <div className="p-3 bg-accent/10 border border-accent/20 rounded-xl flex gap-2 items-start">
-            <PlayCircle className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-            <div className="min-w-0">
-              <p className="text-[10px] font-bold text-accent uppercase">Simulation Mode</p>
-              <p className="text-[10px] text-accent/80 leading-tight mt-1">Showing generated data for preview.</p>
-            </div>
+        {/* Mode Toggle */}
+        <div className="p-4 bg-secondary/50 rounded-xl border border-border space-y-3">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="mode-toggle" className="text-[10px] font-bold text-muted-foreground uppercase cursor-pointer">
+              {isSimulated ? "Simulation" : "Real Data"}
+            </Label>
+            <Switch 
+              id="mode-toggle" 
+              checked={!isSimulated} 
+              onCheckedChange={(val) => setIsSimulated(!val)}
+            />
           </div>
-        )}
+          <div className="flex items-center gap-2">
+            {isSimulated ? (
+              <PlayCircle className="w-3 h-3 text-accent" />
+            ) : (
+              <Radio className="w-3 h-3 text-primary animate-pulse" />
+            )}
+            <span className="text-[10px] text-muted-foreground leading-none">
+              {isSimulated ? "Demo data mode" : "Polling 192.168.0.3"}
+            </span>
+          </div>
+        </div>
         
-        {error && !connected && (
+        {error && !isSimulated && (
           <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-xl flex gap-2 items-start">
             <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
             <div className="min-w-0">
-              <p className="text-[10px] font-bold text-destructive uppercase">Connection Issue</p>
-              <p className="text-[10px] text-destructive/80 leading-tight mt-1 truncate">{error}</p>
+              <p className="text-[10px] font-bold text-destructive uppercase">Network Error</p>
+              <p className="text-[10px] text-destructive/80 leading-tight mt-1">
+                Local endpoint blocked? Check Mixed Content rules.
+              </p>
             </div>
           </div>
         )}
 
         <div className="bg-background rounded-xl p-4 border border-border">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Broker Connection</p>
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">System Integrity</p>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium truncate max-w-[100px]">192.168.0.3</span>
-            <StatusBadge status={connected ? 'online' : 'offline'} />
+            <span className="text-xs font-medium">Core Engine</span>
+            <StatusBadge status={!error ? 'online' : 'alert'} />
           </div>
         </div>
       </div>

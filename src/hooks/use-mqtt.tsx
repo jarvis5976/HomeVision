@@ -1,8 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, createContext, useContext, useRef } from 'react';
-import mqtt, { MqttClient } from 'mqtt';
+import { useState, useEffect, createContext, useContext, useRef, useCallback } from 'react';
 
 export interface HomeDashboardData {
   compteurEdf?: { conso_base: number; isousc: number };
@@ -24,15 +23,12 @@ interface MQTTMessage {
 }
 
 interface MQTTContextType {
-  connected: boolean;
   isSimulated: boolean;
+  setIsSimulated: (val: boolean) => void;
   messages: MQTTMessage[];
   latestData: HomeDashboardData | null;
-  topics: string[];
-  addTopic: (topic: string) => void;
-  removeTopic: (topic: string) => void;
-  publish: (topic: string, message: string) => void;
   error: string | null;
+  refreshData: () => Promise<void>;
 }
 
 const MQTTContext = createContext<MQTTContextType | undefined>(undefined);
@@ -65,137 +61,87 @@ const BASE_MOCK_DATA: HomeDashboardData = {
 };
 
 export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [client, setClient] = useState<MqttClient | null>(null);
-  const [connected, setConnected] = useState(false);
-  const [isSimulated, setIsSimulated] = useState(false);
+  const [isSimulated, setIsSimulated] = useState(true);
   const [messages, setMessages] = useState<MQTTMessage[]>([]);
   const [latestData, setLatestData] = useState<HomeDashboardData | null>(BASE_MOCK_DATA);
-  const [topics, setTopics] = useState<string[]>(['home/dashboard/data', 'home/sensors/#']);
   const [error, setError] = useState<string | null>(null);
   
-  const simulationInterval = useRef<NodeJS.Timeout | null>(null);
+  const pollInterval = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    const brokerUrl = 'ws://192.168.0.3:1885'; 
-    let mqttClient: MqttClient | null = null;
-
+  const fetchRealData = useCallback(async () => {
     try {
-      mqttClient = mqtt.connect(brokerUrl, {
-        connectTimeout: 5000,
-        reconnectPeriod: 1000,
-        rejectUnauthorized: false,
-      });
-
-      mqttClient.on('connect', () => {
-        setConnected(true);
-        setIsSimulated(false);
-        setError(null);
-        if (simulationInterval.current) {
-          clearInterval(simulationInterval.current);
-          simulationInterval.current = null;
-        }
-        topics.forEach(t => mqttClient?.subscribe(t));
-      });
-
-      mqttClient.on('message', (topic, payload) => {
-        const msgStr = payload.toString();
-        if (topic === 'home/dashboard/data') {
-          try {
-            const parsed = JSON.parse(msgStr);
-            setLatestData(parsed);
-          } catch (e) {
-            console.error("Failed to parse dashboard data", e);
-          }
-        }
-        setMessages(prev => [
-          { topic, message: msgStr, timestamp: new Date() },
-          ...prev.slice(0, 49)
-        ]);
-      });
-
-      mqttClient.on('close', () => {
-        setConnected(false);
-        // If connection closes and stays closed, start simulation for UI demo
-        if (!isSimulated) startSimulation();
-      });
+      const response = await fetch('http://192.168.0.3/Dashboard/assets/instant_from_mqtt.php');
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      setLatestData(data);
+      setError(null);
       
-      mqttClient.on('error', (err) => {
-        setError(err.message);
-        startSimulation();
-      });
-
-      setClient(mqttClient);
+      // Log as a pseudo-message for the UI
+      setMessages(prev => [
+        { topic: 'api/poll', message: 'Data updated from endpoint', timestamp: new Date() },
+        ...prev.slice(0, 9)
+      ]);
     } catch (e: any) {
-      setError("Browser Security: WS connections often require WSS. Falling back to simulation.");
-      startSimulation();
+      console.error("Polling error:", e);
+      setError(e.message || "Failed to fetch from local endpoint. Note: Browsers block HTTP on HTTPS pages (Mixed Content).");
     }
+  }, []);
 
-    function startSimulation() {
-      if (simulationInterval.current) return;
-      setIsSimulated(true);
-      
-      simulationInterval.current = setInterval(() => {
-        setLatestData(prev => {
-          if (!prev) return BASE_MOCK_DATA;
-          
-          // Helper to slightly fluctuate values for visual feedback
-          const fluctuate = (val: number, range: number = 10) => val + (Math.random() * range - range/2);
-
-          return {
-            ...prev,
-            grid: { ...prev.grid, watts: Math.round(fluctuate(prev.grid?.watts || 3000, 100)) } as any,
-            production: { ...prev.production, total: Math.round(fluctuate(prev.production?.total || 30, 5)) } as any,
-            battery: { 
-              ...prev.battery, 
-              watts: Math.round(fluctuate(prev.battery?.watts || 2600, 50)),
-              soc: Math.max(0, Math.min(100, Math.round(fluctuate(prev.battery?.soc || 83, 1))))
-            } as any,
-            energy: {
-              total: {
-                all: Math.round(fluctuate(prev.energy?.total.all || 4600, 100)),
-                maison: Math.round(fluctuate(prev.energy?.total.maison || 3300, 80)),
-                annexe: Math.round(fluctuate(prev.energy?.total.annexe || 1200, 40)),
-              }
-            } as any,
-            voiture: {
-              tesla: {
-                ...prev.voiture?.tesla,
-                battery_level: Math.round(fluctuate(prev.voiture?.tesla?.battery_level || 80, 0.5)),
-                inside_temp: Math.round(fluctuate(prev.voiture?.tesla?.inside_temp || 12, 1)),
-              }
-            } as any
-          };
-        });
-      }, 3000);
-    }
-
-    return () => {
-      mqttClient?.end();
-      if (simulationInterval.current) clearInterval(simulationInterval.current);
-    };
+  const runSimulation = useCallback(() => {
+    setLatestData(prev => {
+      if (!prev) return BASE_MOCK_DATA;
+      const fluctuate = (val: number, range: number = 10) => val + (Math.random() * range - range/2);
+      return {
+        ...prev,
+        grid: { ...prev.grid, watts: Math.round(fluctuate(prev.grid?.watts || 3000, 100)) } as any,
+        production: { ...prev.production, total: Math.round(fluctuate(prev.production?.total || 30, 5)) } as any,
+        battery: { 
+          ...prev.battery, 
+          watts: Math.round(fluctuate(prev.battery?.watts || 2600, 50)),
+          soc: Math.max(0, Math.min(100, Math.round(fluctuate(prev.battery?.soc || 83, 1))))
+        } as any,
+        energy: {
+          total: {
+            all: Math.round(fluctuate(prev.energy?.total.all || 4600, 100)),
+            maison: Math.round(fluctuate(prev.energy?.total.maison || 3300, 80)),
+            annexe: Math.round(fluctuate(prev.energy?.total.annexe || 1200, 40)),
+          }
+        } as any,
+        voiture: {
+          tesla: {
+            ...prev.voiture?.tesla,
+            battery_level: Math.round(fluctuate(prev.voiture?.tesla?.battery_level || 80, 0.5)),
+            inside_temp: Math.round(fluctuate(prev.voiture?.tesla?.inside_temp || 12, 1)),
+          }
+        } as any
+      };
+    });
   }, []);
 
   useEffect(() => {
-    if (client && connected) {
-      topics.forEach(t => client.subscribe(t));
+    if (pollInterval.current) clearInterval(pollInterval.current);
+
+    if (isSimulated) {
+      pollInterval.current = setInterval(runSimulation, 3000);
+    } else {
+      fetchRealData(); // Initial fetch
+      pollInterval.current = setInterval(fetchRealData, 5000);
     }
-  }, [topics, client, connected]);
 
-  const addTopic = (topic: string) => {
-    if (!topics.includes(topic)) setTopics([...topics, topic]);
-  };
-
-  const removeTopic = (topic: string) => {
-    if (client && connected) client.unsubscribe(topic);
-    setTopics(topics.filter(t => t !== topic));
-  };
-
-  const publish = (topic: string, message: string) => {
-    if (client && connected) client.publish(topic, message);
-  };
+    return () => {
+      if (pollInterval.current) clearInterval(pollInterval.current);
+    };
+  }, [isSimulated, fetchRealData, runSimulation]);
 
   return (
-    <MQTTContext.Provider value={{ connected, isSimulated, messages, latestData, topics, addTopic, removeTopic, publish, error }}>
+    <MQTTContext.Provider value={{ 
+      isSimulated, 
+      setIsSimulated, 
+      messages, 
+      latestData, 
+      error,
+      refreshData: fetchRealData 
+    }}>
       {children}
     </MQTTContext.Provider>
   );
