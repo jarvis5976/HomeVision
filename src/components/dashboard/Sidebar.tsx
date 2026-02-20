@@ -2,13 +2,13 @@
 "use client";
 
 import Link from "next/link";
-import { LayoutDashboard, Settings, Activity, Shield, Home, AlertCircle } from "lucide-react";
+import { LayoutDashboard, Settings, Activity, Shield, Home, AlertCircle, PlayCircle } from "lucide-react";
 import { useMQTT } from "@/hooks/use-mqtt";
 import { StatusBadge } from "./StatusBadge";
 import { cn } from "@/lib/utils";
 
 export function Sidebar() {
-  const { connected, error } = useMQTT();
+  const { connected, error, isSimulated } = useMQTT();
 
   const navItems = [
     { name: "Overview", icon: LayoutDashboard, href: "/", active: true },
@@ -48,12 +48,22 @@ export function Sidebar() {
       </div>
 
       <div className="mt-auto p-6 border-t border-border space-y-4">
-        {error && (
+        {isSimulated && (
+          <div className="p-3 bg-accent/10 border border-accent/20 rounded-xl flex gap-2 items-start">
+            <PlayCircle className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold text-accent uppercase">Simulation Mode</p>
+              <p className="text-[10px] text-accent/80 leading-tight mt-1">Showing generated data for preview.</p>
+            </div>
+          </div>
+        )}
+        
+        {error && !connected && (
           <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-xl flex gap-2 items-start">
             <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
             <div className="min-w-0">
-              <p className="text-[10px] font-bold text-destructive uppercase">Connection Error</p>
-              <p className="text-[10px] text-destructive/80 leading-tight mt-1">{error}</p>
+              <p className="text-[10px] font-bold text-destructive uppercase">Connection Issue</p>
+              <p className="text-[10px] text-destructive/80 leading-tight mt-1 truncate">{error}</p>
             </div>
           </div>
         )}
