@@ -3,6 +3,16 @@
 
 import { useState, useEffect, createContext, useContext, useRef, useCallback } from 'react';
 
+export interface CarData {
+  batteryLevel?: number;
+  odometer?: number;
+  states?: number | string;
+  chargeStatus?: string;
+  carModel?: string;
+  display_name?: string;
+  [key: string]: any;
+}
+
 export interface HomeDashboardData {
   compteurEdf?: { conso_base: number; isousc: number };
   eau?: { total: number; maison: number; annexe: number; compteur: number };
@@ -10,7 +20,7 @@ export interface HomeDashboardData {
   production?: { total: number; detail: any };
   battery?: { watts: number; soc: number; stateLabel: string; voltage: number; temperature: number; state: number };
   victron?: { batteryTitle: string; EssState: any };
-  voiture?: { tesla: any };
+  voiture?: Record<string, CarData>;
   energy?: { total: { all: number; maison: number; annexe: number }; detail: any };
   zenFlex?: { couleurJourJ: string; couleurJourJ1: string; contratColor: string };
   solCast?: { today: number; tomorrow: number };
@@ -35,18 +45,13 @@ interface MQTTContextType {
 
 const MQTTContext = createContext<MQTTContextType | undefined>(undefined);
 
-// Accurate mock data based on the user's provided JSON
 const BASE_MOCK_DATA: HomeDashboardData = {
   compteurEdf: { isousc: 60, conso_base: 102752909 },
   eau: { total: 1127.65, maison: 796.81, annexe: 330.84, compteur: 1214.91 },
   grid: { watts: 7301, sens: "Achat", arrow: "dist/img/Arrow_Right_to_Left_R.svg" },
   production: { 
     total: 32,
-    detail: {
-      solarEdge: 0,
-      apSystems: 32,
-      apsAnnexe: 32
-    }
+    detail: { solarEdge: 0, apSystems: 32, apsAnnexe: 32 }
   },
   battery: { 
     watts: 2647, 
@@ -70,14 +75,20 @@ const BASE_MOCK_DATA: HomeDashboardData = {
   chauffeEau: { total: 1255.2, maison: 1253, annexe: 2.2 },
   voiture: {
     tesla: {
-      battery_level: 80,
-      est_battery_range_km: 425.17,
-      inside_temp: 12,
+      batteryLevel: 80,
       odometer: 63294.17,
-      charging_state: "Complete",
-      plugged_in: true,
-      model: "Y",
+      states: 425.17,
+      chargeStatus: "Complete",
+      carModel: "Model Y",
       display_name: "E-Ty"
+    },
+    second_car: {
+      batteryLevel: 45,
+      odometer: 12450.5,
+      states: 180,
+      chargeStatus: "Charging",
+      carModel: "Model 3",
+      display_name: "Blue Lightning"
     }
   },
   zenFlex: {
@@ -105,7 +116,21 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
-      setLatestData(data);
+      
+      // Adaptation logic for real data mapping if it still uses the old format
+      const adaptedData = { ...data };
+      if (adaptedData.voiture) {
+        Object.keys(adaptedData.voiture).forEach(key => {
+          const car = adaptedData.voiture[key];
+          // Support both old and new mapping
+          car.batteryLevel = car.batteryLevel ?? car.battery_level;
+          car.carModel = car.carModel ?? (car.model ? `Model ${car.model}` : undefined);
+          car.states = car.states ?? car.est_battery_range_km;
+          car.chargeStatus = car.chargeStatus ?? car.charging_state;
+        });
+      }
+
+      setLatestData(adaptedData);
       setError(null);
       
       setMessages(prev => [
@@ -113,10 +138,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...prev.slice(0, 9)
       ]);
     } catch (e: any) {
-      const errorMessage = e.name === 'TypeError' 
-        ? "Network error: Local endpoint (192.168.0.3) unreachable or Mixed Content block."
-        : e.message || "Failed to fetch from local endpoint.";
-      setError(errorMessage);
+      setError(e.message || "Failed to fetch from local endpoint.");
     }
   }, []);
 
@@ -124,6 +146,17 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLatestData(prev => {
       if (!prev) return BASE_MOCK_DATA;
       const fluctuate = (val: number, range: number = 10) => val + (Math.random() * range - range/2);
+      
+      const updatedVoiture = { ...prev.voiture };
+      Object.keys(updatedVoiture).forEach(key => {
+        const car = updatedVoiture[key];
+        updatedVoiture[key] = {
+          ...car,
+          batteryLevel: Math.round(Math.max(0, Math.min(100, fluctuate(car.batteryLevel || 50, 0.5)))),
+          odometer: (car.odometer || 0) + 0.01
+        };
+      });
+
       return {
         ...prev,
         grid: { ...prev.grid, watts: Math.round(fluctuate(prev.grid?.watts || 7300, 150)) } as any,
@@ -140,41 +173,26 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
             annexe: Math.round(fluctuate(prev.energy?.total.annexe || 1200, 40)),
           }
         } as any,
-        voiture: {
-          tesla: {
-            ...prev.voiture?.tesla,
-            battery_level: Math.round(fluctuate(prev.voiture?.tesla?.battery_level || 80, 0.1)),
-            inside_temp: Math.round(fluctuate(prev.voiture?.tesla?.inside_temp || 12, 0.5)),
-          }
-        } as any
+        voiture: updatedVoiture
       };
     });
   }, []);
 
   useEffect(() => {
     if (pollInterval.current) clearInterval(pollInterval.current);
-
     if (isSimulated) {
       pollInterval.current = setInterval(runSimulation, 3000);
     } else {
       fetchRealData(); 
       pollInterval.current = setInterval(fetchRealData, 5000);
     }
-
     return () => {
       if (pollInterval.current) clearInterval(pollInterval.current);
     };
   }, [isSimulated, fetchRealData, runSimulation]);
 
   return (
-    <MQTTContext.Provider value={{ 
-      isSimulated, 
-      setIsSimulated, 
-      messages, 
-      latestData, 
-      error,
-      refreshData: fetchRealData 
-    }}>
+    <MQTTContext.Provider value={{ isSimulated, setIsSimulated, messages, latestData, error, refreshData: fetchRealData }}>
       {children}
     </MQTTContext.Provider>
   );

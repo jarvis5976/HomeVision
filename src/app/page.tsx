@@ -1,3 +1,4 @@
+
 "use client";
 
 import { MQTTProvider, useMQTT } from "@/hooks/use-mqtt";
@@ -13,16 +14,24 @@ import {
   Home, 
   Building2, 
   CloudSun,
-  Flame
+  Flame,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 function DashboardContent() {
   const { latestData } = useMQTT();
 
-  // Mapping actual values from the specific JSON structure provided
   const gridPower = latestData?.grid?.watts ?? 0;
   const solarProduction = latestData?.production?.total ?? 0;
   const batterySoc = latestData?.battery?.soc ?? 0;
@@ -30,11 +39,7 @@ function DashboardContent() {
   const houseConsumption = latestData?.energy?.total?.maison ?? 0;
   const annexeConsumption = latestData?.energy?.total?.annexe ?? 0;
   const totalWater = latestData?.eau?.total ?? 0;
-  
-  const teslaBattery = latestData?.voiture?.tesla?.battery_level ?? 0;
-  const teslaRange = latestData?.voiture?.tesla?.est_battery_range_km ?? 0;
 
-  // Mock chart data for visualization
   const chartData = [
     { time: "00:00", value: 2200 },
     { time: "04:00", value: 1800 },
@@ -45,11 +50,12 @@ function DashboardContent() {
     { time: "23:59", value: 2500 },
   ];
 
+  const vehicles = Object.entries(latestData?.voiture || {});
+
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
       <main className="flex-1 flex flex-col">
-        {/* Simplified Header */}
         <header className="h-16 bg-white border-b border-border flex items-center justify-end px-8 sticky top-0 z-10">
           <div className="flex items-center gap-4">
             {latestData?.zenFlex && (
@@ -65,7 +71,6 @@ function DashboardContent() {
           </div>
         </header>
 
-        {/* Dashboard Body */}
         <div className="p-8 max-w-7xl mx-auto w-full space-y-8 animate-in fade-in slide-up duration-500">
           <section>
             <div className="flex justify-between items-end mb-6">
@@ -116,7 +121,6 @@ function DashboardContent() {
               <SensorChart title="Total Power Load (24h)" data={chartData} />
               
               <div className="grid grid-cols-1 gap-8">
-                {/* Detailed Consumption */}
                 <Card className="border-none shadow-sm">
                   <CardHeader>
                     <CardTitle className="text-base flex items-center gap-2">
@@ -161,44 +165,57 @@ function DashboardContent() {
             </div>
 
             <aside className="space-y-8">
-              {/* Tesla Widget */}
-              <Card className="border-none shadow-sm overflow-hidden bg-primary/5 border-primary/10">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Car className="w-4 h-4 text-primary" />
-                    Tesla Model {latestData?.voiture?.tesla?.model ?? 'Y'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 pt-2">
-                  <div className="flex items-end justify-between mb-4">
-                    <div>
-                      <p className="text-3xl font-bold">{teslaBattery}%</p>
-                      <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
-                        Est. Range: {teslaRange} km
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs font-bold text-primary uppercase">
-                        {latestData?.voiture?.tesla?.charging_state}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">
-                        Plugged: {latestData?.voiture?.tesla?.plugged_in ? 'Yes' : 'No'}
-                      </p>
-                    </div>
-                  </div>
-                  <Progress value={teslaBattery} className="h-2.5 bg-primary/20" />
-                  <div className="mt-6 grid grid-cols-2 gap-3">
-                    <div className="text-center p-2 rounded-lg bg-white/50 border border-border/50">
-                      <p className="text-[10px] text-muted-foreground">Inside Temp</p>
-                      <p className="text-sm font-bold">{latestData?.voiture?.tesla?.inside_temp}°C</p>
-                    </div>
-                    <div className="text-center p-2 rounded-lg bg-white/50 border border-border/50">
-                      <p className="text-[10px] text-muted-foreground">Odometer</p>
-                      <p className="text-sm font-bold">{Math.round(latestData?.voiture?.tesla?.odometer ?? 0)} km</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Vehicles Carousel */}
+              {vehicles.length > 0 && (
+                <div className="relative">
+                  <Carousel className="w-full">
+                    <CarouselContent>
+                      {vehicles.map(([id, car]) => (
+                        <CarouselItem key={id}>
+                          <Card className="border-none shadow-sm overflow-hidden bg-primary/5 border-primary/10">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-base flex items-center gap-2">
+                                <Car className="w-4 h-4 text-primary" />
+                                {car.carModel || id.toUpperCase()}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-6 pt-2">
+                              <div className="flex items-end justify-between mb-4">
+                                <div>
+                                  <p className="text-3xl font-bold">{car.batteryLevel}%</p>
+                                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
+                                    Autonomie: {car.states} km
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-xs font-bold text-primary uppercase">
+                                    {car.chargeStatus}
+                                  </p>
+                                  <p className="text-[10px] text-muted-foreground">
+                                    Odometer: {Math.round(car.odometer ?? 0)} km
+                                  </p>
+                                </div>
+                              </div>
+                              <Progress value={car.batteryLevel} className="h-2.5 bg-primary/20" />
+                              <div className="mt-6 flex justify-center">
+                                <Badge variant="secondary" className="text-[10px]">
+                                  {car.display_name || id}
+                                </Badge>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    {vehicles.length > 1 && (
+                      <div className="flex justify-center gap-2 mt-4">
+                        <CarouselPrevious className="static translate-y-0" />
+                        <CarouselNext className="static translate-y-0" />
+                      </div>
+                    )}
+                  </Carousel>
+                </div>
+              )}
 
               {/* System Battery Overview */}
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-border">
