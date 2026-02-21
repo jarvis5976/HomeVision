@@ -71,42 +71,46 @@ function DashboardContent() {
 
         <div className="p-8 max-w-7xl mx-auto w-full space-y-8 animate-in fade-in slide-up duration-500">
           <section>
-            <div className="flex justify-between items-end mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
               <div>
                 <h2 className="text-2xl font-bold tracking-tight text-foreground">Energy Center</h2>
-                <p className="text-sm text-muted-foreground">Real-time monitoring of your smart energy ecosystem</p>
+                <p className="text-sm text-muted-foreground">Monitoring en temps réel de votre écosystème énergétique</p>
               </div>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-2">
                  <Badge variant="outline" className="flex items-center gap-2 px-3 py-1 bg-white">
                   <CloudSun className="w-3.5 h-3.5 text-orange-500" />
-                  Forecast Today: {latestData?.solCast?.today ?? 0} kWh
+                  Prévision du jour : {latestData?.solCast?.today ?? 0} kWh
+                </Badge>
+                <Badge variant="outline" className="flex items-center gap-2 px-3 py-1 bg-white/50 border-dashed">
+                  <CloudSun className="w-3.5 h-3.5 text-orange-400" />
+                  Demain : {latestData?.solCast?.tomorrow ?? 0} kWh
                 </Badge>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <MetricCard 
-                title="Grid Connection" 
+                title="Réseau Electrique" 
                 value={gridPower} 
                 unit="W" 
                 icon={Zap} 
                 status={gridPower > 6000 ? 'alert' : 'online'}
               />
               <MetricCard 
-                title="Solar Production" 
+                title="Production Solaire" 
                 value={solarProduction} 
                 unit="W" 
                 icon={Sun} 
               />
               <MetricCard 
-                title="Battery" 
+                title="Batterie" 
                 value={batterySoc} 
                 unit="%" 
                 icon={Battery} 
                 status={batterySoc < 20 ? 'alert' : 'online'}
               />
               <MetricCard 
-                title="Total Consumption" 
+                title="Consommation Totale" 
                 value={latestData?.energy?.total?.all ?? 0} 
                 unit="W" 
                 icon={Home} 
@@ -116,20 +120,20 @@ function DashboardContent() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
-              <SensorChart title="Total Power Load (24h)" data={chartData} />
+              <SensorChart title="Charge Totale (24h)" data={chartData} />
               
               <div className="grid grid-cols-1 gap-8">
                 <Card className="border-none shadow-sm">
                   <CardHeader>
                     <CardTitle className="text-base flex items-center gap-2">
                       <Zap className="w-4 h-4 text-primary" />
-                      Detailed Consumption
+                      Détails de consommation
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs font-medium">
-                        <span className="flex items-center gap-1.5"><Home className="w-3.5 h-3.5" /> Main House</span>
+                        <span className="flex items-center gap-1.5"><Home className="w-3.5 h-3.5" /> Maison Principale</span>
                         <span>{houseConsumption} W</span>
                       </div>
                       <Progress value={(houseConsumption / (latestData?.energy?.total?.all || 1)) * 100} className="h-2" />
@@ -143,14 +147,14 @@ function DashboardContent() {
                     </div>
                     <div className="pt-4 grid grid-cols-2 gap-4">
                       <div className="p-3 bg-secondary rounded-xl">
-                        <p className="text-[10px] text-muted-foreground uppercase font-bold">Water Heater</p>
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold">Chauffe-eau</p>
                         <p className="text-lg font-bold flex items-center gap-2">
                           <Flame className="w-4 h-4 text-orange-500" />
                           {latestData?.chauffeEau?.total ?? 0} W
                         </p>
                       </div>
                       <div className="p-3 bg-secondary rounded-xl">
-                        <p className="text-[10px] text-muted-foreground uppercase font-bold">Water Usage</p>
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold">Consommation Eau</p>
                         <p className="text-lg font-bold flex items-center gap-2">
                           <Droplets className="w-4 h-4 text-blue-500" />
                           {totalWater} m³
@@ -190,7 +194,7 @@ function DashboardContent() {
                                     {car.chargeStatus}
                                   </p>
                                   <p className="text-[10px] text-muted-foreground">
-                                    Odometer: {Math.round(car.odometer ?? 0)} km
+                                    Odomètre: {Math.round(car.odometer ?? 0)} km
                                   </p>
                                 </div>
                               </div>
@@ -212,24 +216,24 @@ function DashboardContent() {
 
               {/* System Battery Overview */}
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-border">
-                <h3 className="text-base font-bold mb-4">Battery System</h3>
+                <h3 className="text-base font-bold mb-4">Système de Batterie</h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 border border-border">
                     <div>
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase">Power Flow</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase">Flux d'énergie</p>
                       <p className="text-sm font-bold">{batteryPower} W</p>
                     </div>
                     <Badge variant={batteryPower > 0 ? "default" : "secondary"} className="text-[10px]">
-                      {batteryPower > 0 ? 'Charging' : 'Discharging'}
+                      {batteryPower > 0 ? 'Charge' : 'Décharge'}
                     </Badge>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-[10px] text-muted-foreground font-bold uppercase">Voltage</p>
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase">Tension</p>
                       <p className="text-sm font-bold">{latestData?.battery?.voltage ?? 0} V</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-muted-foreground font-bold uppercase">Temp</p>
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase">Temp.</p>
                       <p className="text-sm font-bold">{latestData?.battery?.temperature ?? 0} °C</p>
                     </div>
                   </div>
