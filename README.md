@@ -31,7 +31,7 @@ Si vous voyez l'erreur `requested access to the resource is denied` dans vos Git
    ```
 
 ## Note sur les données réelles (HTTPS vs HTTP)
-L'application tente de contacter `http://192.168.0.3`. Si vous hébergez cette application en HTTPS (GitHub Pages, etc.), le navigateur bloquera la requête par défaut ("Mixed Content"). 
+L'application tente de contacter `http://192.168.0.3`. Si vous hébergez cette application en HTTPS (GitHub Pages, Vercel, etc.), le navigateur bloquera la requête par défaut ("Mixed Content"). 
 
 **Solution :**
 Autorisez le "contenu non sécurisé" dans les paramètres de votre navigateur pour l'URL de votre tableau de bord.
