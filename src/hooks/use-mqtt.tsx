@@ -85,9 +85,9 @@ const BASE_MOCK_DATA: HomeDashboardData = {
     },
     volvo: {
       carModel: "Volvo XC40",
-      batteryLevel: 0,
-      odometer: 0,
-      range: 0,
+      batteryLevel: 45,
+      odometer: 12400,
+      range: 180,
       chargeStatus: "Pas en charge",
       display_name: "Volvo"
     },
@@ -103,7 +103,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
   zenFlex: {
     contratColor: "bg-success",
     couleurJourJ: "Aujourd'hui : jour Eco",
-    couleurJourJ1: "Demain : jour Eco"
+    couleurJourJ1: "Demain : jour Sobriété"
   },
   solCast: { today: 8.75, tomorrow: 8.03 }
 };

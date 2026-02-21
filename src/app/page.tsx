@@ -26,6 +26,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { cn } from "@/lib/utils";
 
 function DashboardContent() {
   const { latestData } = useMQTT();
@@ -50,19 +51,33 @@ function DashboardContent() {
 
   const vehicles = Object.entries(latestData?.voiture || {});
 
+  const getZenFlexColor = (text: string) => {
+    const lower = text.toLowerCase();
+    if (lower.includes('eco')) return 'bg-emerald-500 hover:bg-emerald-600 text-white border-none';
+    if (lower.includes('sobriété') || lower.includes('sobriete')) return 'bg-rose-500 hover:bg-rose-600 text-white border-none';
+    return 'bg-slate-500 text-white border-none';
+  };
+
+  const getZenFlexOutlineColor = (text: string) => {
+    const lower = text.toLowerCase();
+    if (lower.includes('eco')) return 'border-emerald-500 text-emerald-700 bg-emerald-50';
+    if (lower.includes('sobriété') || lower.includes('sobriete')) return 'border-rose-500 text-rose-700 bg-rose-50';
+    return 'border-slate-300 text-slate-700 bg-slate-50';
+  };
+
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       <Sidebar />
       <main className="flex-1 flex flex-col">
         <header className="h-16 bg-white border-b border-border flex items-center justify-end px-8 sticky top-0 z-10">
           <div className="flex items-center gap-4">
-            {latestData?.zenFlex && (
-              <Badge className={`${latestData.zenFlex.contratColor} border-none text-white px-3 py-1 font-bold`}>
+            {latestData?.zenFlex?.couleurJourJ && (
+              <Badge className={cn("px-4 py-1.5 font-bold shadow-sm transition-colors", getZenFlexColor(latestData.zenFlex.couleurJourJ))}>
                 {latestData.zenFlex.couleurJourJ}
               </Badge>
             )}
             {latestData?.zenFlex?.couleurJourJ1 && (
-              <Badge variant="outline" className="border-primary/20 text-primary px-3 py-1 font-medium bg-primary/5">
+              <Badge variant="outline" className={cn("px-4 py-1.5 font-semibold border-2", getZenFlexOutlineColor(latestData.zenFlex.couleurJourJ1))}>
                 {latestData.zenFlex.couleurJourJ1}
               </Badge>
             )}
@@ -178,7 +193,7 @@ function DashboardContent() {
                             <CardHeader className="pb-2">
                               <CardTitle className="text-base flex items-center gap-2">
                                 <Car className="w-4 h-4 text-primary" />
-                                {car.carModel || id.toUpperCase()}
+                                {car.carModel}
                               </CardTitle>
                             </CardHeader>
                             <CardContent className="p-6 pt-2">
