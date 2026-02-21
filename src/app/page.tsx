@@ -182,7 +182,7 @@ function DashboardContent() {
                                 <div>
                                   <p className="text-3xl font-bold">{car.batteryLevel}%</p>
                                   <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
-                                    Autonomie: {car.range ?? car.states ?? 0} km
+                                    Autonomie: {car.range ?? 0} km
                                   </p>
                                 </div>
                                 <div className="text-right">
@@ -195,11 +195,6 @@ function DashboardContent() {
                                 </div>
                               </div>
                               <Progress value={car.batteryLevel} className="h-2.5 bg-primary/20" />
-                              <div className="mt-6 flex justify-center">
-                                <Badge variant="secondary" className="text-[10px]">
-                                  {car.display_name || id}
-                                </Badge>
-                              </div>
                             </CardContent>
                           </Card>
                         </CarouselItem>
