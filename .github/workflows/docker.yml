@@ -23,4 +23,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: jarvis5976/home-vision:latest
+          tags: sam5976/home-vision:latest
