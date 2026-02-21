@@ -1,4 +1,3 @@
-
 "use client";
 
 import { MQTTProvider, useMQTT } from "@/hooks/use-mqtt";
@@ -201,9 +200,9 @@ function DashboardContent() {
                 </CardContent>
               </Card>
 
-              {/* System Overview */}
+              {/* System Battery Overview */}
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-border">
-                <h3 className="text-base font-bold mb-4">Battery Health</h3>
+                <h3 className="text-base font-bold mb-4">Battery System</h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 border border-border">
                     <div>

@@ -1,8 +1,7 @@
-
 "use client";
 
 import Link from "next/link";
-import { LayoutDashboard, Settings, Activity, Shield, Home, AlertCircle, PlayCircle, Radio } from "lucide-react";
+import { LayoutDashboard, Settings, Activity, Home, AlertCircle, PlayCircle, Radio } from "lucide-react";
 import { useMQTT } from "@/hooks/use-mqtt";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
@@ -15,7 +14,6 @@ export function Sidebar() {
     { name: "Overview", icon: LayoutDashboard, href: "/", active: true },
     { name: "Devices", icon: Home, href: "#" },
     { name: "Analytics", icon: Activity, href: "#" },
-    { name: "Security", icon: Shield, href: "#" },
     { name: "Settings", icon: Settings, href: "#" },
   ];
 
