@@ -6,6 +6,7 @@ import { useState, useEffect, createContext, useContext, useRef, useCallback } f
 export interface CarData {
   batteryLevel?: number;
   odometer?: number;
+  range?: number;
   states?: number | string;
   chargeStatus?: string;
   carModel?: string;
@@ -75,20 +76,28 @@ const BASE_MOCK_DATA: HomeDashboardData = {
   chauffeEau: { total: 1255.2, maison: 1253, annexe: 2.2 },
   voiture: {
     tesla: {
-      batteryLevel: 80,
-      odometer: 63294.17,
-      states: 425.17,
-      chargeStatus: "Complete",
-      carModel: "Model Y",
+      carModel: "Tesla Model Y",
+      batteryLevel: 70,
+      range: 343,
+      odometer: 51439,
+      chargeStatus: "Pas en charge",
       display_name: "E-Ty"
     },
-    second_car: {
-      batteryLevel: 45,
-      odometer: 12450.5,
-      states: 180,
-      chargeStatus: "Charging",
-      carModel: "Model 3",
-      display_name: "Blue Lightning"
+    volvo: {
+      carModel: "Volvo XC40",
+      batteryLevel: 0,
+      odometer: 0,
+      range: 0,
+      chargeStatus: "Pas en charge",
+      display_name: "Volvo"
+    },
+    zoe: {
+      carModel: "Renault Zoe",
+      batteryLevel: 100,
+      odometer: 51503,
+      range: 311,
+      chargeStatus: "Pas en charge",
+      display_name: "Zoe"
     }
   },
   zenFlex: {
@@ -117,15 +126,13 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
       
-      // Adaptation logic for real data mapping if it still uses the old format
       const adaptedData = { ...data };
       if (adaptedData.voiture) {
         Object.keys(adaptedData.voiture).forEach(key => {
           const car = adaptedData.voiture[key];
-          // Support both old and new mapping
           car.batteryLevel = car.batteryLevel ?? car.battery_level;
           car.carModel = car.carModel ?? (car.model ? `Model ${car.model}` : undefined);
-          car.states = car.states ?? car.est_battery_range_km;
+          car.range = car.range ?? car.est_battery_range_km;
           car.chargeStatus = car.chargeStatus ?? car.charging_state;
         });
       }
@@ -153,7 +160,8 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updatedVoiture[key] = {
           ...car,
           batteryLevel: Math.round(Math.max(0, Math.min(100, fluctuate(car.batteryLevel || 50, 0.5)))),
-          odometer: (car.odometer || 0) + 0.01
+          odometer: (car.odometer || 0) + 0.01,
+          range: Math.round(Math.max(0, fluctuate(car.range || 300, 2)))
         };
       });
 

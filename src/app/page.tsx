@@ -14,9 +14,7 @@ import {
   Home, 
   Building2, 
   CloudSun,
-  Flame,
-  ChevronLeft,
-  ChevronRight
+  Flame
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,7 +51,7 @@ function DashboardContent() {
   const vehicles = Object.entries(latestData?.voiture || {});
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background text-foreground">
       <Sidebar />
       <main className="flex-1 flex flex-col">
         <header className="h-16 bg-white border-b border-border flex items-center justify-end px-8 sticky top-0 z-10">
@@ -184,7 +182,7 @@ function DashboardContent() {
                                 <div>
                                   <p className="text-3xl font-bold">{car.batteryLevel}%</p>
                                   <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
-                                    Autonomie: {car.states} km
+                                    Autonomie: {car.range ?? car.states ?? 0} km
                                   </p>
                                 </div>
                                 <div className="text-right">
