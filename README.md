@@ -1,4 +1,3 @@
-
 # HomeVision Smart Dashboard
 
 Tableau de bord intelligent pour le suivi de l'énergie (Solaire, Batterie Victron, Tesla) et des capteurs domestiques.
@@ -6,55 +5,33 @@ Tableau de bord intelligent pour le suivi de l'énergie (Solaire, Batterie Victr
 ## Fonctionnalités
 
 - **Energy Center** : Monitoring en temps réel (Grille, Solaire, Batterie).
-- **Détails de consommation** : Répartition Maison vs Annexe.
-- **Widget Tesla** : État de la batterie, autonomie et charge (Modèle Y).
-- **Analyse IA** : Détection d'anomalies via Genkit.
+- **Détails de consommation** : Répartition Maison vs Annexe (Chauffage, Cumulus).
+- **Widget Tesla** : État de la batterie, autonomie, température et charge (Modèle Y).
 - **Mode Simulation/Réel** : Basculez entre des données simulées et votre endpoint local.
 
-## Déploiement Docker
+## Fix "Access Denied" on GitHub Actions
 
-Pour construire et lancer l'application avec Docker :
+Si vous voyez l'erreur `requested access to the resource is denied` dans vos GitHub Actions, c'est que vous n'avez pas encore ajouté vos identifiants Docker Hub à votre dépôt GitHub.
+
+1. Allez sur votre dépôt GitHub : `jarvis5976/HomeVision`
+2. Cliquez sur **Settings** > **Secrets and variables** > **Actions**
+3. Cliquez sur **New repository secret** et ajoutez :
+   - `DOCKERHUB_USERNAME` : Votre nom d'utilisateur Docker Hub (ex: `jarvis5976`)
+   - `DOCKERHUB_TOKEN` : Votre jeton d'accès Docker Hub (créé dans Docker Hub > Account Settings > Security)
+
+## Déploiement Docker (Local)
 
 1. **Construire l'image** :
    ```bash
-   docker build -t homevision .
+   docker build -t jarvis5976/home-vision:latest .
    ```
 2. **Lancer le conteneur** :
    ```bash
-   docker run -p 3000:3000 homevision
-   ```
-L'application sera accessible sur `http://localhost:3000`.
-
-## Déploiement sur GitHub
-
-Pour envoyer ce code sur votre compte GitHub `jarvis5976/HomeVision` :
-
-1. **Initialisez Git** :
-   ```bash
-   git init
-   ```
-2. **Ajoutez les fichiers** :
-   ```bash
-   git add .
-   ```
-3. **Créez le commit** :
-   ```bash
-   git commit -m "Initial commit: HomeVision Dashboard complete"
-   ```
-4. **Configurez le dépôt distant** :
-   ```bash
-   git branch -M main
-   git remote add origin https://github.com/jarvis5976/HomeVision.git
-   ```
-5. **Envoyez le code** :
-   ```bash
-   git push -u origin main
+   docker run -p 3000:3000 jarvis5976/home-vision:latest
    ```
 
-## Note sur les données réelles (HTTP vs HTTPS)
-L'application tente de contacter `http://192.168.0.3`. 
-Si vous hébergez cette application sur GitHub (HTTPS), le navigateur bloquera la requête par défaut ("Mixed Content"). 
+## Note sur les données réelles (HTTPS vs HTTP)
+L'application tente de contacter `http://192.168.0.3`. Si vous hébergez cette application en HTTPS (GitHub Pages, etc.), le navigateur bloquera la requête par défaut ("Mixed Content"). 
 
-**Pour tester en réel :**
-Configurez votre navigateur (Chrome/Edge) pour autoriser le "contenu non sécurisé" spécifiquement pour l'URL de votre déploiement.
-# Test workflow
+**Solution :**
+Autorisez le "contenu non sécurisé" dans les paramètres de votre navigateur pour l'URL de votre tableau de bord.
