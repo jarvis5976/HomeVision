@@ -37,9 +37,11 @@ import { cn } from "@/lib/utils";
 function DashboardContent() {
   const { latestData, isSimulated, setIsSimulated } = useMQTT();
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [mounted, setMounted] = useState(false);
 
-  // Handle Theme Toggle
+  // Handle Hydration & Theme
   useEffect(() => {
+    setMounted(true);
     const savedTheme = localStorage.getItem('homevision-theme') as 'light' | 'dark' | null;
     const initialTheme = savedTheme || 'dark';
     setTheme(initialTheme);
@@ -278,7 +280,7 @@ function DashboardContent() {
                                   {car.chargeStatus}
                                 </p>
                                 <p className="text-[9px] text-muted-foreground font-medium">
-                                  Odo: {Math.round(car.odometer ?? 0).toLocaleString()} km
+                                  Odo: {mounted ? Math.round(car.odometer ?? 0).toLocaleString() : Math.round(car.odometer ?? 0)} km
                                 </p>
                               </div>
                             </div>
@@ -328,7 +330,7 @@ function DashboardContent() {
       </main>
       
       <footer className="py-8 text-center text-[10px] text-muted-foreground uppercase tracking-[0.2em] border-t border-border/50 mt-12">
-        HomeVision Dashboard &copy; {new Date().getFullYear()}
+        HomeVision Dashboard &copy; {mounted ? new Date().getFullYear() : ""}
       </footer>
     </div>
   );
