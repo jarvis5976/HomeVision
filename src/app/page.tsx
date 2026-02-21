@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { MQTTProvider, useMQTT } from "@/hooks/use-mqtt";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { SensorChart } from "@/components/dashboard/SensorChart";
@@ -14,13 +15,16 @@ import {
   CloudSun,
   Flame,
   Radio,
-  PlayCircle
+  PlayCircle,
+  Moon,
+  SunMedium
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import {
   Carousel,
   CarouselContent,
@@ -32,6 +36,22 @@ import { cn } from "@/lib/utils";
 
 function DashboardContent() {
   const { latestData, isSimulated, setIsSimulated } = useMQTT();
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+
+  // Handle Theme Toggle
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('homevision-theme') as 'light' | 'dark' | null;
+    const initialTheme = savedTheme || 'dark';
+    setTheme(initialTheme);
+    document.documentElement.classList.toggle('dark', initialTheme === 'dark');
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('homevision-theme', newTheme);
+    document.documentElement.classList.toggle('dark', newTheme === 'dark');
+  };
 
   const gridPower = latestData?.grid?.watts ?? 0;
   const solarProduction = latestData?.production?.total ?? 0;
@@ -68,17 +88,17 @@ function DashboardContent() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
+    <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
       {/* Header with Title and ZenFlex Info */}
       <header className="h-20 border-b border-border flex items-center justify-between px-8 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-            <Home className="w-6 h-6 text-primary-foreground" />
+        <div className="flex items-center gap-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+              <Home className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <h1 className="text-xl font-black tracking-tight uppercase">HomeVision</h1>
           </div>
-          <h1 className="text-xl font-black tracking-tight uppercase">HomeVision</h1>
-        </div>
-
-        <div className="flex items-center gap-6">
+          
           <div className="hidden sm:flex items-center gap-3">
             {latestData?.zenFlex?.couleurJourJ && (
               <Badge className={cn("px-4 py-1.5 font-bold shadow-sm transition-colors", getZenFlexColor(latestData.zenFlex.couleurJourJ))}>
@@ -91,6 +111,21 @@ function DashboardContent() {
               </Badge>
             )}
           </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={toggleTheme}
+            className="rounded-full w-10 h-10 hover:bg-secondary"
+          >
+            {theme === 'dark' ? (
+              <SunMedium className="w-5 h-5 text-orange-400" />
+            ) : (
+              <Moon className="w-5 h-5 text-primary" />
+            )}
+          </Button>
 
           <div className="h-8 w-px bg-border mx-2 hidden sm:block" />
 
