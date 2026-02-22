@@ -2,7 +2,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AnnualData } from "@/hooks/use-mqtt";
+import { AnnualData, AnnualMetricItem } from "@/hooks/use-mqtt";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -22,28 +22,21 @@ interface AnnualSummaryTableProps {
 
 type MetricType = 'production' | 'achat' | 'vente' | 'autoConsommation';
 
-const MONTH_LABELS: Record<string, string> = {
-  "TOTAL": "TOTAL",
-  "01": "Janvier",
-  "02": "Février",
-  "03": "Mars",
-  "04": "Avril",
-  "05": "Mai",
-  "06": "Juin",
-  "07": "Juillet",
-  "08": "Août",
-  "09": "Septembre",
-  "10": "Octobre",
-  "11": "Novembre",
-  "12": "Décembre",
-};
-
 export function AnnualSummaryTable({ data }: AnnualSummaryTableProps) {
   const [activeMetric, setActiveMetric] = useState<MetricType>('production');
 
-  const metricData = data?.[activeMetric] || {};
-  const years = useMemo(() => Object.keys(metricData).sort(), [metricData]);
-  const months = ["TOTAL", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+  const metricArray = data?.[activeMetric] || [];
+
+  const years = useMemo(() => {
+    if (metricArray.length === 0) return [];
+    const keys = new Set<string>();
+    metricArray.forEach(item => {
+      Object.keys(item).forEach(key => {
+        if (key !== 'mois') keys.add(key);
+      });
+    });
+    return Array.from(keys).sort();
+  }, [metricArray]);
 
   const getTrendInfo = (current: number, previous: number | undefined) => {
     if (previous === undefined || previous === 0) return null;
@@ -54,7 +47,7 @@ export function AnnualSummaryTable({ data }: AnnualSummaryTableProps) {
     if (activeMetric === 'production' || activeMetric === 'autoConsommation') {
       isGood = isIncrease;
     } else {
-      // Pour Achat et Vente, une hausse est marquée en rouge (selon demande)
+      // Pour Achat et Vente, une hausse est marquée en rouge
       isGood = !isIncrease;
     }
 
@@ -65,7 +58,7 @@ export function AnnualSummaryTable({ data }: AnnualSummaryTableProps) {
     };
   };
 
-  if (!data) return null;
+  if (!data || metricArray.length === 0) return null;
 
   return (
     <Card className="border-border bg-card shadow-lg">
@@ -95,22 +88,22 @@ export function AnnualSummaryTable({ data }: AnnualSummaryTableProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {months.map(month => (
-                <TableRow key={month} className={cn("border-border/50", month === 'TOTAL' ? "bg-secondary/10" : "")}>
-                  <TableCell className={cn("text-xs font-bold", month === 'TOTAL' ? "font-black text-foreground" : "text-muted-foreground")}>
-                    {MONTH_LABELS[month]}
+              {metricArray.map((row: AnnualMetricItem) => (
+                <TableRow key={row.mois} className={cn("border-border/50", row.mois === 'TOTAL' ? "bg-secondary/10" : "")}>
+                  <TableCell className={cn("text-xs font-bold", row.mois === 'TOTAL' ? "font-black text-foreground" : "text-muted-foreground")}>
+                    {row.mois}
                   </TableCell>
                   {years.map((year, idx) => {
-                    const value = metricData[year]?.[month] || 0;
+                    const value = Number(row[year] || 0);
                     const prevYear = years[idx - 1];
-                    const prevValue = prevYear ? metricData[prevYear]?.[month] : undefined;
+                    const prevValue = prevYear ? Number(row[prevYear] || 0) : undefined;
                     const trend = getTrendInfo(value, prevValue);
 
                     return (
                       <TableCell key={year} className="text-center">
                         <div className="flex flex-col items-center gap-0">
                           <div className="flex items-center gap-1">
-                            <span className={cn("text-xs", month === 'TOTAL' ? "font-black" : "font-bold")}>
+                            <span className={cn("text-xs", row.mois === 'TOTAL' ? "font-black" : "font-bold")}>
                               {value.toFixed(2)} <span className="text-[9px] font-normal opacity-60">kWh</span>
                             </span>
                             {trend && (
