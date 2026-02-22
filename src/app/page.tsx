@@ -88,7 +88,7 @@ function DashboardContent() {
   };
 
   const calculatePercent = (val: number, total: number) => {
-    if (!total) return 0;
+    if (!total || total === 0) return 0;
     return Math.round((val / total) * 100);
   };
 
@@ -378,7 +378,7 @@ function DashboardContent() {
                 </Badge>
             </div>
             
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Card 1: Production journalière */}
                 <MetricCard 
                     title="Production journalière" 
