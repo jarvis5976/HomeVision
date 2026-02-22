@@ -39,6 +39,44 @@ const COLORS = {
   estimation: 'red'
 };
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-card border border-border p-3 rounded-xl shadow-xl text-[11px] font-bold space-y-2">
+        <p className="text-primary border-b border-border pb-1 mb-1">{data.rangeLabel}</p>
+        <div className="space-y-1">
+          {payload.map((entry: any, index: number) => {
+            // Labels map to user friendly names
+            const namesMap: Record<string, string> = {
+              achat: 'Achat',
+              vente: 'Vente',
+              chargeBatterie: 'Charge Batterie',
+              dechargeBatterie: 'Décharge Batterie',
+              autoConsommation: 'Auto-Conso.',
+              production: 'Production',
+              estimation: 'Estimation'
+            };
+            const name = namesMap[entry.dataKey] || entry.name;
+            return (
+              <div key={index} className="flex justify-between gap-4">
+                <span style={{ color: entry.color }}>{name}:</span>
+                <span>{entry.value.toFixed(2)} kWh</span>
+              </div>
+            );
+          })}
+        </div>
+        {data.batterieSoc !== null && data.batterieSoc !== undefined && (
+          <p className="border-t border-border pt-1 mt-1 text-accent">
+            Le soc batterie à '{data.label} +' est de {data.batterieSoc} %
+          </p>
+        )}
+      </div>
+    );
+  }
+  return null;
+};
+
 export function SolarHistoryChart({ 
   data, 
   startDate, 
@@ -50,16 +88,24 @@ export function SolarHistoryChart({
   const chartData = useMemo(() => {
     if (!data || !data.multi) return [];
     
-    return data.multi.Label.map((label, i) => ({
-      label,
-      achat: parseFloat((data.multi.Achat[i] || 0).toFixed(2)),
-      vente: parseFloat((data.multi.Vente[i] || 0).toFixed(2)),
-      autoConsommation: parseFloat((data.multi.AutoConsommation[i] || 0).toFixed(2)),
-      production: parseFloat((data.multi.Production[i] || 0).toFixed(2)),
-      chargeBatterie: parseFloat((data.multi.BatterieCharge[i] || 0).toFixed(2)),
-      dechargeBatterie: parseFloat((data.multi.BatterieDecharge[i] || 0).toFixed(2)),
-      estimation: parseFloat((data.multi.Estimation[i] || 0).toFixed(2)),
-    }));
+    return data.multi.Label.map((label, i) => {
+      const [hours, minutes] = label.split(':');
+      const nextHour = (parseInt(hours) + 1).toString().padStart(2, '0');
+      const nextLabel = `${nextHour}:${minutes}`;
+
+      return {
+        label,
+        rangeLabel: `${label} - ${nextLabel}`,
+        achat: parseFloat((data.multi.Achat[i] || 0).toFixed(2)),
+        vente: parseFloat((data.multi.Vente[i] || 0).toFixed(2)),
+        autoConsommation: parseFloat((data.multi.AutoConsommation[i] || 0).toFixed(2)),
+        production: parseFloat((data.multi.Production[i] || 0).toFixed(2)),
+        chargeBatterie: parseFloat((data.multi.BatterieCharge[i] || 0).toFixed(2)),
+        dechargeBatterie: parseFloat((data.multi.BatterieDecharge[i] || 0).toFixed(2)),
+        estimation: parseFloat((data.multi.Estimation[i] || 0).toFixed(2)),
+        batterieSoc: data.multi.BatterieSoc ? data.multi.BatterieSoc[i] : null,
+      };
+    });
   }, [data]);
 
   const totals = useMemo(() => {
@@ -146,11 +192,7 @@ export function SolarHistoryChart({
                 tickLine={false}
                 tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
               />
-              <Tooltip 
-                contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '12px', border: '1px solid hsl(var(--border))' }}
-                itemStyle={{ fontSize: '11px', fontWeight: 'bold' }}
-                formatter={(value: number) => value.toFixed(2)}
-              />
+              <Tooltip content={<CustomTooltip />} />
               <Legend 
                 verticalAlign="top" 
                 height={70}

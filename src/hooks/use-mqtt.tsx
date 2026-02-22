@@ -43,6 +43,7 @@ export interface SolarChartData {
     BatterieCharge: number[];
     BatterieDecharge: number[];
     Estimation: number[];
+    BatterieSoc: number[];
     TotalHC: number;
     TotalHP: number;
   };
@@ -174,6 +175,7 @@ const SOLAR_CHART_MOCK: SolarChartData = {
     Production: [0,0,0,0,0,0,0,0.01,0.02,0.1,0.23,0.19,0.8,1.8,2.5,1.8,1.2,0.6,0.1,0,0,0,0,0],
     BatterieCharge: [0,0,0,0,0,0,-1.52,-2.38,0,0,0,0,-0.5,-1.2,-0.8,0,0,0,0,0,0,0,0,0],
     BatterieDecharge: [0,0,0,0,0,0,0,0,0.25,0.26,0.26,0.16,0,0,0,0.2,0.5,0.8,1.2,1.5,1.0,0.5,0.2,0.1],
+    BatterieSoc: [76,76,76,76,76,76,81,90,84,79,75,73,70,68,65,63,60,58,55,52,50,48,45,42],
     Estimation: [0,0,0,0,0,0,0,0,0.02,0.34,0.64,0.9,1.5,2.2,2.8,2.2,1.6,0.8,0.2,0,0,0,0,0],
     TotalHC: 33.02,
     TotalHP: 0.22
