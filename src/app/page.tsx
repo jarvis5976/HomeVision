@@ -494,13 +494,13 @@ function DashboardContent() {
               onRefresh={() => fetchSolarChart(startDate, endDate)}
             />
 
-            {/* Annual Summary Table */}
-            <AnnualSummaryTable data={annualData} />
-
             {/* Solar Forecast Chart */}
             <SolarForecastChart 
               data={solCastChartData}
             />
+
+            {/* Annual Summary Table - Moved to the end */}
+            <AnnualSummaryTable data={annualData} />
           </div>
         )}
       </main>
