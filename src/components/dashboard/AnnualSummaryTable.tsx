@@ -39,7 +39,7 @@ export function AnnualSummaryTable({ data }: AnnualSummaryTableProps) {
   }, [metricArray]);
 
   const getTrendInfo = (current: number, previous: number | undefined) => {
-    if (previous === undefined || previous === 0) return null;
+    if (previous === undefined || previous === 0 || current === 0) return null;
     const diffPercent = ((current - previous) / previous) * 100;
     const isIncrease = current > previous;
 
@@ -94,7 +94,10 @@ export function AnnualSummaryTable({ data }: AnnualSummaryTableProps) {
                     {row.mois}
                   </TableCell>
                   {years.map((year, idx) => {
-                    const value = Number(row[year] || 0);
+                    const rawValue = row[year];
+                    const value = Number(rawValue || 0);
+                    const hasValue = rawValue !== undefined && rawValue !== null && value !== 0;
+                    
                     const prevYear = years[idx - 1];
                     const prevValue = prevYear ? Number(row[prevYear] || 0) : undefined;
                     const trend = getTrendInfo(value, prevValue);
@@ -104,15 +107,21 @@ export function AnnualSummaryTable({ data }: AnnualSummaryTableProps) {
                         <div className="flex flex-col items-center gap-0">
                           <div className="flex items-center gap-1">
                             <span className={cn("text-xs", row.mois === 'TOTAL' ? "font-black" : "font-bold")}>
-                              {value.toFixed(2)} <span className="text-[9px] font-normal opacity-60">kWh</span>
+                              {hasValue ? (
+                                <>
+                                  {value.toFixed(2)} <span className="text-[9px] font-normal opacity-60">kWh</span>
+                                </>
+                              ) : (
+                                <span className="opacity-30">-</span>
+                              )}
                             </span>
-                            {trend && (
+                            {hasValue && trend && (
                               <span className={trend.isGood ? "text-emerald-500" : "text-rose-500"}>
                                 {trend.isIncrease ? <ArrowUp className="w-2.5 h-2.5" /> : <ArrowDown className="w-2.5 h-2.5" />}
                               </span>
                             )}
                           </div>
-                          {trend && (
+                          {hasValue && trend && (
                             <span className={cn(
                               "text-[9px] font-black",
                               trend.isGood ? "text-emerald-500" : "text-rose-500"
