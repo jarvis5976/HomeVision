@@ -33,6 +33,21 @@ export interface TotalHistoryData {
   apSystems: number;
 }
 
+export interface SolarChartData {
+  multi: {
+    Label: string[];
+    Achat: number[];
+    Vente: number[];
+    AutoConsommation: number[];
+    Production: number[];
+    BatterieCharge: number[];
+    BatterieDecharge: number[];
+    Estimation: number[];
+    TotalHC: number;
+    TotalHP: number;
+  };
+}
+
 export interface HomeDashboardData {
   compteurEdf?: { conso_base: number; isousc: number };
   eau?: { total: number; maison: number; annexe: number; compteur: number };
@@ -61,8 +76,10 @@ interface MQTTContextType {
   latestData: HomeDashboardData | null;
   historyData: HistoryData | null;
   totalHistoryData: TotalHistoryData | null;
+  solarChartData: SolarChartData | null;
   error: string | null;
   refreshAll: () => Promise<void>;
+  fetchSolarChart: (start: string, end: string) => Promise<void>;
 }
 
 const MQTTContext = createContext<MQTTContextType | undefined>(undefined);
@@ -148,19 +165,34 @@ const BASE_TOTAL_HISTORY_MOCK: TotalHistoryData = {
   apSystems: 1245.30
 };
 
+const SOLAR_CHART_MOCK: SolarChartData = {
+  multi: {
+    Label: ["00:00","01:00","02:00","03:00","04:00","05:00","06:00","07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00"],
+    Achat: [1.96,5.57,5.17,6,5.63,2.19,2.82,3.68,0.08,0.05,0.06,0.03,0.01,0.01,0.01,0.02,0.05,0.1,0.5,1.2,1.8,2.2,2.5,2.1],
+    Vente: [0,0,0,0,0,0,0,0,-0.02,-0.02,-0.02,-0.01,-0.1,-0.5,-0.8,-0.4,-0.2,0,0,0,0,0,0,0],
+    AutoConsommation: [0,0,0,0,0,0,0,0.01,0,0.08,0.21,0.18,0.5,1.2,1.5,1.1,0.8,0.4,0,0,0,0,0,0],
+    Production: [0,0,0,0,0,0,0,0.01,0.02,0.1,0.23,0.19,0.8,1.8,2.5,1.8,1.2,0.6,0.1,0,0,0,0,0],
+    BatterieCharge: [0,0,0,0,0,0,-1.52,-2.38,0,0,0,0,-0.5,-1.2,-0.8,0,0,0,0,0,0,0,0,0],
+    BatterieDecharge: [0,0,0,0,0,0,0,0,0.25,0.26,0.26,0.16,0,0,0,0.2,0.5,0.8,1.2,1.5,1.0,0.5,0.2,0.1],
+    Estimation: [0,0,0,0,0,0,0,0,0.02,0.34,0.64,0.9,1.5,2.2,2.8,2.2,1.6,0.8,0.2,0,0,0,0,0],
+    TotalHC: 33.02,
+    TotalHP: 0.22
+  }
+};
+
 export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSimulated, setIsSimulated] = useState(false);
   const [messages, setMessages] = useState<MQTTMessage[]>([]);
   const [latestData, setLatestData] = useState<HomeDashboardData | null>(BASE_MOCK_DATA);
   const [historyData, setHistoryData] = useState<HistoryData | null>(BASE_HISTORY_MOCK);
   const [totalHistoryData, setTotalHistoryData] = useState<TotalHistoryData | null>(BASE_TOTAL_HISTORY_MOCK);
+  const [solarChartData, setSolarChartData] = useState<SolarChartData | null>(SOLAR_CHART_MOCK);
   const [error, setError] = useState<string | null>(null);
   
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
 
   const fetchRealData = useCallback(async () => {
     try {
-      // On utilise le proxy interne pour éviter les erreurs CORS
       const proxyUrl = (target: string) => `/api/proxy?url=${encodeURIComponent(target)}`;
 
       const [instantRes, historyRes, queryRes] = await Promise.all([
@@ -175,10 +207,6 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const histData = await historyRes.json();
       const productQuery = await queryRes.json();
       
-      if (instantData.error) throw new Error(instantData.error);
-      if (histData.error) throw new Error(histData.error);
-      if (productQuery.error) throw new Error(productQuery.error);
-
       const adaptedData = { ...instantData };
       if (adaptedData.voiture) {
         Object.keys(adaptedData.voiture).forEach(key => {
@@ -210,6 +238,22 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setError(e.message || "Impossible de contacter l'endpoint local via le proxy.");
     }
   }, []);
+
+  const fetchSolarChart = useCallback(async (start: string, end: string) => {
+    if (isSimulated) {
+      setSolarChartData(SOLAR_CHART_MOCK);
+      return;
+    }
+    try {
+      const url = `http://192.168.0.3/Dashboard/assets/Solaire/getSolaire.php?startDate=${start}&endDate=${end}`;
+      const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`);
+      if (!res.ok) throw new Error('Failed to fetch solar chart');
+      const data = await res.json();
+      setSolarChartData(data);
+    } catch (e) {
+      console.error('Solar Chart Error:', e);
+    }
+  }, [isSimulated]);
 
   const runSimulation = useCallback(() => {
     setLatestData(prev => {
@@ -252,14 +296,6 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
             Consommation: Number((prev.Consommation + 0.02).toFixed(2))
         };
     });
-    setTotalHistoryData(prev => {
-        if (!prev) return BASE_TOTAL_HISTORY_MOCK;
-        return {
-            ...prev,
-            production: Number((prev.production + 0.1).toFixed(2)),
-            consommation: Number((prev.consommation + 0.15).toFixed(2))
-        };
-    });
   }, []);
 
   useEffect(() => {
@@ -276,7 +312,18 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isSimulated, fetchRealData, runSimulation]);
 
   return (
-    <MQTTContext.Provider value={{ isSimulated, setIsSimulated, messages, latestData, historyData, totalHistoryData, error, refreshAll: fetchRealData }}>
+    <MQTTContext.Provider value={{ 
+      isSimulated, 
+      setIsSimulated, 
+      messages, 
+      latestData, 
+      historyData, 
+      totalHistoryData, 
+      solarChartData,
+      error, 
+      refreshAll: fetchRealData,
+      fetchSolarChart
+    }}>
       {children}
     </MQTTContext.Provider>
   );

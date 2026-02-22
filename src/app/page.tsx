@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { MQTTProvider, useMQTT } from "@/hooks/use-mqtt";
 import { MetricCard } from "@/components/dashboard/MetricCard";
+import { SolarHistoryChart } from "@/components/dashboard/SolarHistoryChart";
 import { 
   Zap, 
   Battery as BatteryIcon, 
@@ -23,7 +24,8 @@ import {
   TrendingUp,
   PieChart,
   Activity,
-  CalendarDays
+  CalendarDays,
+  Calendar
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +33,7 @@ import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Carousel,
   CarouselContent,
@@ -43,10 +46,22 @@ import { cn } from "@/lib/utils";
 type ViewType = 'dashboard' | 'history';
 
 function DashboardContent() {
-  const { latestData, historyData, totalHistoryData, isSimulated, setIsSimulated } = useMQTT();
+  const { 
+    latestData, 
+    historyData, 
+    totalHistoryData, 
+    solarChartData,
+    isSimulated, 
+    setIsSimulated,
+    fetchSolarChart
+  } = useMQTT();
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [mounted, setMounted] = useState(false);
   const [view, setView] = useState<ViewType>('dashboard');
+  
+  const todayStr = new Date().toISOString().split('T')[0];
+  const [startDate, setStartDate] = useState(todayStr);
+  const [endDate, setEndDate] = useState(todayStr);
 
   // Handle Hydration & Theme
   useEffect(() => {
@@ -56,6 +71,12 @@ function DashboardContent() {
     setTheme(initialTheme);
     document.documentElement.classList.toggle('dark', initialTheme === 'dark');
   }, []);
+
+  useEffect(() => {
+    if (view === 'history') {
+      fetchSolarChart(startDate, endDate);
+    }
+  }, [view, startDate, endDate, fetchSolarChart]);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -95,7 +116,6 @@ function DashboardContent() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
-      {/* Header with Title and Mode Toggle */}
       <header className="h-20 border-b border-border flex items-center justify-between px-8 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-3">
@@ -161,7 +181,6 @@ function DashboardContent() {
         
         {view === 'dashboard' ? (
           <>
-            {/* Indicators Section (ZenFlex) */}
             <section className="flex flex-col sm:flex-row items-center justify-between gap-6 p-6 bg-secondary/10 rounded-3xl border border-border/50">
               <div className="flex flex-wrap items-center gap-4">
                 {latestData?.zenFlex?.couleurJourJ && (
@@ -200,7 +219,6 @@ function DashboardContent() {
               </div>
             </section>
 
-            {/* Primary Metrics Grid */}
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <MetricCard 
                 title="Réseau Electrique" 
@@ -316,7 +334,6 @@ function DashboardContent() {
               </div>
 
               <aside className="space-y-8">
-                {/* Vehicles Carousel */}
                 {vehicles.length > 0 && (
                   <div className="relative">
                     <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4 px-1">Flotte Véhicules</h3>
@@ -367,9 +384,36 @@ function DashboardContent() {
             </div>
           </>
         ) : (
-          /* History View */
           <div className="space-y-12 animate-in fade-in slide-in-from-left duration-500">
-            {/* Journalier Section */}
+            {/* Date Range Selector */}
+            <div className="flex flex-col sm:flex-row items-center gap-4 bg-secondary/10 p-4 rounded-2xl border border-border/50">
+              <div className="flex items-center gap-3">
+                <Calendar className="w-5 h-5 text-primary" />
+                <span className="text-sm font-bold uppercase tracking-tight">Période :</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Input 
+                  type="date" 
+                  value={startDate} 
+                  onChange={(e) => setStartDate(e.target.value)} 
+                  className="w-40 bg-card"
+                />
+                <span className="text-muted-foreground">au</span>
+                <Input 
+                  type="date" 
+                  value={endDate} 
+                  onChange={(e) => setEndDate(e.target.value)} 
+                  className="w-40 bg-card"
+                />
+              </div>
+              <Button size="sm" onClick={() => fetchSolarChart(startDate, endDate)} className="ml-auto font-bold uppercase text-[10px]">
+                Actualiser Graphique
+              </Button>
+            </div>
+
+            {/* Solar History Chart */}
+            <SolarHistoryChart data={solarChartData} />
+
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                   <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
@@ -382,7 +426,6 @@ function DashboardContent() {
               </div>
               
               <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Card 1: Production journalière */}
                   <MetricCard 
                       title="Production journalière" 
                       value={historyData?.Production ?? 0} 
@@ -394,7 +437,6 @@ function DashboardContent() {
                       ]}
                   />
 
-                  {/* Card 2: Utilisation production journalière */}
                   <MetricCard 
                       title="Utilisation production" 
                       value={historyData?.Production ?? 0} 
@@ -406,7 +448,6 @@ function DashboardContent() {
                       ]}
                   />
 
-                  {/* Card 3: Consommation journalière */}
                   <MetricCard 
                       title="Consommation journalière" 
                       value={historyData?.Consommation ?? 0} 
@@ -420,7 +461,6 @@ function DashboardContent() {
               </section>
             </div>
 
-            {/* Totaux Section */}
             <div className="space-y-6">
               <div className="flex items-center gap-3">
                   <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
@@ -430,7 +470,6 @@ function DashboardContent() {
               </div>
 
               <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Card 1: Production totale */}
                   <MetricCard 
                       title="Production totale" 
                       value={totalHistoryData?.production ?? 0} 
@@ -442,7 +481,6 @@ function DashboardContent() {
                       ]}
                   />
 
-                  {/* Card 2: Utilisation production totale */}
                   <MetricCard 
                       title="Utilisation production totale" 
                       value={totalHistoryData?.production ?? 0} 
@@ -454,7 +492,6 @@ function DashboardContent() {
                       ]}
                   />
 
-                  {/* Card 3: Consommation totale */}
                   <MetricCard 
                       title="Consommation totale" 
                       value={totalHistoryData?.consommation ?? 0} 
@@ -466,16 +503,6 @@ function DashboardContent() {
                       ]}
                   />
               </section>
-            </div>
-            
-            <div className="p-8 bg-secondary/5 rounded-3xl border border-dashed border-border flex flex-col items-center justify-center text-center space-y-4">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                    <History className="w-8 h-8 text-primary opacity-50" />
-                </div>
-                <div className="max-w-md">
-                    <h3 className="font-black uppercase tracking-widest text-sm mb-2">Historique complet bientôt disponible</h3>
-                    <p className="text-xs text-muted-foreground">Nous travaillons sur l'agrégation des données à long terme pour vous proposer des graphiques comparatifs mensuels et annuels.</p>
-                </div>
             </div>
           </div>
         )}
