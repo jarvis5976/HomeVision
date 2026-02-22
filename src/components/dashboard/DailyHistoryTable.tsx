@@ -57,9 +57,11 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
 
   if (!data) return null;
 
+  const unit = isPercentage ? "%" : "kWh";
+
   const renderValue = (val: number | undefined) => {
-    if (val === undefined) return "0.00";
-    return val.toFixed(2);
+    if (val === undefined) return `0.00 ${unit}`;
+    return `${val.toFixed(2)} ${unit}`;
   };
 
   const handlePageChange = (page: number) => {
@@ -82,7 +84,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
           <div className="flex items-center gap-2 ml-4">
             <Rows className="w-3.5 h-3.5 text-muted-foreground" />
             <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
-              <SelectTrigger className="h-8 w-20 text-[10px] font-bold">
+              <SelectTrigger className="h-8 w-24 text-[10px] font-bold">
                 <SelectValue placeholder="10" />
               </SelectTrigger>
               <SelectContent>
@@ -200,7 +202,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
       {totalPages > 1 && (
         <CardFooter className="flex items-center justify-between border-t border-border/50 py-4">
           <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-            Page {currentPage} sur {totalPages} ({currentData.length} jours au total)
+            Page {currentPage} sur {totalPages} ({currentData.length} lignes au total)
           </div>
           <div className="flex gap-2">
             <Button
