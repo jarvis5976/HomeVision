@@ -109,7 +109,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
 };
 
 export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isSimulated, setIsSimulated] = useState(true);
+  const [isSimulated, setIsSimulated] = useState(false);
   const [messages, setMessages] = useState<MQTTMessage[]>([]);
   const [latestData, setLatestData] = useState<HomeDashboardData | null>(BASE_MOCK_DATA);
   const [error, setError] = useState<string | null>(null);

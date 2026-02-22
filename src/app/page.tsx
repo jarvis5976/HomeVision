@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,7 +7,7 @@ import { MetricCard } from "@/components/dashboard/MetricCard";
 import { SensorChart } from "@/components/dashboard/SensorChart";
 import { 
   Zap, 
-  Battery, 
+  Battery as BatteryIcon, 
   Car, 
   Droplets, 
   Sun, 
@@ -17,7 +18,8 @@ import {
   Radio,
   PlayCircle,
   Moon,
-  SunMedium
+  SunMedium,
+  History
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -91,7 +93,7 @@ function DashboardContent() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
-      {/* Header with Title and ZenFlex Info */}
+      {/* Header with Title and Mode Toggle */}
       <header className="h-20 border-b border-border flex items-center justify-between px-8 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-3">
@@ -100,22 +102,14 @@ function DashboardContent() {
             </div>
             <h1 className="text-xl font-black tracking-tight uppercase">HomeVision</h1>
           </div>
-          
-          <div className="hidden sm:flex items-center gap-3">
-            {latestData?.zenFlex?.couleurJourJ && (
-              <Badge className={cn("px-4 py-1.5 font-bold shadow-sm transition-colors", getZenFlexColor(latestData.zenFlex.couleurJourJ))}>
-                {latestData.zenFlex.couleurJourJ}
-              </Badge>
-            )}
-            {latestData?.zenFlex?.couleurJourJ1 && (
-              <Badge variant="outline" className={cn("px-4 py-1.5 font-semibold border-2", getZenFlexOutlineColor(latestData.zenFlex.couleurJourJ1))}>
-                {latestData.zenFlex.couleurJourJ1}
-              </Badge>
-            )}
-          </div>
         </div>
 
         <div className="flex items-center gap-4">
+          <Button variant="outline" size="sm" className="hidden sm:flex items-center gap-2 font-bold uppercase text-[10px] tracking-widest">
+            <History className="w-4 h-4" />
+            Historique
+          </Button>
+
           <Button 
             variant="ghost" 
             size="icon" 
@@ -157,52 +151,89 @@ function DashboardContent() {
       </header>
 
       <main className="flex-1 p-8 max-w-7xl mx-auto w-full space-y-8 animate-in fade-in slide-up duration-500">
-        <section>
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
-            <div>
-              <h2 className="text-3xl font-black tracking-tight text-foreground uppercase">Energy Center</h2>
-              <p className="text-sm text-muted-foreground mt-1">Monitoring en temps réel de votre écosystème énergétique</p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-               <Badge variant="outline" className="flex items-center gap-2 px-4 py-2 bg-card border-border shadow-sm">
-                <CloudSun className="w-4 h-4 text-orange-400" />
-                <span className="font-semibold text-xs">Prévision du jour : {latestData?.solCast?.today ?? 0} kWh</span>
-              </Badge>
-              <Badge variant="outline" className="flex items-center gap-2 px-4 py-2 bg-card border-border border-dashed shadow-sm">
-                <CloudSun className="w-4 h-4 text-orange-300 opacity-70" />
-                <span className="font-medium text-xs text-muted-foreground">Demain : {latestData?.solCast?.tomorrow ?? 0} kWh</span>
-              </Badge>
-            </div>
+        {/* Indicators Section (ZenFlex) */}
+        <section className="flex flex-col sm:flex-row items-center justify-between gap-6 p-6 bg-secondary/10 rounded-3xl border border-border/50">
+          <div className="flex flex-wrap items-center gap-4">
+            {latestData?.zenFlex?.couleurJourJ && (
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest px-1">Aujourd'hui</span>
+                <Badge className={cn("px-6 py-2.5 text-sm font-black shadow-lg transition-transform hover:scale-105", getZenFlexColor(latestData.zenFlex.couleurJourJ))}>
+                  {latestData.zenFlex.couleurJourJ}
+                </Badge>
+              </div>
+            )}
+            {latestData?.zenFlex?.couleurJourJ1 && (
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest px-1">Demain</span>
+                <Badge variant="outline" className={cn("px-6 py-2.5 text-sm font-black border-2 shadow-sm transition-transform hover:scale-105", getZenFlexOutlineColor(latestData.zenFlex.couleurJourJ1))}>
+                  {latestData.zenFlex.couleurJourJ1}
+                </Badge>
+              </div>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <MetricCard 
-              title="Réseau Electrique" 
-              value={gridPower} 
-              unit="W" 
-              icon={Zap} 
-              status={gridPower > 6000 ? 'alert' : 'online'}
-            />
-            <MetricCard 
-              title="Production Solaire" 
-              value={solarProduction} 
-              unit="W" 
-              icon={Sun} 
-            />
-            <MetricCard 
-              title="Batterie" 
-              value={batterySoc} 
-              unit="%" 
-              icon={Battery} 
-              status={batterySoc < 20 ? 'alert' : 'online'}
-            />
-            <MetricCard 
-              title="Consommation Totale" 
-              value={latestData?.energy?.total?.all ?? 0} 
-              unit="W" 
-              icon={Home} 
-            />
+          <div className="flex flex-wrap gap-3">
+             <Badge variant="outline" className="flex items-center gap-3 px-5 py-3 bg-card border-border shadow-md">
+              <CloudSun className="w-5 h-5 text-orange-400" />
+              <div className="flex flex-col">
+                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Aujourd'hui</span>
+                <span className="font-black text-xs">{latestData?.solCast?.today ?? 0} kWh</span>
+              </div>
+            </Badge>
+            <Badge variant="outline" className="flex items-center gap-3 px-5 py-3 bg-card border-border border-dashed shadow-sm">
+              <CloudSun className="w-5 h-5 text-orange-300 opacity-70" />
+              <div className="flex flex-col">
+                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Demain</span>
+                <span className="font-black text-xs">{latestData?.solCast?.tomorrow ?? 0} kWh</span>
+              </div>
+            </Badge>
           </div>
+        </section>
+
+        {/* Primary Metrics Grid */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <MetricCard 
+            title="Réseau Electrique" 
+            value={gridPower} 
+            unit="W" 
+            icon={Zap} 
+            status={gridPower > 6000 ? 'alert' : 'online'}
+            details={[
+              { label: "Sens", value: latestData?.grid?.sens ?? "Achat" }
+            ]}
+          />
+          <MetricCard 
+            title="Production Solaire" 
+            value={solarProduction} 
+            unit="W" 
+            icon={Sun} 
+            details={[
+              { label: "SolarEdge", value: latestData?.production?.detail?.solarEdge ?? 0, unit: "W" },
+              { label: "APsystems", value: latestData?.production?.detail?.apSystems ?? 0, unit: "W" }
+            ]}
+          />
+          <MetricCard 
+            title="Batterie" 
+            value={batterySoc} 
+            unit="%" 
+            icon={BatteryIcon} 
+            status={batterySoc < 20 ? 'alert' : 'online'}
+            details={[
+              { label: "Flux", value: batteryPower, unit: "W" },
+              { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" },
+              { label: "Temp.", value: latestData?.battery?.temperature ?? 0, unit: "°C" }
+            ]}
+          />
+          <MetricCard 
+            title="Consommation Totale" 
+            value={latestData?.energy?.total?.all ?? 0} 
+            unit="W" 
+            icon={Home} 
+            details={[
+              { label: "Maison", value: houseConsumption, unit: "W" },
+              { label: "Annexe", value: annexeConsumption, unit: "W" }
+            ]}
+          />
         </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -255,7 +286,7 @@ function DashboardContent() {
             {/* Vehicles Carousel */}
             {vehicles.length > 0 && (
               <div className="relative">
-                <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4">Flotte Véhicules</h3>
+                <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4 px-1">Flotte Véhicules</h3>
                 <Carousel className="w-full">
                   <CarouselContent>
                     {vehicles.map(([id, car]) => (
@@ -300,30 +331,13 @@ function DashboardContent() {
               </div>
             )}
 
-            {/* System Battery Overview */}
-            <div className="bg-card rounded-2xl p-6 shadow-xl border border-border">
-              <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-6">Système de Batterie</h3>
-              <div className="space-y-6">
-                <div className="flex items-center justify-between p-4 rounded-2xl bg-secondary/20 border border-border/50">
-                  <div>
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Flux d'énergie</p>
-                    <p className="text-xl font-black">{batteryPower} <span className="text-xs font-medium text-muted-foreground">W</span></p>
-                  </div>
-                  <Badge variant={batteryPower > 0 ? "default" : "secondary"} className="text-[9px] font-black uppercase tracking-widest px-3">
-                    {batteryPower > 0 ? 'Charge' : 'Décharge'}
-                  </Badge>
-                </div>
-                <div className="grid grid-cols-2 gap-6 px-2">
-                  <div>
-                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Tension</p>
-                    <p className="text-lg font-black">{latestData?.battery?.voltage ?? 0} <span className="text-xs font-medium opacity-50">V</span></p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Temp.</p>
-                    <p className="text-lg font-black">{latestData?.battery?.temperature ?? 0} <span className="text-xs font-medium opacity-50">°C</span></p>
-                  </div>
-                </div>
-              </div>
+            {/* System Info Box */}
+            <div className="bg-primary/5 rounded-3xl p-6 border border-primary/20 shadow-inner">
+               <h4 className="text-[10px] font-black uppercase text-primary tracking-widest mb-4">État du Système Victron</h4>
+               <p className="text-sm font-bold text-foreground mb-2">{latestData?.victron?.batteryTitle ?? "N/A"}</p>
+               <p className="text-[11px] text-muted-foreground leading-relaxed italic">
+                 {latestData?.victron?.EssState?.label ?? "Chargement..."}
+               </p>
             </div>
           </aside>
         </div>
