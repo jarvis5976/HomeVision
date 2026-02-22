@@ -64,6 +64,11 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
     return `${val.toFixed(2)} ${unit}`;
   };
 
+  const renderRawValue = (val: number | undefined) => {
+    if (val === undefined) return "0.00";
+    return val.toFixed(2);
+  };
+
   const handlePageChange = (page: number) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
@@ -72,6 +77,9 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
     setPageSize(parseInt(val));
     setCurrentPage(1);
   };
+
+  // Classe CSS pour harmoniser la largeur des colonnes de données
+  const dataColClass = "w-[110px] min-w-[110px] text-center px-2";
 
   return (
     <Card className="border-border bg-card shadow-lg">
@@ -84,8 +92,8 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
           <div className="flex items-center gap-2 ml-4">
             <Rows className="w-3.5 h-3.5 text-muted-foreground" />
             <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
-              <SelectTrigger className="h-8 w-24 text-[10px] font-bold">
-                <SelectValue placeholder="10" />
+              <SelectTrigger className="h-8 w-28 text-[10px] font-bold">
+                <SelectValue placeholder="10 lignes" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="5">5 lignes</SelectItem>
@@ -122,25 +130,25 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-border">
-                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap">Année</TableHead>
-                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap">Date</TableHead>
-                {!isGrouped && <TableHead className="text-[9px] font-black uppercase whitespace-nowrap">Couleur</TableHead>}
-                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap text-center">Heure Soleil</TableHead>
-                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap text-center">SolarEdge</TableHead>
-                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap text-center">APsystems</TableHead>
-                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap text-center">Total Prod.</TableHead>
-                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap text-center">Achat</TableHead>
-                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap text-center">Consommation</TableHead>
-                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap text-center">Auto Conso.</TableHead>
-                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap text-center">Vente</TableHead>
-                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap text-center">Borne</TableHead>
-                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap text-center">Maison Cons.</TableHead>
-                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap text-center">Annexe Cons.</TableHead>
-                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap text-center">Bat. Charge</TableHead>
-                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap text-center">Bat. Discharge</TableHead>
-                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap text-center">Bat. Total</TableHead>
-                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap text-center">Achat Maison</TableHead>
-                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap text-center">Achat Annexe</TableHead>
+                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap w-[60px]">Année</TableHead>
+                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap w-[100px]">Date</TableHead>
+                {!isGrouped && <TableHead className="text-[9px] font-black uppercase whitespace-nowrap w-[80px]">Couleur</TableHead>}
+                <TableHead className="text-[9px] font-black uppercase whitespace-nowrap text-center w-[80px]">Heure Soleil</TableHead>
+                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>SolarEdge</TableHead>
+                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>APsystems</TableHead>
+                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Total Prod.</TableHead>
+                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Achat</TableHead>
+                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Consommation</TableHead>
+                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Auto Conso.</TableHead>
+                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Vente</TableHead>
+                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Borne</TableHead>
+                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Maison Cons.</TableHead>
+                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Annexe Cons.</TableHead>
+                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Bat. Charge</TableHead>
+                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Bat. Discharge</TableHead>
+                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Bat. Total</TableHead>
+                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Achat Maison</TableHead>
+                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Achat Annexe</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -154,9 +162,9 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
                     </TableCell>
                   )}
                   <TableCell className="text-[10px] font-bold text-center">{row.SunHours}h</TableCell>
-                  <TableCell className="text-[10px] font-bold text-center">{renderValue(row.Production_SolarEdge)}</TableCell>
-                  <TableCell className="text-[10px] font-bold text-center">{renderValue(row.Production_Ecu)}</TableCell>
-                  <TableCell>
+                  <TableCell className={dataColClass}>{renderValue(row.Production_SolarEdge)}</TableCell>
+                  <TableCell className={dataColClass}>{renderValue(row.Production_Ecu)}</TableCell>
+                  <TableCell className={dataColClass}>
                     <div className="flex flex-col items-center">
                       <span className={cn(
                         "text-[10px] font-black",
@@ -164,35 +172,35 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
                       )}>
                         {renderValue(row.Production_Total)}
                       </span>
-                      <span className="text-[8px] text-muted-foreground">Prév: {renderValue(row.Prevision)}</span>
+                      <span className="text-[8px] text-muted-foreground">{renderRawValue(row.Prevision)}</span>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className={dataColClass}>
                     <div className="flex flex-col items-center">
                       <span className="text-[10px] font-black">{renderValue(row.Achat)}</span>
                       <div className="text-[8px] flex gap-1">
-                        <span className="text-emerald-500">{renderValue(row.HC)}</span>
+                        <span className="text-emerald-500">{renderRawValue(row.HC)}</span>
                         <span className="opacity-30">/</span>
-                        <span className="text-rose-500">{renderValue(row.HP)}</span>
+                        <span className="text-rose-500">{renderRawValue(row.HP)}</span>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className={dataColClass}>
                     <div className="flex flex-col items-center">
                       <span className="text-[10px] font-black">{renderValue(row.Consommation)}</span>
-                      <span className="text-[8px] text-emerald-500 font-bold">Net: {renderValue(row.Consommation - (row.Borne || 0))}</span>
+                      <span className="text-[8px] text-emerald-500 font-bold">{renderRawValue(row.Consommation - (row.Borne || 0))}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-[10px] font-bold text-center">{renderValue(row.Autoconsommation)}</TableCell>
-                  <TableCell className="text-[10px] font-bold text-center">{renderValue(row.Vente)}</TableCell>
-                  <TableCell className="text-[10px] font-bold text-center">{renderValue(row.Borne)}</TableCell>
-                  <TableCell className="text-[10px] font-bold text-center">{renderValue(row.ConsommationMaison)}</TableCell>
-                  <TableCell className="text-[10px] font-bold text-center">{renderValue(row.ConsommationAnnexe)}</TableCell>
-                  <TableCell className="text-[10px] font-bold text-center">{renderValue(row.BatteryCharge)}</TableCell>
-                  <TableCell className="text-[10px] font-bold text-center">{renderValue(row.BatteryDischarge)}</TableCell>
-                  <TableCell className="text-[10px] font-bold text-center">{renderValue(row.BatteryTotal)}</TableCell>
-                  <TableCell className="text-[10px] font-bold text-center">{renderValue(row.AchatMaison)}</TableCell>
-                  <TableCell className="text-[10px] font-bold text-center">{renderValue(row.AchatAnnexe)}</TableCell>
+                  <TableCell className={dataColClass}>{renderValue(row.Autoconsommation)}</TableCell>
+                  <TableCell className={dataColClass}>{renderValue(row.Vente)}</TableCell>
+                  <TableCell className={dataColClass}>{renderValue(row.Borne)}</TableCell>
+                  <TableCell className={dataColClass}>{renderValue(row.ConsommationMaison)}</TableCell>
+                  <TableCell className={dataColClass}>{renderValue(row.ConsommationAnnexe)}</TableCell>
+                  <TableCell className={dataColClass}>{renderValue(row.BatteryCharge)}</TableCell>
+                  <TableCell className={dataColClass}>{renderValue(row.BatteryDischarge)}</TableCell>
+                  <TableCell className={dataColClass}>{renderValue(row.BatteryTotal)}</TableCell>
+                  <TableCell className={dataColClass}>{renderValue(row.AchatMaison)}</TableCell>
+                  <TableCell className={dataColClass}>{renderValue(row.AchatAnnexe)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
