@@ -165,7 +165,7 @@ function DashboardContent() {
              <Badge variant="outline" className="flex items-center gap-3 px-5 py-3 bg-card border-border shadow-md">
               <CloudSun className="w-5 h-5 text-orange-400" />
               <div className="flex flex-col">
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Aujourd'hui</span>
+                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Prévision du jour</span>
                 <span className="font-black text-xs">{latestData?.solCast?.today ?? 0} kWh</span>
               </div>
             </Badge>
@@ -207,7 +207,9 @@ function DashboardContent() {
             unit="%" 
             icon={BatteryIcon} 
             status={batterySoc < 20 ? 'alert' : 'online'}
+            description={latestData?.victron?.batteryTitle}
             details={[
+              { label: "Système", value: latestData?.victron?.EssState?.label ?? "N/A" },
               { label: "Flux", value: batteryPower, unit: "W" },
               { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" },
               { label: "Temp.", value: latestData?.battery?.temperature ?? 0, unit: "°C" }
@@ -341,15 +343,6 @@ function DashboardContent() {
                 </Carousel>
               </div>
             )}
-
-            {/* System Info Box */}
-            <div className="bg-primary/5 rounded-3xl p-6 border border-primary/20 shadow-inner">
-               <h4 className="text-[10px] font-black uppercase text-primary tracking-widest mb-4">État du Système Victron</h4>
-               <p className="text-sm font-bold text-foreground mb-2">{latestData?.victron?.batteryTitle ?? "N/A"}</p>
-               <p className="text-[11px] text-muted-foreground leading-relaxed italic">
-                 {latestData?.victron?.EssState?.label ?? "Chargement..."}
-               </p>
-            </div>
           </aside>
         </div>
       </main>

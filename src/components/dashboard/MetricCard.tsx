@@ -19,9 +19,10 @@ interface MetricCardProps {
   trend?: number;
   status?: 'online' | 'offline' | 'alert';
   details?: DetailItem[];
+  description?: string;
 }
 
-export function MetricCard({ title, value, unit, icon: Icon, trend, status = 'online', details }: MetricCardProps) {
+export function MetricCard({ title, value, unit, icon: Icon, trend, status = 'online', details, description }: MetricCardProps) {
   return (
     <Card className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow h-full">
       <CardContent className="p-5 flex flex-col h-full">
@@ -39,6 +40,11 @@ export function MetricCard({ title, value, unit, icon: Icon, trend, status = 'on
             <h3 className="text-2xl font-bold text-foreground">{value}</h3>
             {unit && <span className="text-sm font-medium text-muted-foreground">{unit}</span>}
           </div>
+          {description && (
+            <p className="text-[11px] font-bold text-primary mt-1 leading-tight uppercase tracking-tight">
+              {description}
+            </p>
+          )}
           {trend !== undefined && (
             <p className={cn("text-[10px] mt-2 font-medium", trend >= 0 ? "text-accent" : "text-destructive")}>
               {trend >= 0 ? "+" : ""}{trend}% from last hour
