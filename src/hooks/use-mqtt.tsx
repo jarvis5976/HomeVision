@@ -100,6 +100,7 @@ interface MQTTContextType {
   annualData: AnnualData | null;
   error: string | null;
   refreshAll: () => Promise<void>;
+  fetchHistoryStats: () => Promise<void>;
   fetchSolarChart: (start: string, end: string) => Promise<void>;
   fetchSolCastChart: () => Promise<void>;
   fetchAnnualData: () => Promise<void>;
@@ -246,18 +247,10 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchRealData = useCallback(async () => {
     try {
       const proxyUrl = (target: string) => `/api/proxy?url=${encodeURIComponent(target)}`;
-
-      const [instantRes, historyRes, queryRes] = await Promise.all([
-        fetch(proxyUrl('http://192.168.0.3/Dashboard/assets/instant_from_mqtt.php'), { signal: AbortSignal.timeout(5000) }),
-        fetch(proxyUrl('http://192.168.0.3/Dashboard/assets/Solaire/getProductDays.php'), { signal: AbortSignal.timeout(5000) }),
-        fetch(proxyUrl('http://192.168.0.3/Dashboard/assets/Solaire/getProduct_query.php'), { signal: AbortSignal.timeout(5000) })
-      ]);
+      const instantRes = await fetch(proxyUrl('http://192.168.0.3/Dashboard/assets/instant_from_mqtt.php'), { signal: AbortSignal.timeout(5000) });
       
-      if (!instantRes.ok || !historyRes.ok || !queryRes.ok) throw new Error(`Proxy error!`);
-      
+      if (!instantRes.ok) throw new Error(`Proxy error!`);
       const instantData = await instantRes.json();
-      const histData = await historyRes.json();
-      const productQuery = await queryRes.json();
       
       const adaptedData = { ...instantData };
       if (adaptedData.voiture) {
@@ -269,10 +262,33 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
           car.chargeStatus = car.chargeStatus ?? car.charging_state;
         });
       }
-
       setLatestData(adaptedData);
-      setHistoryData(histData);
+      setError(null);
+    } catch (e: any) {
+      console.error('Instant fetch error:', e);
+      setError(e.message || "Impossible de contacter l'endpoint local.");
+    }
+  }, []);
 
+  const fetchHistoryStats = useCallback(async () => {
+    if (isSimulated) {
+      setHistoryData(BASE_HISTORY_MOCK);
+      setTotalHistoryData(BASE_TOTAL_HISTORY_MOCK);
+      return;
+    }
+    try {
+      const proxyUrl = (target: string) => `/api/proxy?url=${encodeURIComponent(target)}`;
+      const [historyRes, queryRes] = await Promise.all([
+        fetch(proxyUrl('http://192.168.0.3/Dashboard/assets/Solaire/getProductDays.php'), { signal: AbortSignal.timeout(5000) }),
+        fetch(proxyUrl('http://192.168.0.3/Dashboard/assets/Solaire/getProduct_query.php'), { signal: AbortSignal.timeout(5000) })
+      ]);
+      
+      if (!historyRes.ok || !queryRes.ok) throw new Error('History endpoints error');
+      
+      const histData = await historyRes.json();
+      const productQuery = await queryRes.json();
+      
+      setHistoryData(histData);
       if (productQuery.data && productQuery.data.total) {
         setTotalHistoryData({
           production: parseFloat(productQuery.data.total[1]?.data || 0),
@@ -283,13 +299,10 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
           apSystems: parseFloat(productQuery.data.total[6]?.data || productQuery.data.total[6] || 0)
         });
       }
-
-      setError(null);
-    } catch (e: any) {
-      console.error('Fetch error:', e);
-      setError(e.message || "Impossible de contacter l'endpoint local via le proxy.");
+    } catch (e) {
+      console.error('History Stats Error:', e);
     }
-  }, []);
+  }, [isSimulated]);
 
   const fetchSolarChart = useCallback(async (start: string, end: string) => {
     if (isSimulated) {
@@ -372,14 +385,6 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
         voiture: updatedVoiture
       };
     });
-    setHistoryData(prev => {
-        if (!prev) return BASE_HISTORY_MOCK;
-        return {
-            ...prev,
-            Production: Number((prev.Production + 0.01).toFixed(2)),
-            Consommation: Number((prev.Consommation + 0.02).toFixed(2))
-        };
-    });
   }, []);
 
   useEffect(() => {
@@ -408,6 +413,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       annualData,
       error, 
       refreshAll: fetchRealData,
+      fetchHistoryStats,
       fetchSolarChart,
       fetchSolCastChart,
       fetchAnnualData

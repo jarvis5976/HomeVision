@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MQTTProvider, useMQTT } from "@/hooks/use-mqtt";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { SolarHistoryChart } from "@/components/dashboard/SolarHistoryChart";
@@ -26,7 +26,8 @@ import {
   TrendingUp,
   PieChart,
   Activity,
-  CalendarDays
+  CalendarDays,
+  RefreshCw
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,6 +56,7 @@ function DashboardContent() {
     annualData,
     isSimulated, 
     setIsSimulated,
+    fetchHistoryStats,
     fetchSolarChart,
     fetchSolCastChart,
     fetchAnnualData
@@ -76,13 +78,18 @@ function DashboardContent() {
     document.documentElement.classList.toggle('dark', initialTheme === 'dark');
   }, []);
 
+  const refreshHistory = useCallback(() => {
+    fetchHistoryStats();
+    fetchSolarChart(startDate, endDate);
+    fetchSolCastChart();
+    fetchAnnualData();
+  }, [fetchHistoryStats, fetchSolarChart, fetchSolCastChart, fetchAnnualData, startDate, endDate]);
+
   useEffect(() => {
     if (view === 'history') {
-      fetchSolarChart(startDate, endDate);
-      fetchSolCastChart();
-      fetchAnnualData();
+      refreshHistory();
     }
-  }, [view, startDate, endDate, fetchSolarChart, fetchSolCastChart, fetchAnnualData]);
+  }, [view, refreshHistory]);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -398,9 +405,20 @@ function DashboardContent() {
                       <TrendingUp className="w-6 h-6 text-primary" />
                       Résumé Journalier
                   </h2>
-                  <Badge variant="secondary" className="px-4 py-1.5 font-bold uppercase tracking-widest text-[10px]">
-                      {mounted ? new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ""}
-                  </Badge>
+                  <div className="flex items-center gap-3">
+                    <Badge variant="secondary" className="px-4 py-1.5 font-bold uppercase tracking-widest text-[10px]">
+                        {mounted ? new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ""}
+                    </Badge>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={refreshHistory}
+                      className="h-8 w-8 rounded-full hover:bg-secondary"
+                      title="Rafraîchir l'historique"
+                    >
+                      <RefreshCw className="w-4 h-4 text-primary" />
+                    </Button>
+                  </div>
               </div>
               
               <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -491,7 +509,7 @@ function DashboardContent() {
               endDate={endDate}
               onStartDateChange={setStartDate}
               onEndDateChange={setEndDate}
-              onRefresh={() => fetchSolarChart(startDate, endDate)}
+              onRefresh={refreshHistory}
             />
 
             {/* Solar Forecast Chart */}
