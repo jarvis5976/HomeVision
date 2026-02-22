@@ -47,7 +47,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <p className="text-primary border-b border-border pb-1 mb-1">{data.rangeLabel}</p>
         <div className="space-y-1">
           {payload.map((entry: any, index: number) => {
-            // Labels map to user friendly names
             const namesMap: Record<string, string> = {
               achat: 'Achat',
               vente: 'Vente',
@@ -68,7 +67,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         </div>
         {data.batterieSoc !== null && data.batterieSoc !== undefined && (
           <p className="border-t border-border pt-1 mt-1 text-accent">
-            Le soc batterie à '{data.label} +' est de {data.batterieSoc} %
+            Le soc batterie à {data.label} est de {data.batterieSoc} %
           </p>
         )}
       </div>
