@@ -49,6 +49,12 @@ export interface SolarChartData {
   };
 }
 
+export type SolCastChartData = [
+  { Label: string[] },
+  { Energy: number[] },
+  { Energy: number[] }
+];
+
 export interface HomeDashboardData {
   compteurEdf?: { conso_base: number; isousc: number };
   eau?: { total: number; maison: number; annexe: number; compteur: number };
@@ -78,9 +84,11 @@ interface MQTTContextType {
   historyData: HistoryData | null;
   totalHistoryData: TotalHistoryData | null;
   solarChartData: SolarChartData | null;
+  solCastChartData: SolCastChartData | null;
   error: string | null;
   refreshAll: () => Promise<void>;
   fetchSolarChart: (start: string, end: string) => Promise<void>;
+  fetchSolCastChart: () => Promise<void>;
 }
 
 const MQTTContext = createContext<MQTTContextType | undefined>(undefined);
@@ -182,6 +190,12 @@ const SOLAR_CHART_MOCK: SolarChartData = {
   }
 };
 
+const SOLCAST_CHART_MOCK: SolCastChartData = [
+  { "Label": ["07:46","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","18:17"] },
+  { "Energy": [0,0.02,0.34,0.64,0.9,1.08,1.17,1.17,1.06,0.85,0.55,0.25,0.02] },
+  { "Energy": [0,0.03,0.35,0.65,0.91,1.09,1.18,1.18,1.07,0.86,0.56,0.29,0.03] }
+];
+
 export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSimulated, setIsSimulated] = useState(false);
   const [messages, setMessages] = useState<MQTTMessage[]>([]);
@@ -189,6 +203,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [historyData, setHistoryData] = useState<HistoryData | null>(BASE_HISTORY_MOCK);
   const [totalHistoryData, setTotalHistoryData] = useState<TotalHistoryData | null>(BASE_TOTAL_HISTORY_MOCK);
   const [solarChartData, setSolarChartData] = useState<SolarChartData | null>(SOLAR_CHART_MOCK);
+  const [solCastChartData, setSolCastChartData] = useState<SolCastChartData | null>(SOLCAST_CHART_MOCK);
   const [error, setError] = useState<string | null>(null);
   
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
@@ -257,6 +272,22 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [isSimulated]);
 
+  const fetchSolCastChart = useCallback(async () => {
+    if (isSimulated) {
+      setSolCastChartData(SOLCAST_CHART_MOCK);
+      return;
+    }
+    try {
+      const url = `http://192.168.0.3/Dashboard/assets/Solaire/getSolCast.php`;
+      const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`);
+      if (!res.ok) throw new Error('Failed to fetch SolCast chart');
+      const data = await res.json();
+      setSolCastChartData(data);
+    } catch (e) {
+      console.error('SolCast Chart Error:', e);
+    }
+  }, [isSimulated]);
+
   const runSimulation = useCallback(() => {
     setLatestData(prev => {
       if (!prev) return BASE_MOCK_DATA;
@@ -322,9 +353,11 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       historyData, 
       totalHistoryData, 
       solarChartData,
+      solCastChartData,
       error, 
       refreshAll: fetchRealData,
-      fetchSolarChart
+      fetchSolarChart,
+      fetchSolCastChart
     }}>
       {children}
     </MQTTContext.Provider>

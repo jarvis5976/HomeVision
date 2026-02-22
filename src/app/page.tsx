@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { MQTTProvider, useMQTT } from "@/hooks/use-mqtt";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { SolarHistoryChart } from "@/components/dashboard/SolarHistoryChart";
+import { SolarForecastChart } from "@/components/dashboard/SolarForecastChart";
 import { 
   Zap, 
   Battery as BatteryIcon, 
@@ -49,9 +50,11 @@ function DashboardContent() {
     historyData, 
     totalHistoryData, 
     solarChartData,
+    solCastChartData,
     isSimulated, 
     setIsSimulated,
-    fetchSolarChart
+    fetchSolarChart,
+    fetchSolCastChart
   } = useMQTT();
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [mounted, setMounted] = useState(false);
@@ -73,8 +76,9 @@ function DashboardContent() {
   useEffect(() => {
     if (view === 'history') {
       fetchSolarChart(startDate, endDate);
+      fetchSolCastChart();
     }
-  }, [view, startDate, endDate, fetchSolarChart]);
+  }, [view, startDate, endDate, fetchSolarChart, fetchSolCastChart]);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -476,7 +480,7 @@ function DashboardContent() {
               </section>
             </div>
 
-            {/* Solar History Chart at the bottom with integrated controls */}
+            {/* Solar History Chart */}
             <SolarHistoryChart 
               data={solarChartData} 
               startDate={startDate}
@@ -484,6 +488,11 @@ function DashboardContent() {
               onStartDateChange={setStartDate}
               onEndDateChange={setEndDate}
               onRefresh={() => fetchSolarChart(startDate, endDate)}
+            />
+
+            {/* Solar Forecast Chart */}
+            <SolarForecastChart 
+              data={solCastChartData}
             />
           </div>
         )}
