@@ -160,18 +160,25 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchRealData = useCallback(async () => {
     try {
+      // On utilise le proxy interne pour éviter les erreurs CORS
+      const proxyUrl = (target: string) => `/api/proxy?url=${encodeURIComponent(target)}`;
+
       const [instantRes, historyRes, queryRes] = await Promise.all([
-        fetch('http://192.168.0.3/Dashboard/assets/instant_from_mqtt.php', { signal: AbortSignal.timeout(3000), cache: 'no-store' }),
-        fetch('http://192.168.0.3/Dashboard/assets/Solaire/getProductDays.php', { signal: AbortSignal.timeout(3000), cache: 'no-store' }),
-        fetch('http://192.168.0.3/Dashboard/assets/Solaire/getProduct_query.php', { signal: AbortSignal.timeout(3000), cache: 'no-store' })
+        fetch(proxyUrl('http://192.168.0.3/Dashboard/assets/instant_from_mqtt.php'), { signal: AbortSignal.timeout(5000) }),
+        fetch(proxyUrl('http://192.168.0.3/Dashboard/assets/Solaire/getProductDays.php'), { signal: AbortSignal.timeout(5000) }),
+        fetch(proxyUrl('http://192.168.0.3/Dashboard/assets/Solaire/getProduct_query.php'), { signal: AbortSignal.timeout(5000) })
       ]);
       
-      if (!instantRes.ok || !historyRes.ok || !queryRes.ok) throw new Error(`HTTP error!`);
+      if (!instantRes.ok || !historyRes.ok || !queryRes.ok) throw new Error(`Proxy error!`);
       
       const instantData = await instantRes.json();
       const histData = await historyRes.json();
       const productQuery = await queryRes.json();
       
+      if (instantData.error) throw new Error(instantData.error);
+      if (histData.error) throw new Error(histData.error);
+      if (productQuery.error) throw new Error(productQuery.error);
+
       const adaptedData = { ...instantData };
       if (adaptedData.voiture) {
         Object.keys(adaptedData.voiture).forEach(key => {
@@ -186,7 +193,6 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLatestData(adaptedData);
       setHistoryData(histData);
 
-      // Adaptation des données totales
       if (productQuery.data && productQuery.data.total) {
         setTotalHistoryData({
           production: parseFloat(productQuery.data.total[1]?.data || 0),
@@ -200,7 +206,8 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setError(null);
     } catch (e: any) {
-      setError(e.message || "Failed to fetch from local endpoint.");
+      console.error('Fetch error:', e);
+      setError(e.message || "Impossible de contacter l'endpoint local via le proxy.");
     }
   }, []);
 
