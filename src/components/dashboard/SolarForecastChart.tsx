@@ -35,7 +35,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
             const name = entry.name === 'today' ? "Aujourd'hui" : "Demain";
             return (
               <div key={index} className="flex justify-between gap-4 items-center">
-                <span style={{ color: entry.color }}>{name}:</span>
+                <span className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                  <span className="text-black uppercase">{name}:</span>
+                </span>
                 <span className="text-black font-black">{entry.value.toFixed(2)} kWh</span>
               </div>
             );
