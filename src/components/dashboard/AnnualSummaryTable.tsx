@@ -96,8 +96,8 @@ export function AnnualSummaryTable({ data }: AnnualSummaryTableProps) {
             </TableHeader>
             <TableBody>
               {months.map(month => (
-                <TableRow key={month} className={cn("border-border/50", month === 'TOTAL' ? "bg-secondary/10 font-black" : "")}>
-                  <TableCell className="text-xs font-bold text-muted-foreground">
+                <TableRow key={month} className={cn("border-border/50", month === 'TOTAL' ? "bg-secondary/10" : "")}>
+                  <TableCell className={cn("text-xs font-bold", month === 'TOTAL' ? "font-black text-foreground" : "text-muted-foreground")}>
                     {MONTH_LABELS[month]}
                   </TableCell>
                   {years.map((year, idx) => {
@@ -108,16 +108,24 @@ export function AnnualSummaryTable({ data }: AnnualSummaryTableProps) {
 
                     return (
                       <TableCell key={year} className="text-center">
-                        <div className="flex flex-col items-center gap-0.5">
-                          <span className="text-xs font-black">{value.toFixed(2)} <span className="text-[9px] font-normal opacity-60">kWh</span></span>
+                        <div className="flex flex-col items-center gap-0">
+                          <div className="flex items-center gap-1">
+                            <span className={cn("text-xs", month === 'TOTAL' ? "font-black" : "font-bold")}>
+                              {value.toFixed(2)} <span className="text-[9px] font-normal opacity-60">kWh</span>
+                            </span>
+                            {trend && (
+                              <span className={trend.isGood ? "text-emerald-500" : "text-rose-500"}>
+                                {trend.isIncrease ? <ArrowUp className="w-2.5 h-2.5" /> : <ArrowDown className="w-2.5 h-2.5" />}
+                              </span>
+                            )}
+                          </div>
                           {trend && (
-                            <div className={cn(
-                              "flex items-center gap-0.5 text-[9px] font-black",
+                            <span className={cn(
+                              "text-[9px] font-black",
                               trend.isGood ? "text-emerald-500" : "text-rose-500"
                             )}>
-                              {trend.isIncrease ? <ArrowUp className="w-2 h-2" /> : <ArrowDown className="w-2 h-2" />}
-                              {trend.percent}%
-                            </div>
+                              ({trend.percent}%)
+                            </span>
                           )}
                         </div>
                       </TableCell>
