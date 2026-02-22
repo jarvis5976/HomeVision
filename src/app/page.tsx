@@ -7,6 +7,7 @@ import { MetricCard } from "@/components/dashboard/MetricCard";
 import { SolarHistoryChart } from "@/components/dashboard/SolarHistoryChart";
 import { SolarForecastChart } from "@/components/dashboard/SolarForecastChart";
 import { AnnualSummaryTable } from "@/components/dashboard/AnnualSummaryTable";
+import { DailyHistoryTable } from "@/components/dashboard/DailyHistoryTable";
 import { 
   Zap, 
   Battery as BatteryIcon, 
@@ -54,12 +55,14 @@ function DashboardContent() {
     solarChartData,
     solCastChartData,
     annualData,
+    dailyHistoryData,
     isSimulated, 
     setIsSimulated,
     fetchHistoryStats,
     fetchSolarChart,
     fetchSolCastChart,
-    fetchAnnualData
+    fetchAnnualData,
+    fetchDailyHistory
   } = useMQTT();
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [mounted, setMounted] = useState(false);
@@ -83,7 +86,8 @@ function DashboardContent() {
     fetchSolarChart(startDate, endDate);
     fetchSolCastChart();
     fetchAnnualData();
-  }, [fetchHistoryStats, fetchSolarChart, fetchSolCastChart, fetchAnnualData, startDate, endDate]);
+    fetchDailyHistory();
+  }, [fetchHistoryStats, fetchSolarChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory, startDate, endDate]);
 
   useEffect(() => {
     if (view === 'history') {
@@ -516,6 +520,9 @@ function DashboardContent() {
             <SolarForecastChart 
               data={solCastChartData}
             />
+
+            {/* Daily History Table */}
+            <DailyHistoryTable data={dailyHistoryData} />
 
             {/* Annual Summary Table - Moved to the end */}
             <AnnualSummaryTable data={annualData} />

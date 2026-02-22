@@ -67,6 +67,42 @@ export interface AnnualData {
   autoConsommation: AnnualMetricItem[];
 }
 
+export interface DailyHistoryItem {
+  Année: number;
+  Date: string;
+  Couleur?: string;
+  Production_SolarEdge: number;
+  Production_Ecu: number;
+  Production_Total: number;
+  Vente: number;
+  Achat: number;
+  Consommation: number;
+  Autoconsommation: number;
+  BatteryCharge: number;
+  BatteryDischarge: number;
+  BatteryTotal: number;
+  HP: number;
+  HC: number;
+  ConsommationMaison: number;
+  ConsommationAnnexe: number;
+  Prevision: number;
+  Borne: number;
+  SunHours: number;
+  AchatMaison: number;
+  AchatAnnexe: number;
+}
+
+export interface DailyHistoryData {
+  unGroup: {
+    byKwh: DailyHistoryItem[];
+    byPourc: DailyHistoryItem[];
+  };
+  group: {
+    byKwh: DailyHistoryItem[];
+    byPourc: DailyHistoryItem[];
+  };
+}
+
 export interface HomeDashboardData {
   compteurEdf?: { conso_base: number; isousc: number };
   eau?: { total: number; maison: number; annexe: number; compteur: number };
@@ -98,12 +134,14 @@ interface MQTTContextType {
   solarChartData: SolarChartData | null;
   solCastChartData: SolCastChartData | null;
   annualData: AnnualData | null;
+  dailyHistoryData: DailyHistoryData | null;
   error: string | null;
   refreshAll: () => Promise<void>;
   fetchHistoryStats: () => Promise<void>;
   fetchSolarChart: (start: string, end: string) => Promise<void>;
   fetchSolCastChart: () => Promise<void>;
   fetchAnnualData: () => Promise<void>;
+  fetchDailyHistory: () => Promise<void>;
 }
 
 const MQTTContext = createContext<MQTTContextType | undefined>(undefined);
@@ -231,6 +269,42 @@ const ANNUAL_DATA_MOCK: AnnualData = {
   ]
 };
 
+const DAILY_HISTORY_MOCK: DailyHistoryData = {
+  unGroup: {
+    byKwh: [
+      {
+        "Année": 2026,
+        "Date": "2026-02-21",
+        "Couleur": "Eco",
+        "Production_SolarEdge": 2.19,
+        "Production_Ecu": 2.66,
+        "Production_Total": 4.85,
+        "Vente": 0.12,
+        "Achat": 58.93,
+        "Consommation": 63.66,
+        "Autoconsommation": 4.73,
+        "BatteryCharge": 12.72,
+        "BatteryDischarge": 2,
+        "BatteryTotal": -10.72,
+        "HP": 0.56,
+        "HC": 58.37,
+        "ConsommationMaison": 37.83,
+        "ConsommationAnnexe": 25.83,
+        "Prevision": 7.97,
+        "Borne": 12.12,
+        "SunHours": 0,
+        "AchatMaison": 35.02,
+        "AchatAnnexe": 23.91
+      }
+    ],
+    byPourc: []
+  },
+  group: {
+    byKwh: [],
+    byPourc: []
+  }
+};
+
 export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSimulated, setIsSimulated] = useState(false);
   const [messages, setMessages] = useState<MQTTMessage[]>([]);
@@ -240,6 +314,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [solarChartData, setSolarChartData] = useState<SolarChartData | null>(SOLAR_CHART_MOCK);
   const [solCastChartData, setSolCastChartData] = useState<SolCastChartData | null>(SOLCAST_CHART_MOCK);
   const [annualData, setAnnualData] = useState<AnnualData | null>(ANNUAL_DATA_MOCK);
+  const [dailyHistoryData, setDailyHistoryData] = useState<DailyHistoryData | null>(DAILY_HISTORY_MOCK);
   const [error, setError] = useState<string | null>(null);
   
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
@@ -352,6 +427,22 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [isSimulated]);
 
+  const fetchDailyHistory = useCallback(async () => {
+    if (isSimulated) {
+      setDailyHistoryData(DAILY_HISTORY_MOCK);
+      return;
+    }
+    try {
+      const url = `http://192.168.0.3/Dashboard/assets/Solaire/listeProductDays2.php`;
+      const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`);
+      if (!res.ok) throw new Error('Failed to fetch daily history');
+      const data = await res.json();
+      setDailyHistoryData(data);
+    } catch (e) {
+      console.error('Daily History Error:', e);
+    }
+  }, [isSimulated]);
+
   const runSimulation = useCallback(() => {
     setLatestData(prev => {
       if (!prev) return BASE_MOCK_DATA;
@@ -411,12 +502,14 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       solarChartData,
       solCastChartData,
       annualData,
+      dailyHistoryData,
       error, 
       refreshAll: fetchRealData,
       fetchHistoryStats,
       fetchSolarChart,
       fetchSolCastChart,
-      fetchAnnualData
+      fetchAnnualData,
+      fetchDailyHistory
     }}>
       {children}
     </MQTTContext.Provider>
