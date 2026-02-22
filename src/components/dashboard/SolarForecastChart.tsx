@@ -79,9 +79,11 @@ export function SolarForecastChart({ data }: SolarForecastChartProps) {
                   borderColor: 'hsl(var(--border))',
                   borderRadius: '12px',
                   fontSize: '11px',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  color: 'black'
                 }}
-                itemStyle={{ padding: '2px 0' }}
+                itemStyle={{ padding: '2px 0', color: 'black' }}
+                labelStyle={{ color: 'black' }}
               />
               <Legend 
                 verticalAlign="top" 

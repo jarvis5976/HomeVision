@@ -43,8 +43,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-card border border-border p-3 rounded-xl shadow-xl text-[11px] font-bold space-y-2">
-        <p className="text-primary border-b border-border pb-1 mb-1">{data.rangeLabel}</p>
+      <div className="bg-card border border-border p-3 rounded-xl shadow-xl text-[11px] font-bold space-y-2 text-black">
+        <p className="text-black border-b border-border pb-1 mb-1">{data.rangeLabel}</p>
         <div className="space-y-1">
           {payload.map((entry: any, index: number) => {
             const namesMap: Record<string, string> = {
@@ -60,13 +60,13 @@ const CustomTooltip = ({ active, payload, label }: any) => {
             return (
               <div key={index} className="flex justify-between gap-4">
                 <span style={{ color: entry.color }}>{name}:</span>
-                <span>{entry.value.toFixed(2)} kWh</span>
+                <span className="text-black">{entry.value.toFixed(2)} kWh</span>
               </div>
             );
           })}
         </div>
         {data.batterieSoc !== null && data.batterieSoc !== undefined && (
-          <p className="border-t border-border pt-1 mt-1 text-accent">
+          <p className="border-t border-border pt-1 mt-1 text-black">
             Le soc batterie à {data.label} est de {data.batterieSoc} %
           </p>
         )}
