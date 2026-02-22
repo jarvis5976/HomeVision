@@ -24,8 +24,7 @@ import {
   TrendingUp,
   PieChart,
   Activity,
-  CalendarDays,
-  Calendar
+  CalendarDays
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,7 +32,6 @@ import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Carousel,
   CarouselContent,
@@ -385,35 +383,7 @@ function DashboardContent() {
           </>
         ) : (
           <div className="space-y-12 animate-in fade-in slide-in-from-left duration-500">
-            {/* Date Range Selector */}
-            <div className="flex flex-col sm:flex-row items-center gap-4 bg-secondary/10 p-4 rounded-2xl border border-border/50">
-              <div className="flex items-center gap-3">
-                <Calendar className="w-5 h-5 text-primary" />
-                <span className="text-sm font-bold uppercase tracking-tight">Période :</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Input 
-                  type="date" 
-                  value={startDate} 
-                  onChange={(e) => setStartDate(e.target.value)} 
-                  className="w-40 bg-card"
-                />
-                <span className="text-muted-foreground">au</span>
-                <Input 
-                  type="date" 
-                  value={endDate} 
-                  onChange={(e) => setEndDate(e.target.value)} 
-                  className="w-40 bg-card"
-                />
-              </div>
-              <Button size="sm" onClick={() => fetchSolarChart(startDate, endDate)} className="ml-auto font-bold uppercase text-[10px]">
-                Actualiser Graphique
-              </Button>
-            </div>
-
-            {/* Solar History Chart */}
-            <SolarHistoryChart data={solarChartData} />
-
+            {/* Résumés Daily first */}
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                   <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
@@ -461,6 +431,7 @@ function DashboardContent() {
               </section>
             </div>
 
+            {/* Résumés Totaux second */}
             <div className="space-y-6">
               <div className="flex items-center gap-3">
                   <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
@@ -504,6 +475,16 @@ function DashboardContent() {
                   />
               </section>
             </div>
+
+            {/* Solar History Chart at the bottom with integrated controls */}
+            <SolarHistoryChart 
+              data={solarChartData} 
+              startDate={startDate}
+              endDate={endDate}
+              onStartDateChange={setStartDate}
+              onEndDateChange={setEndDate}
+              onRefresh={() => fetchSolarChart(startDate, endDate)}
+            />
           </div>
         )}
       </main>
