@@ -13,12 +13,12 @@ import {
   Home, 
   Building2, 
   CloudSun,
-  Flame,
   Radio,
   PlayCircle,
   Moon,
   SunMedium,
-  History
+  History,
+  Flame
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -209,7 +209,6 @@ function DashboardContent() {
             status={batterySoc < 20 ? 'alert' : 'online'}
             description={latestData?.victron?.batteryTitle}
             details={[
-              { label: "Système", value: latestData?.victron?.EssState?.label ?? "N/A" },
               { label: "Flux", value: batteryPower, unit: "W" },
               { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" },
               { label: "Temp.", value: latestData?.battery?.temperature ?? 0, unit: "°C" }
