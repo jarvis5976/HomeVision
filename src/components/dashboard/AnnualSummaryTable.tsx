@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { AnnualData, AnnualMetricItem } from "@/hooks/use-mqtt";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,8 +22,22 @@ interface AnnualSummaryTableProps {
 
 type MetricType = 'production' | 'achat' | 'vente' | 'autoConsommation';
 
+const MONTH_NAMES = [
+  "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
+  "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+];
+
 export function AnnualSummaryTable({ data }: AnnualSummaryTableProps) {
   const [activeMetric, setActiveMetric] = useState<MetricType>('production');
+  const [currentDateInfo, setCurrentDateInfo] = useState<{ month: string; year: string } | null>(null);
+
+  useEffect(() => {
+    const now = new Date();
+    setCurrentDateInfo({
+      month: MONTH_NAMES[now.getMonth()],
+      year: now.getFullYear().toString()
+    });
+  }, []);
 
   const metricArray = data?.[activeMetric] || [];
 
@@ -47,7 +61,6 @@ export function AnnualSummaryTable({ data }: AnnualSummaryTableProps) {
     if (activeMetric === 'production' || activeMetric === 'autoConsommation') {
       isGood = isIncrease;
     } else {
-      // Pour Achat et Vente, une hausse est marquée en rouge
       isGood = !isIncrease;
     }
 
@@ -102,11 +115,13 @@ export function AnnualSummaryTable({ data }: AnnualSummaryTableProps) {
                     const prevValue = prevYear ? Number(row[prevYear] || 0) : undefined;
                     const trend = getTrendInfo(value, prevValue);
 
+                    const isCurrentCell = currentDateInfo && year === currentDateInfo.year && row.mois === currentDateInfo.month;
+
                     return (
-                      <TableCell key={year} className="text-center">
+                      <TableCell key={year} className={cn("text-center transition-colors", isCurrentCell && "bg-primary/10 ring-1 ring-primary/30 ring-inset")}>
                         <div className="flex flex-col items-center gap-0">
                           <div className="flex items-center gap-1">
-                            <span className={cn("text-xs", row.mois === 'TOTAL' ? "font-black" : "font-bold")}>
+                            <span className={cn("text-xs", (row.mois === 'TOTAL' || isCurrentCell) ? "font-black" : "font-bold")}>
                               {hasValue ? (
                                 <>
                                   {value.toFixed(2)} <span className="text-[9px] font-normal opacity-60">kWh</span>
