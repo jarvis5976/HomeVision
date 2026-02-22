@@ -24,6 +24,15 @@ export interface HistoryData {
   AutoConsommation: number;
 }
 
+export interface TotalHistoryData {
+  production: number;
+  achat: number;
+  vente: number;
+  consommation: number;
+  autoConsommation: number;
+  apSystems: number;
+}
+
 export interface HomeDashboardData {
   compteurEdf?: { conso_base: number; isousc: number };
   eau?: { total: number; maison: number; annexe: number; compteur: number };
@@ -51,6 +60,7 @@ interface MQTTContextType {
   messages: MQTTMessage[];
   latestData: HomeDashboardData | null;
   historyData: HistoryData | null;
+  totalHistoryData: TotalHistoryData | null;
   error: string | null;
   refreshAll: () => Promise<void>;
 }
@@ -96,9 +106,9 @@ const BASE_MOCK_DATA: HomeDashboardData = {
     },
     volvo: {
       carModel: "Volvo XC40",
-      batteryLevel: 45,
-      odometer: 12400,
-      range: 180,
+      batteryLevel: 0,
+      odometer: 0,
+      range: 0,
       chargeStatus: "Pas en charge",
       display_name: "Volvo"
     },
@@ -129,26 +139,38 @@ const BASE_HISTORY_MOCK: HistoryData = {
   AutoConsommation: 10.38
 };
 
+const BASE_TOTAL_HISTORY_MOCK: TotalHistoryData = {
+  production: 4567.80,
+  achat: 2130.45,
+  vente: 890.22,
+  consommation: 5808.03,
+  autoConsommation: 3677.58,
+  apSystems: 1245.30
+};
+
 export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSimulated, setIsSimulated] = useState(false);
   const [messages, setMessages] = useState<MQTTMessage[]>([]);
   const [latestData, setLatestData] = useState<HomeDashboardData | null>(BASE_MOCK_DATA);
   const [historyData, setHistoryData] = useState<HistoryData | null>(BASE_HISTORY_MOCK);
+  const [totalHistoryData, setTotalHistoryData] = useState<TotalHistoryData | null>(BASE_TOTAL_HISTORY_MOCK);
   const [error, setError] = useState<string | null>(null);
   
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
 
   const fetchRealData = useCallback(async () => {
     try {
-      const [instantRes, historyRes] = await Promise.all([
+      const [instantRes, historyRes, queryRes] = await Promise.all([
         fetch('http://192.168.0.3/Dashboard/assets/instant_from_mqtt.php', { signal: AbortSignal.timeout(3000), cache: 'no-store' }),
-        fetch('http://192.168.0.3/Dashboard/assets/Solaire/getProductDays.php', { signal: AbortSignal.timeout(3000), cache: 'no-store' })
+        fetch('http://192.168.0.3/Dashboard/assets/Solaire/getProductDays.php', { signal: AbortSignal.timeout(3000), cache: 'no-store' }),
+        fetch('http://192.168.0.3/Dashboard/assets/Solaire/getProduct_query.php', { signal: AbortSignal.timeout(3000), cache: 'no-store' })
       ]);
       
-      if (!instantRes.ok || !historyRes.ok) throw new Error(`HTTP error!`);
+      if (!instantRes.ok || !historyRes.ok || !queryRes.ok) throw new Error(`HTTP error!`);
       
       const instantData = await instantRes.json();
       const histData = await historyRes.json();
+      const productQuery = await queryRes.json();
       
       const adaptedData = { ...instantData };
       if (adaptedData.voiture) {
@@ -163,6 +185,19 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setLatestData(adaptedData);
       setHistoryData(histData);
+
+      // Adaptation des données totales
+      if (productQuery.data && productQuery.data.total) {
+        setTotalHistoryData({
+          production: parseFloat(productQuery.data.total[1]?.data || 0),
+          achat: parseFloat(productQuery.data.total[2]?.data || 0),
+          vente: parseFloat(productQuery.data.total[3]?.data || 0),
+          consommation: parseFloat(productQuery.data.total[4]?.data || 0),
+          autoConsommation: parseFloat(productQuery.data.total[5]?.data || 0),
+          apSystems: parseFloat(productQuery.data.total[6]?.data || productQuery.data.total[6] || 0)
+        });
+      }
+
       setError(null);
     } catch (e: any) {
       setError(e.message || "Failed to fetch from local endpoint.");
@@ -210,6 +245,14 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
             Consommation: Number((prev.Consommation + 0.02).toFixed(2))
         };
     });
+    setTotalHistoryData(prev => {
+        if (!prev) return BASE_TOTAL_HISTORY_MOCK;
+        return {
+            ...prev,
+            production: Number((prev.production + 0.1).toFixed(2)),
+            consommation: Number((prev.consommation + 0.15).toFixed(2))
+        };
+    });
   }, []);
 
   useEffect(() => {
@@ -226,7 +269,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isSimulated, fetchRealData, runSimulation]);
 
   return (
-    <MQTTContext.Provider value={{ isSimulated, setIsSimulated, messages, latestData, historyData, error, refreshAll: fetchRealData }}>
+    <MQTTContext.Provider value={{ isSimulated, setIsSimulated, messages, latestData, historyData, totalHistoryData, error, refreshAll: fetchRealData }}>
       {children}
     </MQTTContext.Provider>
   );

@@ -22,7 +22,8 @@ import {
   ArrowLeft,
   TrendingUp,
   PieChart,
-  Activity
+  Activity,
+  CalendarDays
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,7 +43,7 @@ import { cn } from "@/lib/utils";
 type ViewType = 'dashboard' | 'history';
 
 function DashboardContent() {
-  const { latestData, historyData, isSimulated, setIsSimulated } = useMQTT();
+  const { latestData, historyData, totalHistoryData, isSimulated, setIsSimulated } = useMQTT();
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [mounted, setMounted] = useState(false);
   const [view, setView] = useState<ViewType>('dashboard');
@@ -367,55 +368,106 @@ function DashboardContent() {
           </>
         ) : (
           /* History View */
-          <div className="space-y-8 animate-in fade-in slide-in-from-left duration-500">
-            <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
-                    <TrendingUp className="w-6 h-6 text-primary" />
-                    Résumé Journalier
-                </h2>
-                <Badge variant="secondary" className="px-4 py-1.5 font-bold uppercase tracking-widest text-[10px]">
-                    {mounted ? new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ""}
-                </Badge>
+          <div className="space-y-12 animate-in fade-in slide-in-from-left duration-500">
+            {/* Journalier Section */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
+                      <TrendingUp className="w-6 h-6 text-primary" />
+                      Résumé Journalier
+                  </h2>
+                  <Badge variant="secondary" className="px-4 py-1.5 font-bold uppercase tracking-widest text-[10px]">
+                      {mounted ? new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ""}
+                  </Badge>
+              </div>
+              
+              <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Card 1: Production journalière */}
+                  <MetricCard 
+                      title="Production journalière" 
+                      value={historyData?.Production ?? 0} 
+                      unit="kWh" 
+                      icon={Sun} 
+                      details={[
+                          { label: "SolarEdge", value: `${historyData?.SolarEdge ?? 0}`, unit: `kWh (${calculatePercent(historyData?.SolarEdge ?? 0, historyData?.Production ?? 0)}%)` },
+                          { label: "APsystems", value: `${historyData?.Ecu ?? 0}`, unit: `kWh (${calculatePercent(historyData?.Ecu ?? 0, historyData?.Production ?? 0)}%)` }
+                      ]}
+                  />
+
+                  {/* Card 2: Utilisation production journalière */}
+                  <MetricCard 
+                      title="Utilisation production" 
+                      value={historyData?.Production ?? 0} 
+                      unit="kWh" 
+                      icon={PieChart} 
+                      details={[
+                          { label: "Auto-Conso.", value: `${historyData?.AutoConsommation ?? 0}`, unit: `kWh (${calculatePercent(historyData?.AutoConsommation ?? 0, historyData?.Production ?? 0)}%)` },
+                          { label: "Vente", value: `${historyData?.Vente ?? 0}`, unit: `kWh (${calculatePercent(historyData?.Vente ?? 0, historyData?.Production ?? 0)}%)` }
+                      ]}
+                  />
+
+                  {/* Card 3: Consommation journalière */}
+                  <MetricCard 
+                      title="Consommation journalière" 
+                      value={historyData?.Consommation ?? 0} 
+                      unit="kWh" 
+                      icon={Activity} 
+                      details={[
+                          { label: "Auto-Production", value: `${historyData?.AutoConsommation ?? 0}`, unit: `kWh (${calculatePercent(historyData?.AutoConsommation ?? 0, historyData?.Consommation ?? 0)}%)` },
+                          { label: "Achat", value: `${historyData?.Achat ?? 0}`, unit: `kWh (${calculatePercent(historyData?.Achat ?? 0, historyData?.Consommation ?? 0)}%)` }
+                      ]}
+                  />
+              </section>
+            </div>
+
+            {/* Totaux Section */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                  <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
+                      <CalendarDays className="w-6 h-6 text-accent" />
+                      Résumé Total
+                  </h2>
+              </div>
+
+              <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Card 1: Production totale */}
+                  <MetricCard 
+                      title="Production totale" 
+                      value={totalHistoryData?.production ?? 0} 
+                      unit="kWh" 
+                      icon={Sun} 
+                      details={[
+                          { label: "SolarEdge", value: `${((totalHistoryData?.production ?? 0) - (totalHistoryData?.apSystems ?? 0)).toFixed(2)}`, unit: `kWh (${calculatePercent((totalHistoryData?.production ?? 0) - (totalHistoryData?.apSystems ?? 0), totalHistoryData?.production ?? 0)}%)` },
+                          { label: "APsystems", value: `${totalHistoryData?.apSystems ?? 0}`, unit: `kWh (${calculatePercent(totalHistoryData?.apSystems ?? 0, totalHistoryData?.production ?? 0)}%)` }
+                      ]}
+                  />
+
+                  {/* Card 2: Utilisation production totale */}
+                  <MetricCard 
+                      title="Utilisation production totale" 
+                      value={totalHistoryData?.production ?? 0} 
+                      unit="kWh" 
+                      icon={PieChart} 
+                      details={[
+                          { label: "Auto-Conso.", value: `${totalHistoryData?.autoConsommation ?? 0}`, unit: `kWh (${calculatePercent(totalHistoryData?.autoConsommation ?? 0, totalHistoryData?.production ?? 0)}%)` },
+                          { label: "Vente", value: `${totalHistoryData?.vente ?? 0}`, unit: `kWh (${calculatePercent(totalHistoryData?.vente ?? 0, totalHistoryData?.production ?? 0)}%)` }
+                      ]}
+                  />
+
+                  {/* Card 3: Consommation totale */}
+                  <MetricCard 
+                      title="Consommation totale" 
+                      value={totalHistoryData?.consommation ?? 0} 
+                      unit="kWh" 
+                      icon={Activity} 
+                      details={[
+                          { label: "Auto-Production", value: `${totalHistoryData?.autoConsommation ?? 0}`, unit: `kWh (${calculatePercent(totalHistoryData?.autoConsommation ?? 0, totalHistoryData?.consommation ?? 0)}%)` },
+                          { label: "Achat", value: `${totalHistoryData?.achat ?? 0}`, unit: `kWh (${calculatePercent(totalHistoryData?.achat ?? 0, totalHistoryData?.consommation ?? 0)}%)` }
+                      ]}
+                  />
+              </section>
             </div>
             
-            <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Card 1: Production journalière */}
-                <MetricCard 
-                    title="Production journalière" 
-                    value={historyData?.Production ?? 0} 
-                    unit="kWh" 
-                    icon={Sun} 
-                    details={[
-                        { label: "SolarEdge", value: `${historyData?.SolarEdge ?? 0}`, unit: `kWh (${calculatePercent(historyData?.SolarEdge ?? 0, historyData?.Production ?? 0)}%)` },
-                        { label: "APsystems", value: `${historyData?.Ecu ?? 0}`, unit: `kWh (${calculatePercent(historyData?.Ecu ?? 0, historyData?.Production ?? 0)}%)` }
-                    ]}
-                />
-
-                {/* Card 2: Utilisation production journalière */}
-                <MetricCard 
-                    title="Utilisation production" 
-                    value={historyData?.Production ?? 0} 
-                    unit="kWh" 
-                    icon={PieChart} 
-                    details={[
-                        { label: "Auto-Conso.", value: `${historyData?.AutoConsommation ?? 0}`, unit: `kWh (${calculatePercent(historyData?.AutoConsommation ?? 0, historyData?.Production ?? 0)}%)` },
-                        { label: "Vente", value: `${historyData?.Vente ?? 0}`, unit: `kWh (${calculatePercent(historyData?.Vente ?? 0, historyData?.Production ?? 0)}%)` }
-                    ]}
-                />
-
-                {/* Card 3: Consommation journalière */}
-                <MetricCard 
-                    title="Consommation journalière" 
-                    value={historyData?.Consommation ?? 0} 
-                    unit="kWh" 
-                    icon={Activity} 
-                    details={[
-                        { label: "Auto-Production", value: `${historyData?.AutoConsommation ?? 0}`, unit: `kWh (${calculatePercent(historyData?.AutoConsommation ?? 0, historyData?.Consommation ?? 0)}%)` },
-                        { label: "Achat", value: `${historyData?.Achat ?? 0}`, unit: `kWh (${calculatePercent(historyData?.Achat ?? 0, historyData?.Consommation ?? 0)}%)` }
-                    ]}
-                />
-            </section>
-
             <div className="p-8 bg-secondary/5 rounded-3xl border border-dashed border-border flex flex-col items-center justify-center text-center space-y-4">
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
                     <History className="w-8 h-8 text-primary opacity-50" />
