@@ -91,7 +91,7 @@ export function SolarForecastChart({ data }: SolarForecastChartProps) {
                 formatter={(value) => {
                   const label = value === 'today' ? "Aujourd'hui" : "Demain";
                   const total = value === 'today' ? totals.today : totals.tomorrow;
-                  return `${label} (Total: ${total.toFixed(2)} kWh)`;
+                  return <span style={{ color: 'black' }}>{label} (Total: {total.toFixed(2)} kWh)</span>;
                 }}
               />
               <Bar 

@@ -36,7 +36,7 @@ const COLORS = {
   dechargeBatterie: '#99FFB8',
   autoConsommation: '#ffaa66',
   production: 'grey',
-  estimation: 'red'
+  estimation: '#ff4d4d'
 };
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -200,14 +200,22 @@ export function SolarHistoryChart({
                                    value === 'dechargeBatterie' ? 'dechargeBatterie' : 
                                    value === 'autoConsommation' ? 'autoConsommation' : value as keyof typeof totals;
                     
-                    if (value === 'achat' && totals) return `Achat (Tot: ${totals.achat} - HC: ${totals.hc}, HP: ${totals.hp})`;
-                    
-                    let label = value;
-                    if (value === 'chargeBatterie') label = 'Charge Batterie';
-                    if (value === 'dechargeBatterie') label = 'Décharge Batterie';
-                    if (value === 'autoConsommation') label = 'Auto-Conso.';
+                    let text = value;
+                    if (value === 'achat' && totals) {
+                      text = `Achat (Tot: ${totals.achat} - HC: ${totals.hc}, HP: ${totals.hp})`;
+                    } else if (totals) {
+                      let label = value;
+                      if (value === 'chargeBatterie') label = 'Charge Batterie';
+                      if (value === 'dechargeBatterie') label = 'Décharge Batterie';
+                      if (value === 'autoConsommation') label = 'Auto-Conso.';
+                      text = `${label} (${totals[totalKey as keyof typeof totals]})`;
+                    } else {
+                      if (value === 'chargeBatterie') text = 'Charge Batterie';
+                      if (value === 'dechargeBatterie') text = 'Décharge Batterie';
+                      if (value === 'autoConsommation') text = 'Auto-Conso.';
+                    }
 
-                    return totals ? `${label} (${totals[totalKey as keyof typeof totals]})` : label;
+                    return <span style={{ color: 'black' }}>{text}</span>;
                 }}
                 wrapperStyle={{ color: 'black', fontSize: '10px', textTransform: 'capitalize', fontWeight: 'bold', paddingBottom: '20px' }}
               />
