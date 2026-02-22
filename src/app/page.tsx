@@ -4,7 +4,6 @@
 import { useState, useEffect } from "react";
 import { MQTTProvider, useMQTT } from "@/hooks/use-mqtt";
 import { MetricCard } from "@/components/dashboard/MetricCard";
-import { SensorChart } from "@/components/dashboard/SensorChart";
 import { 
   Zap, 
   Battery as BatteryIcon, 
@@ -64,16 +63,6 @@ function DashboardContent() {
   const houseConsumption = latestData?.energy?.total?.maison ?? 0;
   const annexeConsumption = latestData?.energy?.total?.annexe ?? 0;
   const totalWater = latestData?.eau?.total ?? 0;
-
-  const chartData = [
-    { time: "00:00", value: 2200 },
-    { time: "04:00", value: 1800 },
-    { time: "08:00", value: 3500 },
-    { time: "12:00", value: 4200 },
-    { time: "16:00", value: 4500 },
-    { time: "20:00", value: gridPower },
-    { time: "23:59", value: 2500 },
-  ];
 
   const vehicles = Object.entries(latestData?.voiture || {});
 
@@ -238,8 +227,6 @@ function DashboardContent() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            <SensorChart title="Charge Totale (24h)" data={chartData} />
-            
             <Card className="border-border bg-card shadow-lg">
               <CardHeader>
                 <CardTitle className="text-lg font-bold flex items-center gap-2">
@@ -262,20 +249,44 @@ function DashboardContent() {
                   </div>
                   <Progress value={(annexeConsumption / (latestData?.energy?.total?.all || 1)) * 100} className="h-3 bg-secondary/50" />
                 </div>
-                <div className="pt-6 grid grid-cols-2 gap-6">
+                <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="p-4 bg-secondary/20 rounded-2xl border border-border">
-                    <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-1">Chauffe-eau</p>
-                    <p className="text-2xl font-black flex items-center gap-2">
+                    <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-3">Chauffe-eau</p>
+                    <p className="text-2xl font-black flex items-center gap-2 mb-4">
                       <Flame className="w-5 h-5 text-orange-500" />
                       {latestData?.chauffeEau?.total ?? 0} <span className="text-sm font-medium text-muted-foreground">W</span>
                     </p>
+                    <div className="grid grid-cols-2 gap-4 pt-3 border-t border-border/50">
+                      <div>
+                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison</p>
+                        <p className="text-sm font-black">{latestData?.chauffeEau?.maison ?? 0} <span className="text-[9px] font-normal">W</span></p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe</p>
+                        <p className="text-sm font-black">{latestData?.chauffeEau?.annexe ?? 0} <span className="text-[9px] font-normal">W</span></p>
+                      </div>
+                    </div>
                   </div>
                   <div className="p-4 bg-secondary/20 rounded-2xl border border-border">
-                    <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-1">Consommation Eau</p>
-                    <p className="text-2xl font-black flex items-center gap-2">
+                    <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-3">Consommation Eau</p>
+                    <p className="text-2xl font-black flex items-center gap-2 mb-4">
                       <Droplets className="w-5 h-5 text-blue-400" />
                       {totalWater} <span className="text-sm font-medium text-muted-foreground">m³</span>
                     </p>
+                    <div className="grid grid-cols-3 gap-2 pt-3 border-t border-border/50">
+                      <div>
+                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison</p>
+                        <p className="text-sm font-black">{latestData?.eau?.maison ?? 0} <span className="text-[9px] font-normal">m³</span></p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe</p>
+                        <p className="text-sm font-black">{latestData?.eau?.annexe ?? 0} <span className="text-[9px] font-normal">m³</span></p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Compteur</p>
+                        <p className="text-sm font-black">{latestData?.eau?.compteur ?? 0} <span className="text-[9px] font-normal">m³</span></p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
