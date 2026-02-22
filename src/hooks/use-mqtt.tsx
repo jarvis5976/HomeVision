@@ -14,6 +14,16 @@ export interface CarData {
   [key: string]: any;
 }
 
+export interface HistoryData {
+  Production: number;
+  SolarEdge: number;
+  Ecu: number;
+  Achat: number;
+  Vente: number;
+  Consommation: number;
+  AutoConsommation: number;
+}
+
 export interface HomeDashboardData {
   compteurEdf?: { conso_base: number; isousc: number };
   eau?: { total: number; maison: number; annexe: number; compteur: number };
@@ -40,8 +50,9 @@ interface MQTTContextType {
   setIsSimulated: (val: boolean) => void;
   messages: MQTTMessage[];
   latestData: HomeDashboardData | null;
+  historyData: HistoryData | null;
   error: string | null;
-  refreshData: () => Promise<void>;
+  refreshAll: () => Promise<void>;
 }
 
 const MQTTContext = createContext<MQTTContextType | undefined>(undefined);
@@ -108,25 +119,38 @@ const BASE_MOCK_DATA: HomeDashboardData = {
   solCast: { today: 8.75, tomorrow: 8.03 }
 };
 
+const BASE_HISTORY_MOCK: HistoryData = {
+  Production: 12.45,
+  SolarEdge: 5.62,
+  Ecu: 6.83,
+  Achat: 33.24,
+  Vente: 2.07,
+  Consommation: 43.62,
+  AutoConsommation: 10.38
+};
+
 export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSimulated, setIsSimulated] = useState(false);
   const [messages, setMessages] = useState<MQTTMessage[]>([]);
   const [latestData, setLatestData] = useState<HomeDashboardData | null>(BASE_MOCK_DATA);
+  const [historyData, setHistoryData] = useState<HistoryData | null>(BASE_HISTORY_MOCK);
   const [error, setError] = useState<string | null>(null);
   
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
 
   const fetchRealData = useCallback(async () => {
     try {
-      const response = await fetch('http://192.168.0.3/Dashboard/assets/instant_from_mqtt.php', {
-        signal: AbortSignal.timeout(3000),
-        cache: 'no-store'
-      });
+      const [instantRes, historyRes] = await Promise.all([
+        fetch('http://192.168.0.3/Dashboard/assets/instant_from_mqtt.php', { signal: AbortSignal.timeout(3000), cache: 'no-store' }),
+        fetch('http://192.168.0.3/Dashboard/assets/Solaire/getProductDays.php', { signal: AbortSignal.timeout(3000), cache: 'no-store' })
+      ]);
       
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const data = await response.json();
+      if (!instantRes.ok || !historyRes.ok) throw new Error(`HTTP error!`);
       
-      const adaptedData = { ...data };
+      const instantData = await instantRes.json();
+      const histData = await historyRes.json();
+      
+      const adaptedData = { ...instantData };
       if (adaptedData.voiture) {
         Object.keys(adaptedData.voiture).forEach(key => {
           const car = adaptedData.voiture[key];
@@ -138,12 +162,8 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       setLatestData(adaptedData);
+      setHistoryData(histData);
       setError(null);
-      
-      setMessages(prev => [
-        { topic: 'api/poll', message: 'Data updated from endpoint', timestamp: new Date() },
-        ...prev.slice(0, 9)
-      ]);
     } catch (e: any) {
       setError(e.message || "Failed to fetch from local endpoint.");
     }
@@ -153,7 +173,6 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLatestData(prev => {
       if (!prev) return BASE_MOCK_DATA;
       const fluctuate = (val: number, range: number = 10) => val + (Math.random() * range - range/2);
-      
       const updatedVoiture = { ...prev.voiture };
       Object.keys(updatedVoiture).forEach(key => {
         const car = updatedVoiture[key];
@@ -164,7 +183,6 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
           range: Math.round(Math.max(0, fluctuate(car.range || 300, 2)))
         };
       });
-
       return {
         ...prev,
         grid: { ...prev.grid, watts: Math.round(fluctuate(prev.grid?.watts || 7300, 150)) } as any,
@@ -184,6 +202,14 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
         voiture: updatedVoiture
       };
     });
+    setHistoryData(prev => {
+        if (!prev) return BASE_HISTORY_MOCK;
+        return {
+            ...prev,
+            Production: Number((prev.Production + 0.01).toFixed(2)),
+            Consommation: Number((prev.Consommation + 0.02).toFixed(2))
+        };
+    });
   }, []);
 
   useEffect(() => {
@@ -200,7 +226,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isSimulated, fetchRealData, runSimulation]);
 
   return (
-    <MQTTContext.Provider value={{ isSimulated, setIsSimulated, messages, latestData, error, refreshData: fetchRealData }}>
+    <MQTTContext.Provider value={{ isSimulated, setIsSimulated, messages, latestData, historyData, error, refreshAll: fetchRealData }}>
       {children}
     </MQTTContext.Provider>
   );

@@ -18,7 +18,11 @@ import {
   Moon,
   SunMedium,
   History,
-  Flame
+  Flame,
+  ArrowLeft,
+  TrendingUp,
+  PieChart,
+  Activity
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,10 +39,13 @@ import {
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 
+type ViewType = 'dashboard' | 'history';
+
 function DashboardContent() {
-  const { latestData, isSimulated, setIsSimulated } = useMQTT();
+  const { latestData, historyData, isSimulated, setIsSimulated } = useMQTT();
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [mounted, setMounted] = useState(false);
+  const [view, setView] = useState<ViewType>('dashboard');
 
   // Handle Hydration & Theme
   useEffect(() => {
@@ -80,6 +87,11 @@ function DashboardContent() {
     return 'border-slate-500 text-slate-400 bg-slate-500/10';
   };
 
+  const calculatePercent = (val: number, total: number) => {
+    if (!total) return 0;
+    return Math.round((val / total) * 100);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
       {/* Header with Title and Mode Toggle */}
@@ -94,9 +106,14 @@ function DashboardContent() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" className="hidden sm:flex items-center gap-2 font-bold uppercase text-[10px] tracking-widest">
-            <History className="w-4 h-4" />
-            Historique
+          <Button 
+            variant={view === 'history' ? "secondary" : "outline"} 
+            size="sm" 
+            onClick={() => setView(view === 'history' ? 'dashboard' : 'history')}
+            className="flex items-center gap-2 font-bold uppercase text-[10px] tracking-widest"
+          >
+            {view === 'history' ? <ArrowLeft className="w-4 h-4" /> : <History className="w-4 h-4" />}
+            {view === 'history' ? "Tableau de Bord" : "Historique"}
           </Button>
 
           <Button 
@@ -140,210 +157,276 @@ function DashboardContent() {
       </header>
 
       <main className="flex-1 p-8 max-w-7xl mx-auto w-full space-y-8 animate-in fade-in slide-up duration-500">
-        {/* Indicators Section (ZenFlex) */}
-        <section className="flex flex-col sm:flex-row items-center justify-between gap-6 p-6 bg-secondary/10 rounded-3xl border border-border/50">
-          <div className="flex flex-wrap items-center gap-4">
-            {latestData?.zenFlex?.couleurJourJ && (
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest px-1">Aujourd'hui</span>
-                <Badge className={cn("px-6 py-2.5 text-sm font-black shadow-lg transition-transform hover:scale-105", getZenFlexColor(latestData.zenFlex.couleurJourJ))}>
-                  {latestData.zenFlex.couleurJourJ}
+        
+        {view === 'dashboard' ? (
+          <>
+            {/* Indicators Section (ZenFlex) */}
+            <section className="flex flex-col sm:flex-row items-center justify-between gap-6 p-6 bg-secondary/10 rounded-3xl border border-border/50">
+              <div className="flex flex-wrap items-center gap-4">
+                {latestData?.zenFlex?.couleurJourJ && (
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest px-1">Aujourd'hui</span>
+                    <Badge className={cn("px-6 py-2.5 text-sm font-black shadow-lg transition-transform hover:scale-105", getZenFlexColor(latestData.zenFlex.couleurJourJ))}>
+                      {latestData.zenFlex.couleurJourJ}
+                    </Badge>
+                  </div>
+                )}
+                {latestData?.zenFlex?.couleurJourJ1 && (
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest px-1">Demain</span>
+                    <Badge variant="outline" className={cn("px-6 py-2.5 text-sm font-black border-2 shadow-sm transition-transform hover:scale-105", getZenFlexOutlineColor(latestData.zenFlex.couleurJourJ1))}>
+                      {latestData.zenFlex.couleurJourJ1}
+                    </Badge>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <Badge variant="outline" className="flex items-center gap-3 px-5 py-3 bg-card border-border shadow-md">
+                  <CloudSun className="w-5 h-5 text-orange-400" />
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Prévision du jour</span>
+                    <span className="font-black text-xs">{latestData?.solCast?.today ?? 0} kWh</span>
+                  </div>
+                </Badge>
+                <Badge variant="outline" className="flex items-center gap-3 px-5 py-3 bg-card border-border border-dashed shadow-sm">
+                  <CloudSun className="w-5 h-5 text-orange-300 opacity-70" />
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Demain</span>
+                    <span className="font-black text-xs">{latestData?.solCast?.tomorrow ?? 0} kWh</span>
+                  </div>
                 </Badge>
               </div>
-            )}
-            {latestData?.zenFlex?.couleurJourJ1 && (
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest px-1">Demain</span>
-                <Badge variant="outline" className={cn("px-6 py-2.5 text-sm font-black border-2 shadow-sm transition-transform hover:scale-105", getZenFlexOutlineColor(latestData.zenFlex.couleurJourJ1))}>
-                  {latestData.zenFlex.couleurJourJ1}
+            </section>
+
+            {/* Primary Metrics Grid */}
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <MetricCard 
+                title="Réseau Electrique" 
+                value={gridPower} 
+                unit="W" 
+                icon={Zap} 
+                status={gridPower > 6000 ? 'alert' : 'online'}
+                details={[
+                  { label: "Sens", value: latestData?.grid?.sens ?? "Achat" }
+                ]}
+              />
+              <MetricCard 
+                title="Production Solaire" 
+                value={solarProduction} 
+                unit="W" 
+                icon={Sun} 
+                details={[
+                  { label: "SolarEdge", value: latestData?.production?.detail?.solarEdge ?? 0, unit: "W" },
+                  { label: "APsystems", value: latestData?.production?.detail?.apSystems ?? 0, unit: "W" }
+                ]}
+              />
+              <MetricCard 
+                title="Batterie" 
+                value={batterySoc} 
+                unit="%" 
+                icon={BatteryIcon} 
+                status={batterySoc < 20 ? 'alert' : 'online'}
+                description={latestData?.victron?.batteryTitle}
+                details={[
+                  { label: "Puissance", value: batteryPower, unit: "W" },
+                  { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" },
+                  { label: "Temp.", value: latestData?.battery?.temperature ?? 0, unit: "°C" }
+                ]}
+              />
+              <MetricCard 
+                title="Consommation Totale" 
+                value={latestData?.energy?.total?.all ?? 0} 
+                unit="W" 
+                icon={Home} 
+                details={[
+                  { label: "Maison", value: houseConsumption, unit: "W" },
+                  { label: "Annexe", value: annexeConsumption, unit: "W" }
+                ]}
+              />
+            </section>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-8">
+                <Card className="border-border bg-card shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-bold flex items-center gap-2">
+                      <Zap className="w-5 h-5 text-primary" />
+                      Détails de consommation
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
+                        <span className="flex items-center gap-2"><Home className="w-4 h-4 text-primary" /> Maison Principale</span>
+                        <span className="text-primary">{houseConsumption} W</span>
+                      </div>
+                      <Progress value={(houseConsumption / (latestData?.energy?.total?.all || 1)) * 100} className="h-3 bg-secondary/50" />
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
+                        <span className="flex items-center gap-2"><Building2 className="w-4 h-4 text-accent" /> Annexe</span>
+                        <span className="text-accent">{annexeConsumption} W</span>
+                      </div>
+                      <Progress value={(annexeConsumption / (latestData?.energy?.total?.all || 1)) * 100} className="h-3 bg-secondary/50" />
+                    </div>
+                    <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div className="p-4 bg-secondary/20 rounded-2xl border border-border">
+                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-3">Chauffe-eau</p>
+                        <p className="text-2xl font-black flex items-center gap-2 mb-4">
+                          <Flame className="w-5 h-5 text-orange-500" />
+                          {latestData?.chauffeEau?.total ?? 0} <span className="text-sm font-medium text-muted-foreground">W</span>
+                        </p>
+                        <div className="grid grid-cols-2 gap-4 pt-3 border-t border-border/50">
+                          <div>
+                            <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison</p>
+                            <p className="text-sm font-black">{latestData?.chauffeEau?.maison ?? 0} <span className="text-[9px] font-normal">W</span></p>
+                          </div>
+                          <div>
+                            <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe</p>
+                            <p className="text-sm font-black">{latestData?.chauffeEau?.annexe ?? 0} <span className="text-[9px] font-normal">W</span></p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-4 bg-secondary/20 rounded-2xl border border-border">
+                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-3">Consommation Eau</p>
+                        <p className="text-2xl font-black flex items-center gap-2 mb-4">
+                          <Droplets className="w-5 h-5 text-blue-400" />
+                          {totalWater} <span className="text-sm font-medium text-muted-foreground">m³</span>
+                        </p>
+                        <div className="grid grid-cols-3 gap-2 pt-3 border-t border-border/50">
+                          <div>
+                            <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison</p>
+                            <p className="text-sm font-black">{latestData?.eau?.maison ?? 0} <span className="text-[9px] font-normal">m³</span></p>
+                          </div>
+                          <div>
+                            <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe</p>
+                            <p className="text-sm font-black">{latestData?.eau?.annexe ?? 0} <span className="text-[9px] font-normal">m³</span></p>
+                          </div>
+                          <div>
+                            <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Compteur</p>
+                            <p className="text-sm font-black">{latestData?.eau?.compteur ?? 0} <span className="text-[9px] font-normal">m³</span></p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <aside className="space-y-8">
+                {/* Vehicles Carousel */}
+                {vehicles.length > 0 && (
+                  <div className="relative">
+                    <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4 px-1">Flotte Véhicules</h3>
+                    <Carousel className="w-full">
+                      <CarouselContent>
+                        {vehicles.map(([id, car]) => (
+                          <CarouselItem key={id}>
+                            <Card className="border-border shadow-xl overflow-hidden bg-gradient-to-br from-card to-background">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-base font-bold flex items-center gap-2">
+                                  <Car className="w-4 h-4 text-primary" />
+                                  {car.carModel}
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="p-6 pt-2">
+                                <div className="flex items-end justify-between mb-4">
+                                  <div>
+                                    <p className="text-4xl font-black tracking-tighter">{car.batteryLevel}%</p>
+                                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mt-1">
+                                      Autonomie: {car.range ?? 0} km
+                                    </p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">
+                                      {car.chargeStatus}
+                                    </p>
+                                    <p className="text-[9px] text-muted-foreground font-medium">
+                                      Odo: {mounted ? Math.round(car.odometer ?? 0).toLocaleString() : Math.round(car.odometer ?? 0)} km
+                                    </p>
+                                  </div>
+                                </div>
+                                <Progress value={car.batteryLevel} className="h-2.5 bg-primary/10" />
+                              </CardContent>
+                            </Card>
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      {vehicles.length > 1 && (
+                        <div className="flex justify-center gap-2 mt-4">
+                          <CarouselPrevious className="static translate-y-0 h-8 w-8" />
+                          <CarouselNext className="static translate-y-0 h-8 w-8" />
+                        </div>
+                      )}
+                    </Carousel>
+                  </div>
+                )}
+              </aside>
+            </div>
+          </>
+        ) : (
+          /* History View */
+          <div className="space-y-8 animate-in fade-in slide-in-from-left duration-500">
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
+                    <TrendingUp className="w-6 h-6 text-primary" />
+                    Résumé Journalier
+                </h2>
+                <Badge variant="secondary" className="px-4 py-1.5 font-bold uppercase tracking-widest text-[10px]">
+                    {mounted ? new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ""}
                 </Badge>
-              </div>
-            )}
-          </div>
+            </div>
+            
+            <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Card 1: Production journalière */}
+                <MetricCard 
+                    title="Production journalière" 
+                    value={historyData?.Production ?? 0} 
+                    unit="kWh" 
+                    icon={Sun} 
+                    details={[
+                        { label: "SolarEdge", value: `${historyData?.SolarEdge ?? 0}`, unit: `kWh (${calculatePercent(historyData?.SolarEdge ?? 0, historyData?.Production ?? 0)}%)` },
+                        { label: "APsystems", value: `${historyData?.Ecu ?? 0}`, unit: `kWh (${calculatePercent(historyData?.Ecu ?? 0, historyData?.Production ?? 0)}%)` }
+                    ]}
+                />
 
-          <div className="flex flex-wrap gap-3">
-             <Badge variant="outline" className="flex items-center gap-3 px-5 py-3 bg-card border-border shadow-md">
-              <CloudSun className="w-5 h-5 text-orange-400" />
-              <div className="flex flex-col">
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Prévision du jour</span>
-                <span className="font-black text-xs">{latestData?.solCast?.today ?? 0} kWh</span>
-              </div>
-            </Badge>
-            <Badge variant="outline" className="flex items-center gap-3 px-5 py-3 bg-card border-border border-dashed shadow-sm">
-              <CloudSun className="w-5 h-5 text-orange-300 opacity-70" />
-              <div className="flex flex-col">
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Demain</span>
-                <span className="font-black text-xs">{latestData?.solCast?.tomorrow ?? 0} kWh</span>
-              </div>
-            </Badge>
-          </div>
-        </section>
+                {/* Card 2: Utilisation production journalière */}
+                <MetricCard 
+                    title="Utilisation production" 
+                    value={historyData?.Production ?? 0} 
+                    unit="kWh" 
+                    icon={PieChart} 
+                    details={[
+                        { label: "Auto-Conso.", value: `${historyData?.AutoConsommation ?? 0}`, unit: `kWh (${calculatePercent(historyData?.AutoConsommation ?? 0, historyData?.Production ?? 0)}%)` },
+                        { label: "Vente", value: `${historyData?.Vente ?? 0}`, unit: `kWh (${calculatePercent(historyData?.Vente ?? 0, historyData?.Production ?? 0)}%)` }
+                    ]}
+                />
 
-        {/* Primary Metrics Grid */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <MetricCard 
-            title="Réseau Electrique" 
-            value={gridPower} 
-            unit="W" 
-            icon={Zap} 
-            status={gridPower > 6000 ? 'alert' : 'online'}
-            details={[
-              { label: "Sens", value: latestData?.grid?.sens ?? "Achat" }
-            ]}
-          />
-          <MetricCard 
-            title="Production Solaire" 
-            value={solarProduction} 
-            unit="W" 
-            icon={Sun} 
-            details={[
-              { label: "SolarEdge", value: latestData?.production?.detail?.solarEdge ?? 0, unit: "W" },
-              { label: "APsystems", value: latestData?.production?.detail?.apSystems ?? 0, unit: "W" }
-            ]}
-          />
-          <MetricCard 
-            title="Batterie" 
-            value={batterySoc} 
-            unit="%" 
-            icon={BatteryIcon} 
-            status={batterySoc < 20 ? 'alert' : 'online'}
-            description={latestData?.victron?.batteryTitle}
-            details={[
-              { label: "Puissance", value: batteryPower, unit: "W" },
-              { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" },
-              { label: "Temp.", value: latestData?.battery?.temperature ?? 0, unit: "°C" }
-            ]}
-          />
-          <MetricCard 
-            title="Consommation Totale" 
-            value={latestData?.energy?.total?.all ?? 0} 
-            unit="W" 
-            icon={Home} 
-            details={[
-              { label: "Maison", value: houseConsumption, unit: "W" },
-              { label: "Annexe", value: annexeConsumption, unit: "W" }
-            ]}
-          />
-        </section>
+                {/* Card 3: Consommation journalière */}
+                <MetricCard 
+                    title="Consommation journalière" 
+                    value={historyData?.Consommation ?? 0} 
+                    unit="kWh" 
+                    icon={Activity} 
+                    details={[
+                        { label: "Auto-Production", value: `${historyData?.AutoConsommation ?? 0}`, unit: `kWh (${calculatePercent(historyData?.AutoConsommation ?? 0, historyData?.Consommation ?? 0)}%)` },
+                        { label: "Achat", value: `${historyData?.Achat ?? 0}`, unit: `kWh (${calculatePercent(historyData?.Achat ?? 0, historyData?.Consommation ?? 0)}%)` }
+                    ]}
+                />
+            </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            <Card className="border-border bg-card shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-lg font-bold flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-primary" />
-                  Détails de consommation
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
-                    <span className="flex items-center gap-2"><Home className="w-4 h-4 text-primary" /> Maison Principale</span>
-                    <span className="text-primary">{houseConsumption} W</span>
-                  </div>
-                  <Progress value={(houseConsumption / (latestData?.energy?.total?.all || 1)) * 100} className="h-3 bg-secondary/50" />
+            <div className="p-8 bg-secondary/5 rounded-3xl border border-dashed border-border flex flex-col items-center justify-center text-center space-y-4">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                    <History className="w-8 h-8 text-primary opacity-50" />
                 </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
-                    <span className="flex items-center gap-2"><Building2 className="w-4 h-4 text-accent" /> Annexe</span>
-                    <span className="text-accent">{annexeConsumption} W</span>
-                  </div>
-                  <Progress value={(annexeConsumption / (latestData?.energy?.total?.all || 1)) * 100} className="h-3 bg-secondary/50" />
+                <div className="max-w-md">
+                    <h3 className="font-black uppercase tracking-widest text-sm mb-2">Historique complet bientôt disponible</h3>
+                    <p className="text-xs text-muted-foreground">Nous travaillons sur l'agrégation des données à long terme pour vous proposer des graphiques comparatifs mensuels et annuels.</p>
                 </div>
-                <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="p-4 bg-secondary/20 rounded-2xl border border-border">
-                    <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-3">Chauffe-eau</p>
-                    <p className="text-2xl font-black flex items-center gap-2 mb-4">
-                      <Flame className="w-5 h-5 text-orange-500" />
-                      {latestData?.chauffeEau?.total ?? 0} <span className="text-sm font-medium text-muted-foreground">W</span>
-                    </p>
-                    <div className="grid grid-cols-2 gap-4 pt-3 border-t border-border/50">
-                      <div>
-                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison</p>
-                        <p className="text-sm font-black">{latestData?.chauffeEau?.maison ?? 0} <span className="text-[9px] font-normal">W</span></p>
-                      </div>
-                      <div>
-                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe</p>
-                        <p className="text-sm font-black">{latestData?.chauffeEau?.annexe ?? 0} <span className="text-[9px] font-normal">W</span></p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-4 bg-secondary/20 rounded-2xl border border-border">
-                    <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-3">Consommation Eau</p>
-                    <p className="text-2xl font-black flex items-center gap-2 mb-4">
-                      <Droplets className="w-5 h-5 text-blue-400" />
-                      {totalWater} <span className="text-sm font-medium text-muted-foreground">m³</span>
-                    </p>
-                    <div className="grid grid-cols-3 gap-2 pt-3 border-t border-border/50">
-                      <div>
-                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison</p>
-                        <p className="text-sm font-black">{latestData?.eau?.maison ?? 0} <span className="text-[9px] font-normal">m³</span></p>
-                      </div>
-                      <div>
-                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe</p>
-                        <p className="text-sm font-black">{latestData?.eau?.annexe ?? 0} <span className="text-[9px] font-normal">m³</span></p>
-                      </div>
-                      <div>
-                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Compteur</p>
-                        <p className="text-sm font-black">{latestData?.eau?.compteur ?? 0} <span className="text-[9px] font-normal">m³</span></p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            </div>
           </div>
-
-          <aside className="space-y-8">
-            {/* Vehicles Carousel */}
-            {vehicles.length > 0 && (
-              <div className="relative">
-                <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4 px-1">Flotte Véhicules</h3>
-                <Carousel className="w-full">
-                  <CarouselContent>
-                    {vehicles.map(([id, car]) => (
-                      <CarouselItem key={id}>
-                        <Card className="border-border shadow-xl overflow-hidden bg-gradient-to-br from-card to-background">
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-base font-bold flex items-center gap-2">
-                              <Car className="w-4 h-4 text-primary" />
-                              {car.carModel}
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="p-6 pt-2">
-                            <div className="flex items-end justify-between mb-4">
-                              <div>
-                                <p className="text-4xl font-black tracking-tighter">{car.batteryLevel}%</p>
-                                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mt-1">
-                                  Autonomie: {car.range ?? 0} km
-                                </p>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">
-                                  {car.chargeStatus}
-                                </p>
-                                <p className="text-[9px] text-muted-foreground font-medium">
-                                  Odo: {mounted ? Math.round(car.odometer ?? 0).toLocaleString() : Math.round(car.odometer ?? 0)} km
-                                </p>
-                              </div>
-                            </div>
-                            <Progress value={car.batteryLevel} className="h-2.5 bg-primary/10" />
-                          </CardContent>
-                        </Card>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  {vehicles.length > 1 && (
-                    <div className="flex justify-center gap-2 mt-4">
-                      <CarouselPrevious className="static translate-y-0 h-8 w-8" />
-                      <CarouselNext className="static translate-y-0 h-8 w-8" />
-                    </div>
-                  )}
-                </Carousel>
-              </div>
-            )}
-          </aside>
-        </div>
+        )}
       </main>
       
       <footer className="py-8 text-center text-[10px] text-muted-foreground uppercase tracking-[0.2em] border-t border-border/50 mt-12">
