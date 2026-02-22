@@ -23,6 +23,9 @@ interface MetricCardProps {
 }
 
 export function MetricCard({ title, value, unit, icon: Icon, trend, status = 'online', details, description }: MetricCardProps) {
+  // Determine grid columns based on number of details
+  const detailCols = details && details.length >= 3 ? "grid-cols-3" : "grid-cols-2";
+
   return (
     <Card className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow h-full">
       <CardContent className="p-5 flex flex-col h-full">
@@ -53,7 +56,7 @@ export function MetricCard({ title, value, unit, icon: Icon, trend, status = 'on
         </div>
 
         {details && details.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-border/50 grid grid-cols-2 gap-2">
+          <div className={cn("mt-4 pt-4 border-t border-border/50 grid gap-2", detailCols)}>
             {details.map((detail, idx) => (
               <div key={idx} className="flex flex-col">
                 <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">{detail.label}</span>

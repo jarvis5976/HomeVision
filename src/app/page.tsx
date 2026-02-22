@@ -209,7 +209,7 @@ function DashboardContent() {
             status={batterySoc < 20 ? 'alert' : 'online'}
             description={latestData?.victron?.batteryTitle}
             details={[
-              { label: "Flux", value: batteryPower, unit: "W" },
+              { label: "Puissance", value: batteryPower, unit: "W" },
               { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" },
               { label: "Temp.", value: latestData?.battery?.temperature ?? 0, unit: "°C" }
             ]}
