@@ -209,7 +209,7 @@ export function SolarHistoryChart({
 
                     return totals ? `${label} (${totals[totalKey as keyof typeof totals]})` : label;
                 }}
-                wrapperStyle={{ fontSize: '10px', textTransform: 'capitalize', fontWeight: 'bold', paddingBottom: '20px' }}
+                wrapperStyle={{ color: 'black', fontSize: '10px', textTransform: 'capitalize', fontWeight: 'bold', paddingBottom: '20px' }}
               />
               
               <ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={1} />

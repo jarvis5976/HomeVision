@@ -87,7 +87,7 @@ export function SolarForecastChart({ data }: SolarForecastChartProps) {
                 verticalAlign="top" 
                 align="right"
                 height={40}
-                wrapperStyle={{ fontSize: '10px', fontWeight: 'bold' }}
+                wrapperStyle={{ color: 'black', fontSize: '10px', fontWeight: 'bold' }}
                 formatter={(value) => {
                   const label = value === 'today' ? "Aujourd'hui" : "Demain";
                   const total = value === 'today' ? totals.today : totals.tomorrow;
