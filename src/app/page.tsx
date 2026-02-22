@@ -6,6 +6,7 @@ import { MQTTProvider, useMQTT } from "@/hooks/use-mqtt";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { SolarHistoryChart } from "@/components/dashboard/SolarHistoryChart";
 import { SolarForecastChart } from "@/components/dashboard/SolarForecastChart";
+import { AnnualSummaryTable } from "@/components/dashboard/AnnualSummaryTable";
 import { 
   Zap, 
   Battery as BatteryIcon, 
@@ -51,10 +52,12 @@ function DashboardContent() {
     totalHistoryData, 
     solarChartData,
     solCastChartData,
+    annualData,
     isSimulated, 
     setIsSimulated,
     fetchSolarChart,
-    fetchSolCastChart
+    fetchSolCastChart,
+    fetchAnnualData
   } = useMQTT();
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [mounted, setMounted] = useState(false);
@@ -77,8 +80,9 @@ function DashboardContent() {
     if (view === 'history') {
       fetchSolarChart(startDate, endDate);
       fetchSolCastChart();
+      fetchAnnualData();
     }
-  }, [view, startDate, endDate, fetchSolarChart, fetchSolCastChart]);
+  }, [view, startDate, endDate, fetchSolarChart, fetchSolCastChart, fetchAnnualData]);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -489,6 +493,9 @@ function DashboardContent() {
               onEndDateChange={setEndDate}
               onRefresh={() => fetchSolarChart(startDate, endDate)}
             />
+
+            {/* Annual Summary Table */}
+            <AnnualSummaryTable data={annualData} />
 
             {/* Solar Forecast Chart */}
             <SolarForecastChart 

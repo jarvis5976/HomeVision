@@ -55,6 +55,14 @@ export type SolCastChartData = [
   { Energy: number[] }
 ];
 
+export interface AnnualData {
+  [metric: string]: {
+    [year: string]: {
+      [month: string]: number;
+    };
+  };
+}
+
 export interface HomeDashboardData {
   compteurEdf?: { conso_base: number; isousc: number };
   eau?: { total: number; maison: number; annexe: number; compteur: number };
@@ -85,10 +93,12 @@ interface MQTTContextType {
   totalHistoryData: TotalHistoryData | null;
   solarChartData: SolarChartData | null;
   solCastChartData: SolCastChartData | null;
+  annualData: AnnualData | null;
   error: string | null;
   refreshAll: () => Promise<void>;
   fetchSolarChart: (start: string, end: string) => Promise<void>;
   fetchSolCastChart: () => Promise<void>;
+  fetchAnnualData: () => Promise<void>;
 }
 
 const MQTTContext = createContext<MQTTContextType | undefined>(undefined);
@@ -196,6 +206,26 @@ const SOLCAST_CHART_MOCK: SolCastChartData = [
   { "Energy": [0,0.03,0.35,0.65,0.91,1.09,1.18,1.18,1.07,0.86,0.56,0.29,0.03] }
 ];
 
+const ANNUAL_DATA_MOCK: AnnualData = {
+  production: {
+    "2023": { "TOTAL": 4500, "01": 150, "02": 200, "03": 350, "04": 400, "05": 500, "06": 600, "07": 650, "08": 600, "09": 450, "10": 300, "11": 200, "12": 100 },
+    "2024": { "TOTAL": 4800, "01": 160, "02": 220, "03": 380, "04": 420, "05": 550, "06": 620, "07": 680, "08": 610, "09": 460, "10": 320, "11": 210, "12": 170 },
+    "2025": { "TOTAL": 5200, "01": 180, "02": 240, "03": 410, "04": 450, "05": 590, "06": 650, "07": 710, "08": 650, "09": 490, "10": 350, "11": 250, "12": 230 }
+  },
+  achat: {
+    "2023": { "TOTAL": 3200, "01": 400, "02": 350, "03": 300, "04": 250, "05": 200, "06": 150, "07": 100, "08": 150, "09": 250, "10": 300, "11": 350, "12": 400 },
+    "2024": { "TOTAL": 3000, "01": 380, "02": 330, "03": 280, "04": 230, "05": 180, "06": 140, "07": 90, "08": 140, "09": 230, "10": 280, "11": 330, "12": 390 }
+  },
+  vente: {
+    "2023": { "TOTAL": 800, "01": 10, "02": 20, "03": 50, "04": 80, "05": 100, "06": 120, "07": 150, "08": 110, "09": 80, "10": 50, "11": 20, "12": 10 },
+    "2024": { "TOTAL": 950, "01": 15, "02": 25, "03": 60, "04": 90, "05": 120, "06": 140, "07": 180, "08": 130, "09": 100, "10": 60, "11": 20, "12": 10 }
+  },
+  autoConsommation: {
+    "2023": { "TOTAL": 3700, "01": 140, "02": 180, "03": 300, "04": 320, "05": 400, "06": 480, "07": 500, "08": 490, "09": 370, "10": 250, "11": 180, "12": 90 },
+    "2024": { "TOTAL": 3850, "01": 145, "02": 195, "03": 320, "04": 330, "05": 430, "06": 480, "07": 500, "08": 480, "09": 360, "10": 260, "11": 190, "12": 160 }
+  }
+};
+
 export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSimulated, setIsSimulated] = useState(false);
   const [messages, setMessages] = useState<MQTTMessage[]>([]);
@@ -204,6 +234,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [totalHistoryData, setTotalHistoryData] = useState<TotalHistoryData | null>(BASE_TOTAL_HISTORY_MOCK);
   const [solarChartData, setSolarChartData] = useState<SolarChartData | null>(SOLAR_CHART_MOCK);
   const [solCastChartData, setSolCastChartData] = useState<SolCastChartData | null>(SOLCAST_CHART_MOCK);
+  const [annualData, setAnnualData] = useState<AnnualData | null>(ANNUAL_DATA_MOCK);
   const [error, setError] = useState<string | null>(null);
   
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
@@ -288,6 +319,22 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [isSimulated]);
 
+  const fetchAnnualData = useCallback(async () => {
+    if (isSimulated) {
+      setAnnualData(ANNUAL_DATA_MOCK);
+      return;
+    }
+    try {
+      const url = `http://192.168.0.3/Dashboard/assets/Solaire/getStatByMonths.php`;
+      const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`);
+      if (!res.ok) throw new Error('Failed to fetch annual data');
+      const data = await res.json();
+      setAnnualData(data);
+    } catch (e) {
+      console.error('Annual Data Error:', e);
+    }
+  }, [isSimulated]);
+
   const runSimulation = useCallback(() => {
     setLatestData(prev => {
       if (!prev) return BASE_MOCK_DATA;
@@ -354,10 +401,12 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       totalHistoryData, 
       solarChartData,
       solCastChartData,
+      annualData,
       error, 
       refreshAll: fetchRealData,
       fetchSolarChart,
-      fetchSolCastChart
+      fetchSolCastChart,
+      fetchAnnualData
     }}>
       {children}
     </MQTTContext.Provider>
