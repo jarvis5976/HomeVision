@@ -59,10 +59,10 @@ export function PowerFlowCard() {
   };
 
   /**
-   * Layout Coords (ViewBox 0 0 100 100)
+   * Système de coordonnées unifié (0-100)
    * Hub central: (40, 50)
    * Solaire: (40, 15). Taille 12 -> Bord bas: 15 + 6 = 21
-   * Grille: (10, 50). Taille 12 -> Bord droit: 10 + 6 = 16
+   * Réseau: (10, 50). Taille 12 -> Bord droit: 10 + 6 = 16
    * Batterie: (40, 85). Taille 12 -> Bord haut: 85 - 6 = 79
    * Maison: (70, 50). Taille 14 -> Bord gauche: 70 - 7 = 63, Haut: 50-7=43, Bas: 50+7=57
    * Borne: (70, 20). Taille 12 -> Bord bas: 20 + 6 = 26
@@ -78,12 +78,12 @@ export function PowerFlowCard() {
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-4 pb-10">
-        <div className="relative w-full max-w-[800px] mx-auto aspect-[16/10] flex items-center justify-center">
+        <div className="relative w-full max-w-[900px] mx-auto aspect-[16/10] sm:aspect-[16/9] flex items-center justify-center">
           
-          <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full overflow-visible">
+          <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full overflow-visible select-none">
             <defs>
               <filter id="glow-path" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="0.8" result="blur" />
+                <feGaussianBlur stdDeviation="0.6" result="blur" />
                 <feComposite in="SourceGraphic" in2="blur" operator="over" />
               </filter>
             </defs>
@@ -91,17 +91,17 @@ export function PowerFlowCard() {
             {/* Trajectoires Rectilignes */}
             
             {/* 1. Solaire -> Hub */}
-            <path d="M 40 21 L 40 50" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
+            <path d="M 40 21 L 40 50" className="stroke-muted/20" strokeWidth="0.5" fill="none" />
             {flows.solar > 20 && (
-              <circle r="1" fill="#fbbf24" filter="url(#glow-path)">
+              <circle r="0.8" fill="#fbbf24" filter="url(#glow-path)">
                 <animateMotion dur={`${getDuration(flows.solar)}s`} repeatCount="indefinite" path="M 40 21 L 40 50" />
               </circle>
             )}
 
             {/* 2. Réseau -> Hub */}
-            <path d="M 16 50 L 40 50" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
+            <path d="M 16 50 L 40 50" className="stroke-muted/20" strokeWidth="0.5" fill="none" />
             {Math.abs(flows.grid) > 20 && (
-              <circle r="1" fill={flows.isExporting ? "hsl(var(--primary))" : "#f43f5e"} filter="url(#glow-path)">
+              <circle r="0.8" fill={flows.isExporting ? "hsl(var(--primary))" : "#f43f5e"} filter="url(#glow-path)">
                 <animateMotion 
                   dur={`${getDuration(flows.grid)}s`} 
                   repeatCount="indefinite" 
@@ -111,9 +111,9 @@ export function PowerFlowCard() {
             )}
 
             {/* 3. Hub <-> Batterie */}
-            <path d="M 40 50 L 40 79" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
+            <path d="M 40 50 L 40 79" className="stroke-muted/20" strokeWidth="0.5" fill="none" />
             {Math.abs(flows.battery) > 20 && (
-              <circle r="1" fill="#10b981" filter="url(#glow-path)">
+              <circle r="0.8" fill="#10b981" filter="url(#glow-path)">
                 <animateMotion 
                   dur={`${getDuration(flows.battery)}s`} 
                   repeatCount="indefinite" 
@@ -122,111 +122,116 @@ export function PowerFlowCard() {
               </circle>
             )}
 
-            {/* 4. Hub -> Maison (Bord gauche de l'icône maison) */}
-            <path d="M 40 50 L 63 50" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
+            {/* 4. Hub -> Maison */}
+            <path d="M 40 50 L 63 50" className="stroke-muted/20" strokeWidth="0.5" fill="none" />
             {flows.house > 20 && (
-              <circle r="1" fill="hsl(var(--primary))" filter="url(#glow-path)">
+              <circle r="0.8" fill="hsl(var(--primary))" filter="url(#glow-path)">
                 <animateMotion dur={`${getDuration(flows.house)}s`} repeatCount="indefinite" path="M 40 50 L 63 50" />
               </circle>
             )}
 
-            {/* 5. Maison -> Borne (Sortie par le haut de la maison, entrée bas de la borne) */}
-            <path d="M 70 43 L 70 26" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
+            {/* 5. Maison -> Borne */}
+            <path d="M 70 43 L 70 26" className="stroke-muted/20" strokeWidth="0.5" fill="none" />
             {flows.borneWatts > 20 && (
-              <circle r="1" fill="#3b82f6" filter="url(#glow-path)">
+              <circle r="0.8" fill="#3b82f6" filter="url(#glow-path)">
                 <animateMotion dur={`${getDuration(flows.borneWatts)}s`} repeatCount="indefinite" path="M 70 43 L 70 26" />
               </circle>
             )}
 
-            {/* 6. Maison -> Cumulus (Sortie par le bas de la maison, entrée haut du cumulus) */}
-            <path d="M 70 57 L 70 74" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
+            {/* 6. Maison -> Cumulus */}
+            <path d="M 70 57 L 70 74" className="stroke-muted/20" strokeWidth="0.5" fill="none" />
             {flows.cumulusWatts > 20 && (
-              <circle r="1" fill="#f97316" filter="url(#glow-path)">
+              <circle r="0.8" fill="#f97316" filter="url(#glow-path)">
                 <animateMotion dur={`${getDuration(flows.cumulusWatts)}s`} repeatCount="indefinite" path="M 70 57 L 70 74" />
               </circle>
             )}
+
+            {/* Hub Central Point */}
+            <circle cx="40" cy="50" r="1.5" fill="hsl(var(--background))" stroke="hsl(var(--muted)/0.3)" strokeWidth="0.2" />
+            <circle cx="40" cy="50" r="0.5" fill="hsl(var(--primary))">
+                <animate attributeName="r" values="0.3;0.7;0.3" dur="2s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.2;1;0.2" dur="2s" repeatCount="indefinite" />
+            </circle>
+
+            {/* Solaire (40, 15) */}
+            <foreignObject x="34" y="5" width="12" height="18">
+              <div className="w-full h-full flex flex-col items-center justify-center gap-1 group">
+                <div className="w-full aspect-square rounded-2xl bg-orange-500/5 border border-orange-500/10 flex items-center justify-center shadow-md bg-background/60 backdrop-blur-md transition-transform group-hover:scale-105">
+                  <Sun className="w-[50%] h-[50%] text-orange-500" />
+                </div>
+                <div className="bg-card/80 backdrop-blur-sm px-1.5 py-0.5 rounded-full border border-border/50 shadow-sm min-w-0">
+                  <p className="text-[14%] sm:text-[16%] font-black text-orange-500 text-center whitespace-nowrap">{flows.solar}W</p>
+                </div>
+              </div>
+            </foreignObject>
+
+            {/* Réseau (10, 50) */}
+            <foreignObject x="4" y="40" width="12" height="20">
+              <div className="w-full h-full flex flex-col items-center justify-center gap-1 group">
+                <div className={cn(
+                  "w-full aspect-square rounded-2xl border flex items-center justify-center shadow-md bg-background/60 backdrop-blur-md transition-all group-hover:scale-105",
+                  flows.isExporting ? "bg-primary/5 border-primary/10" : "bg-rose-500/5 border-rose-500/10"
+                )}>
+                  <Zap className={cn("w-[50%] h-[50%]", flows.isExporting ? "text-primary" : "text-rose-500")} />
+                </div>
+                <div className="bg-card/80 backdrop-blur-sm px-1.5 py-0.5 rounded-full border border-border/50 shadow-sm">
+                  <p className={cn("text-[14%] sm:text-[16%] font-black text-center whitespace-nowrap", flows.isExporting ? "text-primary" : "text-rose-500")}>
+                    {Math.abs(flows.grid)}W
+                  </p>
+                </div>
+              </div>
+            </foreignObject>
+
+            {/* Batterie (40, 85) */}
+            <foreignObject x="34" y="75" width="12" height="20">
+              <div className="w-full h-full flex flex-col items-center justify-center gap-1 group">
+                <div className="w-full aspect-square rounded-2xl bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-center shadow-md bg-background/60 backdrop-blur-md relative overflow-hidden transition-transform group-hover:scale-105">
+                  <Battery className="w-[50%] h-[50%] text-emerald-500 z-10" />
+                  <div className="absolute bottom-0 left-0 right-0 bg-emerald-500/20 transition-all duration-1000" style={{ height: `${flows.batterySoc}%` }} />
+                </div>
+                <div className="bg-card/80 backdrop-blur-sm px-1.5 py-0.5 rounded-full border border-border/50 shadow-sm">
+                  <p className="text-[14%] sm:text-[16%] font-black text-emerald-500 text-center whitespace-nowrap">{flows.batterySoc}%</p>
+                </div>
+              </div>
+            </foreignObject>
+
+            {/* Maison (70, 50) */}
+            <foreignObject x="63" y="38" width="14" height="24">
+              <div className="w-full h-full flex flex-col items-center justify-center gap-1 group">
+                <div className="w-full aspect-square rounded-2xl bg-primary/5 border border-primary/20 flex items-center justify-center shadow-lg bg-background/80 backdrop-blur-md transition-transform group-hover:scale-105">
+                  <Home className="w-[55%] h-[55%] text-primary" />
+                </div>
+                <div className="bg-card/80 backdrop-blur-sm px-1.5 py-0.5 rounded-full border border-border shadow-sm">
+                  <p className="text-[14%] sm:text-[16%] font-black text-primary text-center whitespace-nowrap">{flows.house}W</p>
+                </div>
+              </div>
+            </foreignObject>
+
+            {/* Borne (70, 20) */}
+            <foreignObject x="64" y="8" width="12" height="20">
+              <div className="w-full h-full flex flex-col items-center justify-center gap-1 group">
+                <div className="w-full aspect-square rounded-2xl bg-blue-500/5 border border-blue-500/10 flex items-center justify-center shadow-md bg-background/60 backdrop-blur-md relative overflow-hidden transition-transform group-hover:scale-105">
+                  <Car className="w-[50%] h-[50%] text-blue-500 z-10" />
+                  <div className="absolute bottom-0 left-0 right-0 bg-blue-500/20 transition-all duration-1000" style={{ height: `${flows.carSoc}%` }} />
+                </div>
+                <div className="bg-card/80 backdrop-blur-sm px-1.5 py-0.5 rounded-full border border-border/50 shadow-sm">
+                  <p className="text-[14%] sm:text-[16%] font-black text-blue-500 text-center whitespace-nowrap">{flows.carSoc}%</p>
+                </div>
+              </div>
+            </foreignObject>
+
+            {/* Cumulus (70, 80) */}
+            <foreignObject x="64" y="72" width="12" height="20">
+              <div className="w-full h-full flex flex-col items-center justify-center gap-1 group">
+                <div className="w-full aspect-square rounded-2xl bg-orange-600/5 border border-orange-600/10 flex items-center justify-center shadow-md bg-background/60 backdrop-blur-md transition-transform group-hover:scale-105">
+                  <Flame className="w-[50%] h-[50%] text-orange-600" />
+                </div>
+                <div className="bg-card/80 backdrop-blur-sm px-1.5 py-0.5 rounded-full border border-border/50 shadow-sm">
+                  <p className="text-[14%] sm:text-[16%] font-black text-orange-600 text-center whitespace-nowrap">{flows.cumulusWatts}W</p>
+                </div>
+              </div>
+            </foreignObject>
           </svg>
-
-          {/* Hub Central (Nœud de distribution invisible au milieu) */}
-          <div className="absolute top-[50%] left-[40%] -translate-x-1/2 -translate-y-1/2 z-10">
-            <div className="w-5 h-5 rounded-full bg-background border border-muted/30 shadow-inner flex items-center justify-center">
-              <div className="w-2 h-2 rounded-full bg-primary/20 animate-pulse" />
-            </div>
-          </div>
-
-          {/* Solaire (En haut au centre) */}
-          <div className="absolute top-[15%] left-[40%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5 group z-20">
-            <div className="w-12 h-12 rounded-2xl bg-orange-500/5 border border-orange-500/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-500 bg-background/60 backdrop-blur-md">
-              <Sun className="w-6 h-6 text-orange-500" />
-            </div>
-            <div className="text-center bg-card/80 backdrop-blur-sm px-3 py-1 rounded-full border border-border/50 shadow-sm min-w-[70px]">
-              <p className="text-[11px] font-black text-orange-500">{flows.solar} W</p>
-            </div>
-          </div>
-
-          {/* Réseau (Milieu gauche) */}
-          <div className="absolute left-[10%] top-[50%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5 group z-20">
-            <div className={cn(
-              "w-12 h-12 rounded-2xl border flex items-center justify-center shadow-md group-hover:scale-110 transition-all duration-500 bg-background/60 backdrop-blur-md",
-              flows.isExporting ? "bg-primary/5 border-primary/10" : "bg-rose-500/5 border-rose-500/10"
-            )}>
-              <Zap className={cn("w-6 h-6", flows.isExporting ? "text-primary" : "text-rose-500")} />
-            </div>
-            <div className="text-center bg-card/80 backdrop-blur-sm px-3 py-1 rounded-full border border-border/50 shadow-sm min-w-[70px]">
-              <p className={cn("text-[11px] font-black", flows.isExporting ? "text-primary" : "text-rose-500")}>
-                {Math.abs(flows.grid)} W
-              </p>
-            </div>
-          </div>
-
-          {/* Batterie (En bas au centre) */}
-          <div className="absolute top-[85%] left-[40%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5 group z-20">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-all duration-500 relative overflow-hidden bg-background/60 backdrop-blur-md">
-              <Battery className="w-6 h-6 text-emerald-500 z-10" />
-              <div 
-                className="absolute bottom-0 left-0 right-0 bg-emerald-500/20 transition-all duration-1000" 
-                style={{ height: `${flows.batterySoc}%` }} 
-              />
-            </div>
-            <div className="text-center bg-card/80 backdrop-blur-sm px-3 py-1 rounded-full border border-border/50 shadow-sm min-w-[70px]">
-              <p className="text-[11px] font-black text-emerald-500">{flows.batterySoc}% <span className="text-[9px] font-bold opacity-60">({Math.abs(flows.battery)}W)</span></p>
-            </div>
-          </div>
-
-          {/* Maison (Cœur de consommation à droite) */}
-          <div className="absolute left-[70%] top-[50%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5 group z-20">
-            <div className="w-14 h-14 rounded-2xl bg-primary/5 border border-primary/20 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 bg-background/80 backdrop-blur-md">
-              <Home className="w-7 h-7 text-primary" />
-            </div>
-            <div className="text-center bg-card/80 backdrop-blur-sm px-3 py-1 rounded-full border border-border shadow-sm min-w-[80px]">
-              <p className="text-[11px] font-black text-primary">{flows.house} W</p>
-            </div>
-          </div>
-
-          {/* Borne Recharge (Au-dessus de la maison) */}
-          <div className="absolute left-[70%] top-[20%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5 group z-20">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/5 border border-blue-500/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-500 relative overflow-hidden bg-background/60 backdrop-blur-md">
-              <Car className="w-6 h-6 text-blue-500 z-10" />
-              <div 
-                className="absolute bottom-0 left-0 right-0 bg-blue-500/20 transition-all duration-1000" 
-                style={{ height: `${flows.carSoc}%` }} 
-              />
-            </div>
-            <div className="text-center bg-card/80 backdrop-blur-sm px-3 py-1 rounded-full border border-border/50 shadow-sm min-w-[70px]">
-              <p className="text-[11px] font-black text-blue-500">{flows.carSoc}% <span className="text-[9px] font-bold opacity-60">({flows.borneWatts}W)</span></p>
-            </div>
-          </div>
-
-          {/* Cumulus (En-dessous de la maison) */}
-          <div className="absolute left-[70%] top-[80%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5 group z-20">
-            <div className="w-12 h-12 rounded-2xl bg-orange-600/5 border border-orange-600/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-500 bg-background/60 backdrop-blur-md">
-              <Flame className="w-6 h-6 text-orange-600" />
-            </div>
-            <div className="text-center bg-card/80 backdrop-blur-sm px-3 py-1 rounded-full border border-border/50 shadow-sm min-w-[70px]">
-              <p className="text-[11px] font-black text-orange-600">{flows.cumulusWatts} W</p>
-            </div>
-          </div>
-
         </div>
       </CardContent>
     </Card>
