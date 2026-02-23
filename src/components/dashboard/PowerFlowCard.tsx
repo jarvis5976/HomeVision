@@ -60,13 +60,13 @@ export function PowerFlowCard() {
 
   /**
    * Layout Coords (ViewBox 0 0 100 100)
-   * Hub: (40, 50)
-   * Solar: Center (40, 15), Bottom Edge (40, 21)
-   * Grid: Center (10, 50), Right Edge (16, 50)
-   * Battery: Center (40, 85), Top Edge (40, 79)
-   * Maison: Center (70, 50), Left Edge (64, 50), Top Edge (70, 44), Bottom Edge (70, 56)
-   * Borne: Center (70, 20), Bottom Edge (70, 26)
-   * Cumulus: Center (70, 80), Top Edge (70, 74)
+   * Hub central: (40, 50)
+   * Solaire: (40, 15). Taille 12 -> Bord bas: 15 + 6 = 21
+   * Grille: (10, 50). Taille 12 -> Bord droit: 10 + 6 = 16
+   * Batterie: (40, 85). Taille 12 -> Bord haut: 85 - 6 = 79
+   * Maison: (70, 50). Taille 14 -> Bord gauche: 70 - 7 = 63, Haut: 50-7=43, Bas: 50+7=57
+   * Borne: (70, 20). Taille 12 -> Bord bas: 20 + 6 = 26
+   * Cumulus: (70, 80). Taille 12 -> Bord haut: 80 - 6 = 74
    */
 
   return (
@@ -110,7 +110,7 @@ export function PowerFlowCard() {
               </circle>
             )}
 
-            {/* 3. Hub -> Batterie */}
+            {/* 3. Hub <-> Batterie */}
             <path d="M 40 50 L 40 79" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
             {Math.abs(flows.battery) > 20 && (
               <circle r="1" fill="#10b981" filter="url(#glow-path)">
@@ -122,39 +122,39 @@ export function PowerFlowCard() {
               </circle>
             )}
 
-            {/* 4. Hub -> Maison */}
-            <path d="M 40 50 L 64 50" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
+            {/* 4. Hub -> Maison (Bord gauche de l'icône maison) */}
+            <path d="M 40 50 L 63 50" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
             {flows.house > 20 && (
               <circle r="1" fill="hsl(var(--primary))" filter="url(#glow-path)">
-                <animateMotion dur={`${getDuration(flows.house)}s`} repeatCount="indefinite" path="M 40 50 L 64 50" />
+                <animateMotion dur={`${getDuration(flows.house)}s`} repeatCount="indefinite" path="M 40 50 L 63 50" />
               </circle>
             )}
 
-            {/* 5. Maison -> Borne (Verticale Haut) */}
-            <path d="M 70 44 L 70 26" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
+            {/* 5. Maison -> Borne (Sortie par le haut de la maison, entrée bas de la borne) */}
+            <path d="M 70 43 L 70 26" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
             {flows.borneWatts > 20 && (
               <circle r="1" fill="#3b82f6" filter="url(#glow-path)">
-                <animateMotion dur={`${getDuration(flows.borneWatts)}s`} repeatCount="indefinite" path="M 70 44 L 70 26" />
+                <animateMotion dur={`${getDuration(flows.borneWatts)}s`} repeatCount="indefinite" path="M 70 43 L 70 26" />
               </circle>
             )}
 
-            {/* 6. Maison -> Cumulus (Verticale Bas) */}
-            <path d="M 70 56 L 70 74" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
+            {/* 6. Maison -> Cumulus (Sortie par le bas de la maison, entrée haut du cumulus) */}
+            <path d="M 70 57 L 70 74" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
             {flows.cumulusWatts > 20 && (
               <circle r="1" fill="#f97316" filter="url(#glow-path)">
-                <animateMotion dur={`${getDuration(flows.cumulusWatts)}s`} repeatCount="indefinite" path="M 70 56 L 70 74" />
+                <animateMotion dur={`${getDuration(flows.cumulusWatts)}s`} repeatCount="indefinite" path="M 70 57 L 70 74" />
               </circle>
             )}
           </svg>
 
-          {/* Hub Central (Nœud de distribution) */}
+          {/* Hub Central (Nœud de distribution invisible au milieu) */}
           <div className="absolute top-[50%] left-[40%] -translate-x-1/2 -translate-y-1/2 z-10">
             <div className="w-5 h-5 rounded-full bg-background border border-muted/30 shadow-inner flex items-center justify-center">
               <div className="w-2 h-2 rounded-full bg-primary/20 animate-pulse" />
             </div>
           </div>
 
-          {/* Solaire (Haut Centre) */}
+          {/* Solaire (En haut au centre) */}
           <div className="absolute top-[15%] left-[40%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5 group z-20">
             <div className="w-12 h-12 rounded-2xl bg-orange-500/5 border border-orange-500/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-500 bg-background/60 backdrop-blur-md">
               <Sun className="w-6 h-6 text-orange-500" />
@@ -164,7 +164,7 @@ export function PowerFlowCard() {
             </div>
           </div>
 
-          {/* Réseau (Milieu Gauche) */}
+          {/* Réseau (Milieu gauche) */}
           <div className="absolute left-[10%] top-[50%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5 group z-20">
             <div className={cn(
               "w-12 h-12 rounded-2xl border flex items-center justify-center shadow-md group-hover:scale-110 transition-all duration-500 bg-background/60 backdrop-blur-md",
@@ -179,7 +179,7 @@ export function PowerFlowCard() {
             </div>
           </div>
 
-          {/* Batterie (Bas Centre) */}
+          {/* Batterie (En bas au centre) */}
           <div className="absolute top-[85%] left-[40%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5 group z-20">
             <div className="w-12 h-12 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-all duration-500 relative overflow-hidden bg-background/60 backdrop-blur-md">
               <Battery className="w-6 h-6 text-emerald-500 z-10" />
@@ -193,7 +193,7 @@ export function PowerFlowCard() {
             </div>
           </div>
 
-          {/* Maison (Milieu Droite) */}
+          {/* Maison (Cœur de consommation à droite) */}
           <div className="absolute left-[70%] top-[50%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5 group z-20">
             <div className="w-14 h-14 rounded-2xl bg-primary/5 border border-primary/20 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 bg-background/80 backdrop-blur-md">
               <Home className="w-7 h-7 text-primary" />
@@ -203,7 +203,7 @@ export function PowerFlowCard() {
             </div>
           </div>
 
-          {/* Borne Recharge (Haut Droite) */}
+          {/* Borne Recharge (Au-dessus de la maison) */}
           <div className="absolute left-[70%] top-[20%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5 group z-20">
             <div className="w-12 h-12 rounded-2xl bg-blue-500/5 border border-blue-500/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-500 relative overflow-hidden bg-background/60 backdrop-blur-md">
               <Car className="w-6 h-6 text-blue-500 z-10" />
@@ -217,7 +217,7 @@ export function PowerFlowCard() {
             </div>
           </div>
 
-          {/* Cumulus (Bas Droite) */}
+          {/* Cumulus (En-dessous de la maison) */}
           <div className="absolute left-[70%] top-[80%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5 group z-20">
             <div className="w-12 h-12 rounded-2xl bg-orange-600/5 border border-orange-600/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-500 bg-background/60 backdrop-blur-md">
               <Flame className="w-6 h-6 text-orange-600" />
