@@ -280,7 +280,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const proxyUrl = `/api/proxy?url=${encodeURIComponent('http://192.168.0.3/Dashboard/assets/instant_from_mqtt.php')}`;
       const instantRes = await fetch(proxyUrl, { signal: controller.signal });
       
-      if (!instantRes.ok) throw new Error(`Server responded with ${instantRes.status}`);
+      if (!instantRes.ok) throw new Error(`Proxy status: ${instantRes.status}`);
       const instantData = await instantRes.json();
       
       const adaptedData = { ...instantData };
