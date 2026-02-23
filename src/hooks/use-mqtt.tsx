@@ -277,7 +277,8 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
     try {
-      const proxyUrl = `/api/proxy?url=${encodeURIComponent('http://192.168.0.3/Dashboard/assets/instant_from_mqtt.php')}`;
+      const targetUrl = 'http://192.168.0.3/Dashboard/assets/instant_from_mqtt.php';
+      const proxyUrl = `/api/proxy?url=${encodeURIComponent(targetUrl)}`;
       const instantRes = await fetch(proxyUrl, { signal: controller.signal });
       
       if (!instantRes.ok) throw new Error(`Proxy status: ${instantRes.status}`);
@@ -315,10 +316,8 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     try {
       const proxyUrl = (target: string) => `/api/proxy?url=${encodeURIComponent(target)}`;
-      const [historyRes, queryRes] = await Promise.all([
-        fetch(proxyUrl('http://192.168.0.3/Dashboard/assets/Solaire/getProductDays.php')),
-        fetch(proxyUrl('http://192.168.0.3/Dashboard/assets/Solaire/getProduct_query.php'))
-      ]);
+      const historyRes = await fetch(proxyUrl('http://192.168.0.3/Dashboard/assets/Solaire/getProductDays.php'));
+      const queryRes = await fetch(proxyUrl('http://192.168.0.3/Dashboard/assets/Solaire/getProduct_query.php'));
       
       if (historyRes.ok && queryRes.ok) {
         const histData = await historyRes.json();

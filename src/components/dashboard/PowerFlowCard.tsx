@@ -47,7 +47,6 @@ export function PowerFlowCard() {
 
   if (!flows) return null;
 
-  // Plus le wattage est élevé, plus la durée de l'animation est courte (plus rapide)
   const getDuration = (watts: number) => {
     const absWatts = Math.abs(watts);
     if (absWatts < 20) return 0;
@@ -56,12 +55,12 @@ export function PowerFlowCard() {
 
   /**
    * Système de coordonnées SVG (0-100)
-   * CENTRE (MAISON): (50, 50)
-   * SOLAIRE: (50, 15)
-   * RÉSEAU: (15, 50)
-   * BATTERIE: (50, 85)
-   * BORNE: (85, 25)
-   * CUMULUS: (85, 75)
+   * MAISON (CENTRE): (50, 50)
+   * SOLAIRE (HAUT): (50, 10)
+   * RÉSEAU (GAUCHE): (10, 50)
+   * BATTERIE (BAS): (50, 90)
+   * BORNE (HAUT DROITE): (85, 25)
+   * CUMULUS (BAS DROITE): (85, 75)
    */
 
   return (
@@ -69,7 +68,7 @@ export function PowerFlowCard() {
       <CardHeader className="pb-0 pt-6">
         <CardTitle className="text-[10px] font-bold flex items-center gap-2 uppercase tracking-widest text-muted-foreground/80">
           <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-          Flux Énergétique Centralisé
+          Flux Énergétique Temps Réel
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-4 pb-10">
@@ -83,93 +82,93 @@ export function PowerFlowCard() {
               </filter>
             </defs>
 
-            {/* --- TRACÉS DES FLUX (Maison au centre) --- */}
+            {/* --- TRACÉS DES FLUX (Rectilignes) --- */}
             
-            {/* 1. Solaire -> Maison (50, 15 -> 50, 50) */}
-            <path d="M 50 22 L 50 44" className="stroke-muted/20" strokeWidth="0.4" fill="none" />
+            {/* 1. Solaire -> Maison (50, 10 -> 50, 50) */}
+            <path d="M 50 18 L 50 42" className="stroke-muted/20" strokeWidth="0.4" fill="none" />
             {flows.solar > 20 && (
-              <circle r="0.7" fill="#fbbf24" filter="url(#glow-path)">
-                <animateMotion dur={`${getDuration(flows.solar)}s`} repeatCount="indefinite" path="M 50 22 L 50 44" />
+              <circle r="0.8" fill="#fbbf24" filter="url(#glow-path)">
+                <animateMotion dur={`${getDuration(flows.solar)}s`} repeatCount="indefinite" path="M 50 18 L 50 42" />
               </circle>
             )}
 
-            {/* 2. Réseau <-> Maison (15, 50 <-> 50, 50) */}
-            <path d="M 21.5 50 L 44 50" className="stroke-muted/20" strokeWidth="0.4" fill="none" />
+            {/* 2. Réseau <-> Maison (10, 50 <-> 50, 50) */}
+            <path d="M 18 50 L 42 50" className="stroke-muted/20" strokeWidth="0.4" fill="none" />
             {Math.abs(flows.grid) > 20 && (
-              <circle r="0.7" fill={flows.isExporting ? "hsl(var(--primary))" : "#f43f5e"} filter="url(#glow-path)">
+              <circle r="0.8" fill={flows.isExporting ? "#10b981" : "#f43f5e"} filter="url(#glow-path)">
                 <animateMotion 
                   dur={`${getDuration(flows.grid)}s`} 
                   repeatCount="indefinite" 
-                  path={flows.isExporting ? "M 44 50 L 21.5 50" : "M 21.5 50 L 44 50"} 
+                  path={flows.isExporting ? "M 42 50 L 18 50" : "M 18 50 L 42 50"} 
                 />
               </circle>
             )}
 
-            {/* 3. Batterie <-> Maison (50, 85 <-> 50, 50) */}
-            <path d="M 50 78 L 50 56" className="stroke-muted/20" strokeWidth="0.4" fill="none" />
+            {/* 3. Batterie <-> Maison (50, 90 <-> 50, 50) */}
+            <path d="M 50 82 L 50 58" className="stroke-muted/20" strokeWidth="0.4" fill="none" />
             {Math.abs(flows.battery) > 20 && (
-              <circle r="0.7" fill="#10b981" filter="url(#glow-path)">
+              <circle r="0.8" fill="#10b981" filter="url(#glow-path)">
                 <animateMotion 
                   dur={`${getDuration(flows.battery)}s`} 
                   repeatCount="indefinite" 
-                  path={flows.isBatteryCharging ? "M 50 56 L 50 78" : "M 50 78 L 50 56"} 
+                  path={flows.isBatteryCharging ? "M 50 58 L 50 82" : "M 50 82 L 50 58"} 
                 />
               </circle>
             )}
 
-            {/* 4. Maison -> Borne (56, 47 -> 85, 25) */}
-            <path d="M 56 47 L 79 25" className="stroke-muted/20" strokeWidth="0.4" fill="none" />
+            {/* 4. Maison -> Borne (50, 50 -> 85, 25) */}
+            <path d="M 55 45 L 78 28" className="stroke-muted/20" strokeWidth="0.4" fill="none" />
             {flows.borneWatts > 20 && (
-              <circle r="0.7" fill="#3b82f6" filter="url(#glow-path)">
-                <animateMotion dur={`${getDuration(flows.borneWatts)}s`} repeatCount="indefinite" path="M 56 47 L 79 25" />
+              <circle r="0.8" fill="#3b82f6" filter="url(#glow-path)">
+                <animateMotion dur={`${getDuration(flows.borneWatts)}s`} repeatCount="indefinite" path="M 55 45 L 78 28" />
               </circle>
             )}
 
-            {/* 5. Maison -> Cumulus (56, 53 -> 85, 75) */}
-            <path d="M 56 53 L 79 75" className="stroke-muted/20" strokeWidth="0.4" fill="none" />
+            {/* 5. Maison -> Cumulus (50, 50 -> 85, 75) */}
+            <path d="M 55 55 L 78 72" className="stroke-muted/20" strokeWidth="0.4" fill="none" />
             {flows.cumulusWatts > 20 && (
-              <circle r="0.7" fill="#f97316" filter="url(#glow-path)">
-                <animateMotion dur={`${getDuration(flows.cumulusWatts)}s`} repeatCount="indefinite" path="M 56 53 L 79 75" />
+              <circle r="0.8" fill="#f97316" filter="url(#glow-path)">
+                <animateMotion dur={`${getDuration(flows.cumulusWatts)}s`} repeatCount="indefinite" path="M 55 55 L 78 72" />
               </circle>
             )}
 
-            {/* --- COMPOSANTS --- */}
+            {/* --- COMPOSANTS (Utilisation de foreignObject avec tailles fixes pour éviter le cropping) --- */}
 
             {/* MAISON (CENTRE) */}
-            <foreignObject x="43" y="43" width="14" height="18">
+            <foreignObject x="40" y="42" width="20" height="24" className="overflow-visible">
               <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 border-2 border-primary/30 flex items-center justify-center shadow-xl bg-background/90 backdrop-blur-md">
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 border-2 border-primary/40 flex items-center justify-center shadow-xl bg-background/95 backdrop-blur-md">
                   <Home className="w-7 h-7 text-primary" />
                 </div>
-                <div className="bg-card/90 px-2 py-0.5 rounded-full border border-primary/20 shadow-sm">
-                  <p className="text-[8px] font-black text-primary text-center leading-none">{flows.house}W</p>
+                <div className="bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20 shadow-sm backdrop-blur-sm">
+                  <p className="text-[10px] font-black text-primary text-center leading-none">{flows.house}W</p>
                 </div>
               </div>
             </foreignObject>
 
             {/* SOLAIRE (HAUT) */}
-            <foreignObject x="44" y="5" width="12" height="18">
+            <foreignObject x="42" y="0" width="16" height="20" className="overflow-visible">
               <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-                <div className="w-10 h-10 rounded-xl bg-orange-500/5 border border-orange-500/20 flex items-center justify-center shadow-sm bg-background/60 backdrop-blur-md">
-                  <Sun className="w-5 h-5 text-orange-500" />
+                <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center shadow-sm bg-background/80 backdrop-blur-md">
+                  <Sun className="w-6 h-6 text-orange-500" />
                 </div>
-                <div className="bg-card/80 px-2 py-0.5 rounded-full border border-border/50">
-                  <p className="text-[8px] font-bold text-orange-500 text-center">{flows.solar}W</p>
+                <div className="bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/20">
+                  <p className="text-[9px] font-black text-orange-600 text-center">{flows.solar}W</p>
                 </div>
               </div>
             </foreignObject>
 
             {/* RÉSEAU (GAUCHE) */}
-            <foreignObject x="9" y="41" width="12" height="18">
+            <foreignObject x="2" y="40" width="16" height="20" className="overflow-visible">
               <div className="w-full h-full flex flex-col items-center justify-center gap-1">
                 <div className={cn(
-                  "w-10 h-10 rounded-xl border flex items-center justify-center shadow-sm bg-background/60 backdrop-blur-md",
-                  flows.isExporting ? "bg-primary/5 border-primary/20" : "bg-rose-500/5 border-rose-500/20"
+                  "w-10 h-10 rounded-xl border flex items-center justify-center shadow-sm bg-background/80 backdrop-blur-md",
+                  flows.isExporting ? "bg-emerald-500/10 border-emerald-500/30" : "bg-rose-500/10 border-rose-500/30"
                 )}>
-                  <Zap className={cn("w-5 h-5", flows.isExporting ? "text-primary" : "text-rose-500")} />
+                  <Zap className={cn("w-6 h-6", flows.isExporting ? "text-emerald-500" : "text-rose-500")} />
                 </div>
-                <div className="bg-card/80 px-2 py-0.5 rounded-full border border-border/50">
-                  <p className={cn("text-[8px] font-bold text-center", flows.isExporting ? "text-primary" : "text-rose-500")}>
+                <div className="bg-card/90 px-2 py-0.5 rounded-full border border-border/50">
+                  <p className={cn("text-[9px] font-black text-center", flows.isExporting ? "text-emerald-600" : "text-rose-600")}>
                     {Math.abs(flows.grid)}W
                   </p>
                 </div>
@@ -177,39 +176,39 @@ export function PowerFlowCard() {
             </foreignObject>
 
             {/* BATTERIE (BAS) */}
-            <foreignObject x="44" y="77" width="12" height="18">
+            <foreignObject x="42" y="80" width="16" height="20" className="overflow-visible">
               <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/5 border border-emerald-500/20 flex items-center justify-center shadow-sm bg-background/60 backdrop-blur-md relative overflow-hidden">
-                  <Battery className="w-5 h-5 text-emerald-500 z-10" />
-                  <div className="absolute bottom-0 left-0 right-0 bg-emerald-500/20" style={{ height: `${flows.batterySoc}%` }} />
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shadow-sm bg-background/80 backdrop-blur-md relative overflow-hidden">
+                  <Battery className="w-6 h-6 text-emerald-500 z-10" />
+                  <div className="absolute bottom-0 left-0 right-0 bg-emerald-500/30" style={{ height: `${flows.batterySoc}%` }} />
                 </div>
-                <div className="bg-card/80 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                  <p className="text-[8px] font-bold text-emerald-500 text-center">{flows.batterySoc}%</p>
+                <div className="bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  <p className="text-[10px] font-black text-emerald-600 text-center">{flows.batterySoc}%</p>
                 </div>
               </div>
             </foreignObject>
 
             {/* BORNE (HAUT DROITE) */}
-            <foreignObject x="79" y="10" width="12" height="18">
+            <foreignObject x="78" y="15" width="16" height="20" className="overflow-visible">
               <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/5 border border-blue-500/20 flex items-center justify-center shadow-sm bg-background/60 backdrop-blur-md relative overflow-hidden">
-                  <Car className="w-5 h-5 text-blue-500 z-10" />
-                  <div className="absolute bottom-0 left-0 right-0 bg-blue-500/20" style={{ height: `${flows.carSoc}%` }} />
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center shadow-sm bg-background/80 backdrop-blur-md relative overflow-hidden">
+                  <Car className="w-6 h-6 text-blue-500 z-10" />
+                  <div className="absolute bottom-0 left-0 right-0 bg-blue-500/30" style={{ height: `${flows.carSoc}%` }} />
                 </div>
-                <div className="bg-card/80 px-2 py-0.5 rounded-full border border-blue-500/20">
-                  <p className="text-[8px] font-bold text-blue-500 text-center">{flows.carSoc}%</p>
+                <div className="bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                  <p className="text-[10px] font-black text-blue-600 text-center">{flows.carSoc}%</p>
                 </div>
               </div>
             </foreignObject>
 
             {/* CUMULUS (BAS DROITE) */}
-            <foreignObject x="79" y="72" width="12" height="18">
+            <foreignObject x="78" y="65" width="16" height="20" className="overflow-visible">
               <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-                <div className="w-10 h-10 rounded-xl bg-orange-600/5 border border-orange-600/20 flex items-center justify-center shadow-sm bg-background/60 backdrop-blur-md">
-                  <Flame className="w-5 h-5 text-orange-600" />
+                <div className="w-10 h-10 rounded-xl bg-orange-600/10 border border-orange-600/30 flex items-center justify-center shadow-sm bg-background/80 backdrop-blur-md">
+                  <Flame className="w-6 h-6 text-orange-600" />
                 </div>
-                <div className="bg-card/80 px-2 py-0.5 rounded-full border border-orange-600/20">
-                  <p className="text-[8px] font-bold text-orange-600 text-center">{flows.cumulusWatts}W</p>
+                <div className="bg-orange-600/10 px-2 py-0.5 rounded-full border border-orange-600/20">
+                  <p className="text-[9px] font-black text-orange-600 text-center">{flows.cumulusWatts}W</p>
                 </div>
               </div>
             </foreignObject>
