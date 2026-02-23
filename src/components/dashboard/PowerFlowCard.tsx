@@ -4,7 +4,7 @@
 import React, { useMemo } from "react";
 import { useMQTT } from "@/hooks/use-mqtt";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sun, Zap, Battery, Home } from "lucide-react";
+import { Sun, Zap, Battery, Home, Car } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function PowerFlowCard() {
@@ -25,6 +25,17 @@ export function PowerFlowCard() {
     const isBatteryCharging = batteryState.includes("charge") || batteryState.includes("charging");
     
     const house = latestData.energy?.total?.all ?? 0;
+    const borneWatts = latestData.borne?.watts ?? 0;
+
+    // Find the car that is currently charging to display its SOC
+    const vehicles = Object.values(latestData.voiture || {});
+    const chargingCar = vehicles.find(v => 
+      v.chargeStatus && 
+      v.chargeStatus.toLowerCase().includes("charge") && 
+      !v.chargeStatus.toLowerCase().includes("pas")
+    );
+    // If no car is charging, take the first one or default to 0
+    const carSoc = chargingCar?.batteryLevel ?? (vehicles[0]?.batteryLevel ?? 0);
 
     return {
       solar,
@@ -33,7 +44,9 @@ export function PowerFlowCard() {
       battery: batteryWatts,
       isBatteryCharging,
       batterySoc,
-      house
+      house,
+      borneWatts,
+      carSoc
     };
   }, [latestData]);
 
@@ -52,11 +65,11 @@ export function PowerFlowCard() {
       <CardHeader className="pb-0 pt-6">
         <CardTitle className="text-sm font-black flex items-center gap-2 uppercase tracking-widest text-muted-foreground/80">
           <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          Flux Énergétique
+          Flux Énergétique Temps Réel
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-4 pb-10">
-        <div className="relative w-full max-w-[600px] mx-auto aspect-[4/3] flex items-center justify-center">
+        <div className="relative w-full max-w-[700px] mx-auto aspect-[16/9] flex items-center justify-center">
           
           {/* SVG Background Lines */}
           <svg viewBox="0 0 100 80" className="absolute inset-0 w-full h-full overflow-visible">
@@ -65,13 +78,6 @@ export function PowerFlowCard() {
                 <feGaussianBlur stdDeviation="0.8" result="blur" />
                 <feComposite in="SourceGraphic" in2="blur" operator="over" />
               </filter>
-              
-              {/* Particle Gradient */}
-              <linearGradient id="grad-solar" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="transparent" />
-                <stop offset="50%" stopColor="#fbbf24" />
-                <stop offset="100%" stopColor="transparent" />
-              </linearGradient>
             </defs>
 
             {/* Paths Connecting Nodes to Hub (Center: 50, 40) */}
@@ -115,6 +121,14 @@ export function PowerFlowCard() {
                 <animateMotion dur={`${getDuration(flows.house)}s`} repeatCount="indefinite" path="M 50 40 L 50 65" />
               </circle>
             )}
+
+            {/* 5. Home to Borne (EV) */}
+            <path d="M 50 65 L 80 65" className="stroke-muted/20" strokeWidth="1" fill="none" />
+            {flows.borneWatts > 20 && (
+              <circle r="1.2" fill="#3b82f6" filter="url(#glow-path)">
+                <animateMotion dur={`${getDuration(flows.borneWatts)}s`} repeatCount="indefinite" path="M 50 65 L 80 65" />
+              </circle>
+            )}
           </svg>
 
           {/* Central Hub */}
@@ -125,7 +139,7 @@ export function PowerFlowCard() {
           </div>
 
           {/* Solaire (Top) */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 group">
+          <div className="absolute top-[5%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 group">
             <div className="w-14 h-14 rounded-2xl bg-orange-500/5 border border-orange-500/20 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 relative">
               <div className="absolute inset-0 bg-orange-500/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
               <Sun className="w-7 h-7 text-orange-500" />
@@ -137,7 +151,7 @@ export function PowerFlowCard() {
           </div>
 
           {/* Réseau (Left) */}
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 group">
+          <div className="absolute left-[10%] top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 group">
             <div className={cn(
               "w-14 h-14 rounded-2xl border flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-500",
               flows.isExporting ? "bg-primary/5 border-primary/20" : "bg-rose-500/5 border-rose-500/20"
@@ -155,7 +169,7 @@ export function PowerFlowCard() {
           </div>
 
           {/* Batterie (Right) */}
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 group">
+          <div className="absolute right-[10%] top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 group">
             <div className="w-14 h-14 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 relative overflow-hidden">
               <Battery className="w-7 h-7 text-emerald-500 z-10" />
               <div 
@@ -171,14 +185,31 @@ export function PowerFlowCard() {
             </div>
           </div>
 
-          {/* Maison (Bottom) */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 group">
+          {/* Maison (Bottom Center) */}
+          <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 group">
             <div className="text-center bg-background/80 px-3 py-1 rounded-full border border-border/50 shadow-sm order-last mt-2">
               <p className="text-[11px] font-black text-primary">{flows.house} W</p>
               <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-tighter">Maison</p>
             </div>
             <div className="w-16 h-16 rounded-2xl bg-primary/5 border border-primary/20 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-500">
               <Home className="w-8 h-8 text-primary" />
+            </div>
+          </div>
+
+          {/* Borne Recharge (Bottom Right) */}
+          <div className="absolute bottom-[5%] right-[10%] flex flex-col items-center gap-2 group">
+            <div className="w-14 h-14 rounded-2xl bg-blue-500/5 border border-blue-500/20 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 relative overflow-hidden">
+              <Car className="w-7 h-7 text-blue-500 z-10" />
+              <div 
+                className="absolute bottom-0 left-0 right-0 bg-blue-500/10 transition-all duration-1000" 
+                style={{ height: `${flows.carSoc}%` }} 
+              />
+            </div>
+            <div className="text-center bg-background/80 px-3 py-1 rounded-full border border-border/50 shadow-sm">
+              <p className="text-[11px] font-black text-blue-500">{flows.carSoc}%</p>
+              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-tighter">
+                {flows.borneWatts} W
+              </p>
             </div>
           </div>
 
