@@ -149,7 +149,7 @@ const MQTTContext = createContext<MQTTContextType | undefined>(undefined);
 const BASE_MOCK_DATA: HomeDashboardData = {
   compteurEdf: { isousc: 60, conso_base: 102752909 },
   eau: { total: 1127.65, maison: 796.81, annexe: 330.84, compteur: 1214.91 },
-  grid: { watts: 7301, sens: "Achat", arrow: "dist/img/Arrow_Right_to_Left_R.svg" },
+  grid: { watts: 7301, sens: "Achat", arrow: "" },
   production: { 
     total: 32,
     detail: { solarEdge: 0, apSystems: 32, apsAnnexe: 32 }
@@ -182,14 +182,6 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       odometer: 51439,
       chargeStatus: "Pas en charge",
       display_name: "E-Ty"
-    },
-    volvo: {
-      carModel: "Volvo XC40",
-      batteryLevel: 0,
-      odometer: 0,
-      range: 0,
-      chargeStatus: "Pas en charge",
-      display_name: "Volvo"
     },
     zoe: {
       carModel: "Renault Zoe",
@@ -252,57 +244,16 @@ const SOLCAST_CHART_MOCK: SolCastChartData = [
 const ANNUAL_DATA_MOCK: AnnualData = {
   production: [
     { "mois": "TOTAL", "2023": 4534.9, "2024": 4466.79, "2025": 5582.11, "2026": 250.32 },
-    { "mois": "Janvier", "2023": 107.41, "2024": 124.04, "2025": 90.82, "2026": 109.76 },
-    { "mois": "Février", "2023": 252.4, "2024": 147.29, "2025": 233.63, "2026": 140.56 }
+    { "mois": "Janvier", "2023": 107.41, "2024": 124.04, "2025": 90.82, "2026": 109.76 }
   ],
-  achat: [
-    { "mois": "TOTAL", "2023": 14744.06, "2024": 16571.73, "2025": 13734.33, "2026": 3945.53 },
-    { "mois": "Janvier", "2023": 2271.72, "2024": 2234.72, "2025": 2257.73, "2026": 2349.13 }
-  ],
-  vente: [
-    { "mois": "TOTAL", "2023": 1022.46, "2024": 236.36, "2025": 473.49, "2026": 8.75 },
-    { "mois": "Janvier", "2023": 4.79, "2024": 9.15, "2025": 3.6, "2026": 4.1 }
-  ],
-  autoConsommation: [
-    { "mois": "TOTAL", "2023": 3512.44, "2024": 4230.43, "2025": 5108.62, "2026": 241.57 },
-    { "mois": "Janvier", "2023": 102.62, "2024": 114.89, "2025": 87.22, "2026": 105.66 }
-  ]
+  achat: [],
+  vente: [],
+  autoConsommation: []
 };
 
 const DAILY_HISTORY_MOCK: DailyHistoryData = {
-  unGroup: {
-    byKwh: [
-      {
-        "Année": 2026,
-        "Date": "2026-02-21",
-        "Couleur": "Eco",
-        "Production_SolarEdge": 2.19,
-        "Production_Ecu": 2.66,
-        "Production_Total": 4.85,
-        "Vente": 0.12,
-        "Achat": 58.93,
-        "Consommation": 63.66,
-        "Autoconsommation": 4.73,
-        "BatteryCharge": 12.72,
-        "BatteryDischarge": 2,
-        "BatteryTotal": -10.72,
-        "HP": 0.56,
-        "HC": 58.37,
-        "ConsommationMaison": 37.83,
-        "ConsommationAnnexe": 25.83,
-        "Prevision": 7.97,
-        "Borne": 12.12,
-        "SunHours": 0,
-        "AchatMaison": 35.02,
-        "AchatAnnexe": 23.91
-      }
-    ],
-    byPourc: []
-  },
-  group: {
-    byKwh: [],
-    byPourc: []
-  }
+  unGroup: { byKwh: [], byPourc: [] },
+  group: { byKwh: [], byPourc: [] }
 };
 
 export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -320,11 +271,16 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
 
   const fetchRealData = useCallback(async () => {
+    if (isSimulated) return;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
     try {
-      const proxyUrl = (target: string) => `/api/proxy?url=${encodeURIComponent(target)}`;
-      const instantRes = await fetch(proxyUrl('http://192.168.0.3/Dashboard/assets/instant_from_mqtt.php'), { signal: AbortSignal.timeout(5000) });
+      const proxyUrl = `/api/proxy?url=${encodeURIComponent('http://192.168.0.3/Dashboard/assets/instant_from_mqtt.php')}`;
+      const instantRes = await fetch(proxyUrl, { signal: controller.signal });
       
-      if (!instantRes.ok) throw new Error(`Proxy error!`);
+      if (!instantRes.ok) throw new Error(`Server responded with ${instantRes.status}`);
       const instantData = await instantRes.json();
       
       const adaptedData = { ...instantData };
@@ -340,10 +296,16 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLatestData(adaptedData);
       setError(null);
     } catch (e: any) {
-      console.error('Instant fetch error:', e);
-      setError(e.message || "Impossible de contacter l'endpoint local.");
+      if (e.name === 'AbortError') {
+        console.warn('Real data fetch timed out');
+      } else {
+        console.error('Instant fetch error:', e);
+        setError(e.message || "Impossible de contacter l'endpoint local.");
+      }
+    } finally {
+      clearTimeout(timeoutId);
     }
-  }, []);
+  }, [isSimulated]);
 
   const fetchHistoryStats = useCallback(async () => {
     if (isSimulated) {
@@ -354,25 +316,24 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const proxyUrl = (target: string) => `/api/proxy?url=${encodeURIComponent(target)}`;
       const [historyRes, queryRes] = await Promise.all([
-        fetch(proxyUrl('http://192.168.0.3/Dashboard/assets/Solaire/getProductDays.php'), { signal: AbortSignal.timeout(5000) }),
-        fetch(proxyUrl('http://192.168.0.3/Dashboard/assets/Solaire/getProduct_query.php'), { signal: AbortSignal.timeout(5000) })
+        fetch(proxyUrl('http://192.168.0.3/Dashboard/assets/Solaire/getProductDays.php')),
+        fetch(proxyUrl('http://192.168.0.3/Dashboard/assets/Solaire/getProduct_query.php'))
       ]);
       
-      if (!historyRes.ok || !queryRes.ok) throw new Error('History endpoints error');
-      
-      const histData = await historyRes.json();
-      const productQuery = await queryRes.json();
-      
-      setHistoryData(histData);
-      if (productQuery.data && productQuery.data.total) {
-        setTotalHistoryData({
-          production: parseFloat(productQuery.data.total[1]?.data || 0),
-          achat: parseFloat(productQuery.data.total[2]?.data || 0),
-          vente: parseFloat(productQuery.data.total[3]?.data || 0),
-          consommation: parseFloat(productQuery.data.total[4]?.data || 0),
-          autoConsommation: parseFloat(productQuery.data.total[5]?.data || 0),
-          apSystems: parseFloat(productQuery.data.total[6]?.data || productQuery.data.total[6] || 0)
-        });
+      if (historyRes.ok && queryRes.ok) {
+        const histData = await historyRes.json();
+        const productQuery = await queryRes.json();
+        setHistoryData(histData);
+        if (productQuery.data && productQuery.data.total) {
+          setTotalHistoryData({
+            production: parseFloat(productQuery.data.total[1]?.data || 0),
+            achat: parseFloat(productQuery.data.total[2]?.data || 0),
+            vente: parseFloat(productQuery.data.total[3]?.data || 0),
+            consommation: parseFloat(productQuery.data.total[4]?.data || 0),
+            autoConsommation: parseFloat(productQuery.data.total[5]?.data || 0),
+            apSystems: parseFloat(productQuery.data.total[6]?.data || productQuery.data.total[6] || 0)
+          });
+        }
       }
     } catch (e) {
       console.error('History Stats Error:', e);
@@ -387,9 +348,10 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const url = `http://192.168.0.3/Dashboard/assets/Solaire/getSolaire.php?startDate=${start}&endDate=${end}`;
       const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`);
-      if (!res.ok) throw new Error('Failed to fetch solar chart');
-      const data = await res.json();
-      setSolarChartData(data);
+      if (res.ok) {
+        const data = await res.json();
+        setSolarChartData(data);
+      }
     } catch (e) {
       console.error('Solar Chart Error:', e);
     }
@@ -403,9 +365,10 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const url = `http://192.168.0.3/Dashboard/assets/Solaire/getSolCast.php`;
       const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`);
-      if (!res.ok) throw new Error('Failed to fetch SolCast chart');
-      const data = await res.json();
-      setSolCastChartData(data);
+      if (res.ok) {
+        const data = await res.json();
+        setSolCastChartData(data);
+      }
     } catch (e) {
       console.error('SolCast Chart Error:', e);
     }
@@ -419,9 +382,10 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const url = `http://192.168.0.3/Dashboard/assets/Solaire/getStatByMonths.php`;
       const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`);
-      if (!res.ok) throw new Error('Failed to fetch annual data');
-      const data = await res.json();
-      setAnnualData(data);
+      if (res.ok) {
+        const data = await res.json();
+        setAnnualData(data);
+      }
     } catch (e) {
       console.error('Annual Data Error:', e);
     }
@@ -435,9 +399,10 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const url = `http://192.168.0.3/Dashboard/assets/Solaire/listeProductDays2.php`;
       const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`);
-      if (!res.ok) throw new Error('Failed to fetch daily history');
-      const data = await res.json();
-      setDailyHistoryData(data);
+      if (res.ok) {
+        const data = await res.json();
+        setDailyHistoryData(data);
+      }
     } catch (e) {
       console.error('Daily History Error:', e);
     }
