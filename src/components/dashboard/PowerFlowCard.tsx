@@ -55,21 +55,18 @@ export function PowerFlowCard() {
   const getDuration = (watts: number) => {
     const absWatts = Math.abs(watts);
     if (absWatts < 20) return 0;
-    // Vitesse proportionnelle : plus de puissance = plus rapide (durée plus courte)
     return Math.max(0.6, Math.min(4, 4000 / absWatts));
   };
 
   /**
-   * Layout coordinates (viewBox 0 0 100 80)
-   * Hub Center: (40, 40)
-   * Solar: (40, 10)
-   * Grid: (10, 40)
-   * Battery: (40, 70)
-   * Maison: (65, 40)
-   * Borne: (90, 15)
-   * Cumulus: (90, 65)
-   * 
-   * Courbes Bézier Quadratiques (Q controlX controlY, endX endY)
+   * Layout Coords (ViewBox 0 0 100 100)
+   * Hub: (40, 50)
+   * Solar: (40, 15)
+   * Grid: (10, 50)
+   * Battery: (40, 85)
+   * Maison: (70, 50)
+   * Borne: (90, 20)
+   * Cumulus: (90, 80)
    */
 
   return (
@@ -81,9 +78,9 @@ export function PowerFlowCard() {
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-4 pb-10">
-        <div className="relative w-full max-w-[800px] mx-auto aspect-[16/9] flex items-center justify-center">
+        <div className="relative w-full max-w-[800px] mx-auto aspect-[16/10] flex items-center justify-center">
           
-          <svg viewBox="0 0 100 80" className="absolute inset-0 w-full h-full overflow-visible">
+          <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full overflow-visible">
             <defs>
               <filter id="glow-path" x="-20%" y="-20%" width="140%" height="140%">
                 <feGaussianBlur stdDeviation="0.6" result="blur" />
@@ -91,91 +88,91 @@ export function PowerFlowCard() {
               </filter>
             </defs>
 
-            {/* Trajectoires Hub */}
+            {/* Trajectoires */}
             
-            {/* 1. Solar to Hub (Verticale) */}
-            <path d="M 40 10 L 40 40" className="stroke-muted/20" strokeWidth="1" fill="none" />
+            {/* 1. Solar to Hub */}
+            <path d="M 40 15 L 40 50" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
             {flows.solar > 20 && (
-              <circle r="1" fill="#fbbf24" filter="url(#glow-path)">
-                <animateMotion dur={`${getDuration(flows.solar)}s`} repeatCount="indefinite" path="M 40 10 L 40 40" />
+              <circle r="0.8" fill="#fbbf24" filter="url(#glow-path)">
+                <animateMotion dur={`${getDuration(flows.solar)}s`} repeatCount="indefinite" path="M 40 15 L 40 50" />
               </circle>
             )}
 
-            {/* 2. Grid to Hub (Horizontale) */}
-            <path d="M 10 40 L 40 40" className="stroke-muted/20" strokeWidth="1" fill="none" />
+            {/* 2. Grid to Hub */}
+            <path d="M 10 50 L 40 50" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
             {Math.abs(flows.grid) > 20 && (
-              <circle r="1" fill={flows.isExporting ? "hsl(var(--primary))" : "#f43f5e"} filter="url(#glow-path)">
+              <circle r="0.8" fill={flows.isExporting ? "hsl(var(--primary))" : "#f43f5e"} filter="url(#glow-path)">
                 <animateMotion 
                   dur={`${getDuration(flows.grid)}s`} 
                   repeatCount="indefinite" 
-                  path={flows.isExporting ? "M 40 40 L 10 40" : "M 10 40 L 40 40"} 
+                  path={flows.isExporting ? "M 40 50 L 10 50" : "M 10 50 L 40 50"} 
                 />
               </circle>
             )}
 
-            {/* 3. Hub to Battery (Verticale) */}
-            <path d="M 40 40 L 40 70" className="stroke-muted/20" strokeWidth="1" fill="none" />
+            {/* 3. Hub to Battery */}
+            <path d="M 40 50 L 40 85" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
             {Math.abs(flows.battery) > 20 && (
-              <circle r="1" fill="#10b981" filter="url(#glow-path)">
+              <circle r="0.8" fill="#10b981" filter="url(#glow-path)">
                 <animateMotion 
                   dur={`${getDuration(flows.battery)}s`} 
                   repeatCount="indefinite" 
-                  path={flows.isBatteryCharging ? "M 40 40 L 40 70" : "M 40 70 L 40 40"} 
+                  path={flows.isBatteryCharging ? "M 40 50 L 40 85" : "M 40 85 L 40 50"} 
                 />
               </circle>
             )}
 
-            {/* 4. Hub to Maison (Horizontale) */}
-            <path d="M 40 40 L 65 40" className="stroke-muted/20" strokeWidth="1" fill="none" />
+            {/* 4. Hub to Maison */}
+            <path d="M 40 50 L 70 50" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
             {flows.house > 20 && (
-              <circle r="1" fill="hsl(var(--primary))" filter="url(#glow-path)">
-                <animateMotion dur={`${getDuration(flows.house)}s`} repeatCount="indefinite" path="M 40 40 L 65 40" />
+              <circle r="0.8" fill="hsl(var(--primary))" filter="url(#glow-path)">
+                <animateMotion dur={`${getDuration(flows.house)}s`} repeatCount="indefinite" path="M 40 50 L 70 50" />
               </circle>
             )}
 
-            {/* 5. Maison to Borne (Courbe descendante vers le haut) */}
-            <path d="M 65 40 Q 80 40, 90 15" className="stroke-muted/20" strokeWidth="1" fill="none" />
+            {/* 5. Maison to Borne (Curved) */}
+            <path d="M 70 50 Q 85 50, 90 20" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
             {flows.borneWatts > 20 && (
-              <circle r="1" fill="#3b82f6" filter="url(#glow-path)">
-                <animateMotion dur={`${getDuration(flows.borneWatts)}s`} repeatCount="indefinite" path="M 65 40 Q 80 40, 90 15" />
+              <circle r="0.8" fill="#3b82f6" filter="url(#glow-path)">
+                <animateMotion dur={`${getDuration(flows.borneWatts)}s`} repeatCount="indefinite" path="M 70 50 Q 85 50, 90 20" />
               </circle>
             )}
 
-            {/* 6. Maison to Cumulus (Courbe ascendante vers le bas) */}
-            <path d="M 65 40 Q 80 40, 90 65" className="stroke-muted/20" strokeWidth="1" fill="none" />
+            {/* 6. Maison to Cumulus (Curved) */}
+            <path d="M 70 50 Q 85 50, 90 80" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
             {flows.cumulusWatts > 20 && (
-              <circle r="1" fill="#f97316" filter="url(#glow-path)">
-                <animateMotion dur={`${getDuration(flows.cumulusWatts)}s`} repeatCount="indefinite" path="M 65 40 Q 80 40, 90 65" />
+              <circle r="0.8" fill="#f97316" filter="url(#glow-path)">
+                <animateMotion dur={`${getDuration(flows.cumulusWatts)}s`} repeatCount="indefinite" path="M 70 50 Q 85 50, 90 80" />
               </circle>
             )}
           </svg>
 
-          {/* Hub Central discret */}
+          {/* Hub Central */}
           <div className="absolute top-[50%] left-[40%] -translate-x-1/2 -translate-y-1/2 z-10">
-            <div className="w-3 h-3 rounded-full bg-background border border-muted/30 shadow-inner flex items-center justify-center">
-              <div className="w-1 h-1 rounded-full bg-primary/20 animate-pulse" />
+            <div className="w-4 h-4 rounded-full bg-background border border-muted/30 shadow-inner flex items-center justify-center">
+              <div className="w-1.5 h-1.5 rounded-full bg-primary/30 animate-pulse" />
             </div>
           </div>
 
           {/* Solaire (Haut) */}
-          <div className="absolute top-[0%] left-[40%] -translate-x-1/2 flex flex-col items-center gap-1 group">
-            <div className="w-12 h-12 rounded-2xl bg-orange-500/5 border border-orange-500/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-500">
+          <div className="absolute top-[15%] left-[40%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1 group">
+            <div className="w-12 h-12 rounded-2xl bg-orange-500/5 border border-orange-500/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-500 bg-background/40 backdrop-blur-sm">
               <Sun className="w-6 h-6 text-orange-500" />
             </div>
-            <div className="text-center bg-background/60 backdrop-blur-sm px-2 py-0.5 rounded-full border border-border/50 shadow-sm">
+            <div className="text-center bg-background/80 backdrop-blur-sm px-2 py-0.5 rounded-full border border-border/50 shadow-sm">
               <p className="text-[10px] font-black text-orange-500">{flows.solar} W</p>
             </div>
           </div>
 
           {/* Réseau (Gauche) */}
-          <div className="absolute left-[0%] top-[50%] -translate-y-1/2 flex flex-col items-center gap-1 group">
+          <div className="absolute left-[10%] top-[50%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1 group">
             <div className={cn(
-              "w-12 h-12 rounded-2xl border flex items-center justify-center shadow-md group-hover:scale-110 transition-all duration-500",
+              "w-12 h-12 rounded-2xl border flex items-center justify-center shadow-md group-hover:scale-110 transition-all duration-500 bg-background/40 backdrop-blur-sm",
               flows.isExporting ? "bg-primary/5 border-primary/10" : "bg-rose-500/5 border-rose-500/10"
             )}>
               <Zap className={cn("w-6 h-6", flows.isExporting ? "text-primary" : "text-rose-500")} />
             </div>
-            <div className="text-center bg-background/60 backdrop-blur-sm px-2 py-0.5 rounded-full border border-border/50 shadow-sm">
+            <div className="text-center bg-background/80 backdrop-blur-sm px-2 py-0.5 rounded-full border border-border/50 shadow-sm">
               <p className={cn("text-[10px] font-black", flows.isExporting ? "text-primary" : "text-rose-500")}>
                 {Math.abs(flows.grid)} W
               </p>
@@ -183,49 +180,49 @@ export function PowerFlowCard() {
           </div>
 
           {/* Batterie (Bas) */}
-          <div className="absolute bottom-[0%] left-[40%] -translate-x-1/2 flex flex-col items-center gap-1 group">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-all duration-500 relative overflow-hidden">
+          <div className="absolute top-[85%] left-[40%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1 group">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-all duration-500 relative overflow-hidden bg-background/40 backdrop-blur-sm">
               <Battery className="w-6 h-6 text-emerald-500 z-10" />
               <div 
-                className="absolute bottom-0 left-0 right-0 bg-emerald-500/10 transition-all duration-1000" 
+                className="absolute bottom-0 left-0 right-0 bg-emerald-500/15 transition-all duration-1000" 
                 style={{ height: `${flows.batterySoc}%` }} 
               />
             </div>
-            <div className="text-center bg-background/60 backdrop-blur-sm px-2 py-0.5 rounded-full border border-border/50 shadow-sm">
+            <div className="text-center bg-background/80 backdrop-blur-sm px-2 py-0.5 rounded-full border border-border/50 shadow-sm">
               <p className="text-[10px] font-black text-emerald-500">{flows.batterySoc}% <span className="text-[8px] opacity-60">({flows.battery}W)</span></p>
             </div>
           </div>
 
           {/* Maison (Milieu Droite) */}
-          <div className="absolute right-[25%] top-[50%] -translate-y-1/2 flex flex-col items-center gap-1 group">
-            <div className="w-14 h-14 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500">
+          <div className="absolute left-[70%] top-[50%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1 group">
+            <div className="w-14 h-14 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 bg-background/40 backdrop-blur-sm">
               <Home className="w-7 h-7 text-primary" />
             </div>
-            <div className="text-center bg-background/60 backdrop-blur-sm px-2 py-0.5 rounded-full border border-border/50 shadow-sm">
+            <div className="text-center bg-background/80 backdrop-blur-sm px-2 py-0.5 rounded-full border border-border/50 shadow-sm">
               <p className="text-[10px] font-black text-primary">{flows.house} W</p>
             </div>
           </div>
 
           {/* Borne Recharge (Haut Droite) */}
-          <div className="absolute top-[6%] right-[0%] flex flex-col items-center gap-1 group">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/5 border border-blue-500/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-500 relative overflow-hidden">
+          <div className="absolute left-[90%] top-[20%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1 group">
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/5 border border-blue-500/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-500 relative overflow-hidden bg-background/40 backdrop-blur-sm">
               <Car className="w-6 h-6 text-blue-500 z-10" />
               <div 
-                className="absolute bottom-0 left-0 right-0 bg-blue-500/10 transition-all duration-1000" 
+                className="absolute bottom-0 left-0 right-0 bg-blue-500/15 transition-all duration-1000" 
                 style={{ height: `${flows.carSoc}%` }} 
               />
             </div>
-            <div className="text-center bg-background/60 backdrop-blur-sm px-2 py-0.5 rounded-full border border-border/50 shadow-sm">
+            <div className="text-center bg-background/80 backdrop-blur-sm px-2 py-0.5 rounded-full border border-border/50 shadow-sm">
               <p className="text-[10px] font-black text-blue-500">{flows.carSoc}% <span className="text-[8px] opacity-60">({flows.borneWatts}W)</span></p>
             </div>
           </div>
 
           {/* Cumulus (Bas Droite) */}
-          <div className="absolute bottom-[6%] right-[0%] flex flex-col items-center gap-1 group">
-            <div className="w-12 h-12 rounded-2xl bg-orange-600/5 border border-orange-600/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-500">
+          <div className="absolute left-[90%] top-[80%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1 group">
+            <div className="w-12 h-12 rounded-2xl bg-orange-600/5 border border-orange-600/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-500 bg-background/40 backdrop-blur-sm">
               <Flame className="w-6 h-6 text-orange-600" />
             </div>
-            <div className="text-center bg-background/60 backdrop-blur-sm px-2 py-0.5 rounded-full border border-border/50 shadow-sm">
+            <div className="text-center bg-background/80 backdrop-blur-sm px-2 py-0.5 rounded-full border border-border/50 shadow-sm">
               <p className="text-[10px] font-black text-orange-600">{flows.cumulusWatts} W</p>
             </div>
           </div>
