@@ -61,12 +61,12 @@ export function PowerFlowCard() {
   /**
    * Layout Coords (ViewBox 0 0 100 100)
    * Hub: (40, 50)
-   * Solar: (40, 15)
-   * Grid: (10, 50)
-   * Battery: (40, 85)
-   * Maison: (70, 50)
-   * Borne: (90, 20)
-   * Cumulus: (90, 80)
+   * Solar: Center (40, 15), Connexion Bas (40, 21)
+   * Grid: Center (10, 50), Connexion Droite (16, 50)
+   * Battery: Center (40, 85), Connexion Haut (40, 79)
+   * Maison: Center (70, 50), Connexion Gauche (63, 50), Connexion Droite (77, 50)
+   * Borne: Center (90, 20), Connexion Bas (90, 26)
+   * Cumulus: Center (90, 80), Connexion Haut (90, 74)
    */
 
   return (
@@ -90,59 +90,59 @@ export function PowerFlowCard() {
 
             {/* Trajectoires */}
             
-            {/* 1. Solar to Hub */}
-            <path d="M 40 15 L 40 50" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
+            {/* 1. Solar to Hub (Arrive au bas de l'icône solaire) */}
+            <path d="M 40 21 L 40 50" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
             {flows.solar > 20 && (
               <circle r="0.8" fill="#fbbf24" filter="url(#glow-path)">
-                <animateMotion dur={`${getDuration(flows.solar)}s`} repeatCount="indefinite" path="M 40 15 L 40 50" />
+                <animateMotion dur={`${getDuration(flows.solar)}s`} repeatCount="indefinite" path="M 40 21 L 40 50" />
               </circle>
             )}
 
-            {/* 2. Grid to Hub */}
-            <path d="M 10 50 L 40 50" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
+            {/* 2. Grid to Hub (Arrive au bord droit de l'icône réseau) */}
+            <path d="M 16 50 L 40 50" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
             {Math.abs(flows.grid) > 20 && (
               <circle r="0.8" fill={flows.isExporting ? "hsl(var(--primary))" : "#f43f5e"} filter="url(#glow-path)">
                 <animateMotion 
                   dur={`${getDuration(flows.grid)}s`} 
                   repeatCount="indefinite" 
-                  path={flows.isExporting ? "M 40 50 L 10 50" : "M 10 50 L 40 50"} 
+                  path={flows.isExporting ? "M 40 50 L 16 50" : "M 16 50 L 40 50"} 
                 />
               </circle>
             )}
 
-            {/* 3. Hub to Battery */}
-            <path d="M 40 50 L 40 85" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
+            {/* 3. Hub to Battery (Arrive au haut de l'icône batterie) */}
+            <path d="M 40 50 L 40 79" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
             {Math.abs(flows.battery) > 20 && (
               <circle r="0.8" fill="#10b981" filter="url(#glow-path)">
                 <animateMotion 
                   dur={`${getDuration(flows.battery)}s`} 
                   repeatCount="indefinite" 
-                  path={flows.isBatteryCharging ? "M 40 50 L 40 85" : "M 40 85 L 40 50"} 
+                  path={flows.isBatteryCharging ? "M 40 50 L 40 79" : "M 40 79 L 40 50"} 
                 />
               </circle>
             )}
 
-            {/* 4. Hub to Maison */}
-            <path d="M 40 50 L 70 50" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
+            {/* 4. Hub to Maison (Arrive au bord gauche de l'icône maison) */}
+            <path d="M 40 50 L 63 50" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
             {flows.house > 20 && (
               <circle r="0.8" fill="hsl(var(--primary))" filter="url(#glow-path)">
-                <animateMotion dur={`${getDuration(flows.house)}s`} repeatCount="indefinite" path="M 40 50 L 70 50" />
+                <animateMotion dur={`${getDuration(flows.house)}s`} repeatCount="indefinite" path="M 40 50 L 63 50" />
               </circle>
             )}
 
-            {/* 5. Maison to Borne (Curved) */}
-            <path d="M 70 50 Q 85 50, 90 20" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
+            {/* 5. Maison to Borne (Part du bord droit de la maison vers le bas de la borne) */}
+            <path d="M 77 50 Q 90 50, 90 26" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
             {flows.borneWatts > 20 && (
               <circle r="0.8" fill="#3b82f6" filter="url(#glow-path)">
-                <animateMotion dur={`${getDuration(flows.borneWatts)}s`} repeatCount="indefinite" path="M 70 50 Q 85 50, 90 20" />
+                <animateMotion dur={`${getDuration(flows.borneWatts)}s`} repeatCount="indefinite" path="M 77 50 Q 90 50, 90 26" />
               </circle>
             )}
 
-            {/* 6. Maison to Cumulus (Curved) */}
-            <path d="M 70 50 Q 85 50, 90 80" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
+            {/* 6. Maison to Cumulus (Part du bord droit de la maison vers le haut du cumulus) */}
+            <path d="M 77 50 Q 90 50, 90 74" className="stroke-muted/20" strokeWidth="0.8" fill="none" />
             {flows.cumulusWatts > 20 && (
               <circle r="0.8" fill="#f97316" filter="url(#glow-path)">
-                <animateMotion dur={`${getDuration(flows.cumulusWatts)}s`} repeatCount="indefinite" path="M 70 50 Q 85 50, 90 80" />
+                <animateMotion dur={`${getDuration(flows.cumulusWatts)}s`} repeatCount="indefinite" path="M 77 50 Q 90 50, 90 74" />
               </circle>
             )}
           </svg>
