@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { MQTTProvider, useMQTT } from "@/hooks/use-mqtt";
 import { MetricCard } from "@/components/dashboard/MetricCard";
+import { PowerFlowCard } from "@/components/dashboard/PowerFlowCard";
 import { SolarHistoryChart } from "@/components/dashboard/SolarHistoryChart";
 import { SolarForecastChart } from "@/components/dashboard/SolarForecastChart";
 import { AnnualSummaryTable } from "@/components/dashboard/AnnualSummaryTable";
@@ -234,6 +235,11 @@ function DashboardContent() {
                   </div>
                 </Badge>
               </div>
+            </section>
+
+            {/* Power Flow Section */}
+            <section>
+              <PowerFlowCard />
             </section>
 
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
