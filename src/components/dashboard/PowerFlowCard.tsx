@@ -102,31 +102,31 @@ export function PowerFlowCard() {
               </circle>
             )}
 
-            {/* 3. Hub to Battery */}
-            <path d="M 50 40 L 80 40" className="stroke-muted/20" strokeWidth="1" fill="none" />
+            {/* 3. Hub to Battery (Now Bottom) */}
+            <path d="M 50 40 L 50 65" className="stroke-muted/20" strokeWidth="1" fill="none" />
             {Math.abs(flows.battery) > 20 && (
               <circle r="1.2" fill="#10b981" filter="url(#glow-path)">
                 <animateMotion 
                   dur={`${getDuration(flows.battery)}s`} 
                   repeatCount="indefinite" 
-                  path={flows.isBatteryCharging ? "M 50 40 L 80 40" : "M 80 40 L 50 40"} 
+                  path={flows.isBatteryCharging ? "M 50 40 L 50 65" : "M 50 65 L 50 40"} 
                 />
               </circle>
             )}
 
-            {/* 4. Hub to Home */}
-            <path d="M 50 40 L 50 65" className="stroke-muted/20" strokeWidth="1" fill="none" />
+            {/* 4. Hub to Home (Now Right) */}
+            <path d="M 50 40 L 80 40" className="stroke-muted/20" strokeWidth="1" fill="none" />
             {flows.house > 20 && (
               <circle r="1.2" fill="hsl(var(--primary))" filter="url(#glow-path)">
-                <animateMotion dur={`${getDuration(flows.house)}s`} repeatCount="indefinite" path="M 50 40 L 50 65" />
+                <animateMotion dur={`${getDuration(flows.house)}s`} repeatCount="indefinite" path="M 50 40 L 80 40" />
               </circle>
             )}
 
-            {/* 5. Home to Borne (EV) */}
-            <path d="M 50 65 L 80 65" className="stroke-muted/20" strokeWidth="1" fill="none" />
+            {/* 5. Home to Borne (EV) (Now Top Right) */}
+            <path d="M 80 40 L 80 15" className="stroke-muted/20" strokeWidth="1" fill="none" />
             {flows.borneWatts > 20 && (
               <circle r="1.2" fill="#3b82f6" filter="url(#glow-path)">
-                <animateMotion dur={`${getDuration(flows.borneWatts)}s`} repeatCount="indefinite" path="M 50 65 L 80 65" />
+                <animateMotion dur={`${getDuration(flows.borneWatts)}s`} repeatCount="indefinite" path="M 80 40 L 80 15" />
               </circle>
             )}
           </svg>
@@ -168,8 +168,14 @@ export function PowerFlowCard() {
             </div>
           </div>
 
-          {/* Batterie (Right) */}
-          <div className="absolute right-[10%] top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 group">
+          {/* Batterie (Bottom) */}
+          <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 group">
+            <div className="text-center bg-background/80 px-3 py-1 rounded-full border border-border/50 shadow-sm order-last mt-2">
+              <p className="text-[11px] font-black text-emerald-500">{flows.batterySoc}%</p>
+              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-tighter">
+                {flows.battery} W
+              </p>
+            </div>
             <div className="w-14 h-14 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 relative overflow-hidden">
               <Battery className="w-7 h-7 text-emerald-500 z-10" />
               <div 
@@ -177,27 +183,21 @@ export function PowerFlowCard() {
                 style={{ height: `${flows.batterySoc}%` }} 
               />
             </div>
-            <div className="text-center bg-background/80 px-3 py-1 rounded-full border border-border/50 shadow-sm">
-              <p className="text-[11px] font-black text-emerald-500">{flows.batterySoc}%</p>
-              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-tighter">
-                {flows.battery} W
-              </p>
-            </div>
           </div>
 
-          {/* Maison (Bottom Center) */}
-          <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 group">
-            <div className="text-center bg-background/80 px-3 py-1 rounded-full border border-border/50 shadow-sm order-last mt-2">
-              <p className="text-[11px] font-black text-primary">{flows.house} W</p>
-              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-tighter">Maison</p>
-            </div>
+          {/* Maison (Right) */}
+          <div className="absolute right-[10%] top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 group">
             <div className="w-16 h-16 rounded-2xl bg-primary/5 border border-primary/20 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-500">
               <Home className="w-8 h-8 text-primary" />
             </div>
+            <div className="text-center bg-background/80 px-3 py-1 rounded-full border border-border/50 shadow-sm">
+              <p className="text-[11px] font-black text-primary">{flows.house} W</p>
+              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-tighter">Maison</p>
+            </div>
           </div>
 
-          {/* Borne Recharge (Bottom Right) */}
-          <div className="absolute bottom-[5%] right-[10%] flex flex-col items-center gap-2 group">
+          {/* Borne Recharge (Top Right) */}
+          <div className="absolute top-[5%] right-[10%] flex flex-col items-center gap-2 group">
             <div className="w-14 h-14 rounded-2xl bg-blue-500/5 border border-blue-500/20 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 relative overflow-hidden">
               <Car className="w-7 h-7 text-blue-500 z-10" />
               <div 
