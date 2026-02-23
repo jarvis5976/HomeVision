@@ -4,7 +4,7 @@
 import React, { useMemo } from "react";
 import { useMQTT } from "@/hooks/use-mqtt";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sun, Zap, Battery, Home, Car } from "lucide-react";
+import { Sun, Zap, Battery, Home, Car, Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function PowerFlowCard() {
@@ -26,6 +26,7 @@ export function PowerFlowCard() {
     
     const house = latestData.energy?.total?.all ?? 0;
     const borneWatts = latestData.borne?.watts ?? 0;
+    const cumulusWatts = latestData.chauffeEau?.total ?? 0;
 
     // Find the car that is currently charging to display its SOC
     const vehicles = Object.values(latestData.voiture || {});
@@ -46,7 +47,8 @@ export function PowerFlowCard() {
       batterySoc,
       house,
       borneWatts,
-      carSoc
+      carSoc,
+      cumulusWatts
     };
   }, [latestData]);
 
@@ -102,7 +104,7 @@ export function PowerFlowCard() {
               </circle>
             )}
 
-            {/* 3. Hub to Battery (Now Bottom) */}
+            {/* 3. Hub to Battery (Bottom) */}
             <path d="M 50 40 L 50 65" className="stroke-muted/20" strokeWidth="1" fill="none" />
             {Math.abs(flows.battery) > 20 && (
               <circle r="1.2" fill="#10b981" filter="url(#glow-path)">
@@ -114,7 +116,7 @@ export function PowerFlowCard() {
               </circle>
             )}
 
-            {/* 4. Hub to Home (Now Right) */}
+            {/* 4. Hub to Home (Right) */}
             <path d="M 50 40 L 80 40" className="stroke-muted/20" strokeWidth="1" fill="none" />
             {flows.house > 20 && (
               <circle r="1.2" fill="hsl(var(--primary))" filter="url(#glow-path)">
@@ -122,11 +124,19 @@ export function PowerFlowCard() {
               </circle>
             )}
 
-            {/* 5. Home to Borne (EV) (Now Top Right) */}
+            {/* 5. Home to Borne (EV) (Top Right) */}
             <path d="M 80 40 L 80 15" className="stroke-muted/20" strokeWidth="1" fill="none" />
             {flows.borneWatts > 20 && (
               <circle r="1.2" fill="#3b82f6" filter="url(#glow-path)">
                 <animateMotion dur={`${getDuration(flows.borneWatts)}s`} repeatCount="indefinite" path="M 80 40 L 80 15" />
+              </circle>
+            )}
+
+            {/* 6. Home to Cumulus (Bottom Right) */}
+            <path d="M 80 40 L 80 65" className="stroke-muted/20" strokeWidth="1" fill="none" />
+            {flows.cumulusWatts > 20 && (
+              <circle r="1.2" fill="#f97316" filter="url(#glow-path)">
+                <animateMotion dur={`${getDuration(flows.cumulusWatts)}s`} repeatCount="indefinite" path="M 80 40 L 80 65" />
               </circle>
             )}
           </svg>
@@ -210,6 +220,17 @@ export function PowerFlowCard() {
               <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-tighter">
                 {flows.borneWatts} W
               </p>
+            </div>
+          </div>
+
+          {/* Cumulus (Bottom Right) */}
+          <div className="absolute bottom-[5%] right-[10%] flex flex-col items-center gap-2 group">
+            <div className="w-14 h-14 rounded-2xl bg-orange-600/5 border border-orange-600/20 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500">
+              <Flame className="w-7 h-7 text-orange-600" />
+            </div>
+            <div className="text-center bg-background/80 px-3 py-1 rounded-full border border-border/50 shadow-sm">
+              <p className="text-[11px] font-black text-orange-600">{flows.cumulusWatts} W</p>
+              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-tighter">Cumulus</p>
             </div>
           </div>
 
