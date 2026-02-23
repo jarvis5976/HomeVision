@@ -55,6 +55,7 @@ export function PowerFlowCard() {
   const getDuration = (watts: number) => {
     const absWatts = Math.abs(watts);
     if (absWatts < 20) return 0;
+    // Vitesse proportionnelle : plus de puissance = plus rapide (durée plus courte)
     return Math.max(0.6, Math.min(4, 4000 / absWatts));
   };
 
@@ -67,6 +68,8 @@ export function PowerFlowCard() {
    * Maison: (65, 40)
    * Borne: (90, 15)
    * Cumulus: (90, 65)
+   * 
+   * Courbes Bézier Quadratiques (Q controlX controlY, endX endY)
    */
 
   return (
@@ -88,9 +91,9 @@ export function PowerFlowCard() {
               </filter>
             </defs>
 
-            {/* Hub to Nodes */}
+            {/* Trajectoires Hub */}
             
-            {/* 1. Solar to Hub */}
+            {/* 1. Solar to Hub (Verticale) */}
             <path d="M 40 10 L 40 40" className="stroke-muted/20" strokeWidth="1" fill="none" />
             {flows.solar > 20 && (
               <circle r="1" fill="#fbbf24" filter="url(#glow-path)">
@@ -98,7 +101,7 @@ export function PowerFlowCard() {
               </circle>
             )}
 
-            {/* 2. Grid to Hub */}
+            {/* 2. Grid to Hub (Horizontale) */}
             <path d="M 10 40 L 40 40" className="stroke-muted/20" strokeWidth="1" fill="none" />
             {Math.abs(flows.grid) > 20 && (
               <circle r="1" fill={flows.isExporting ? "hsl(var(--primary))" : "#f43f5e"} filter="url(#glow-path)">
@@ -110,7 +113,7 @@ export function PowerFlowCard() {
               </circle>
             )}
 
-            {/* 3. Hub to Battery */}
+            {/* 3. Hub to Battery (Verticale) */}
             <path d="M 40 40 L 40 70" className="stroke-muted/20" strokeWidth="1" fill="none" />
             {Math.abs(flows.battery) > 20 && (
               <circle r="1" fill="#10b981" filter="url(#glow-path)">
@@ -122,7 +125,7 @@ export function PowerFlowCard() {
               </circle>
             )}
 
-            {/* 4. Hub to Maison */}
+            {/* 4. Hub to Maison (Horizontale) */}
             <path d="M 40 40 L 65 40" className="stroke-muted/20" strokeWidth="1" fill="none" />
             {flows.house > 20 && (
               <circle r="1" fill="hsl(var(--primary))" filter="url(#glow-path)">
@@ -130,31 +133,31 @@ export function PowerFlowCard() {
               </circle>
             )}
 
-            {/* 5. Maison to Borne (Diagonal) */}
-            <path d="M 65 40 L 90 15" className="stroke-muted/20" strokeWidth="1" fill="none" />
+            {/* 5. Maison to Borne (Courbe descendante vers le haut) */}
+            <path d="M 65 40 Q 80 40, 90 15" className="stroke-muted/20" strokeWidth="1" fill="none" />
             {flows.borneWatts > 20 && (
               <circle r="1" fill="#3b82f6" filter="url(#glow-path)">
-                <animateMotion dur={`${getDuration(flows.borneWatts)}s`} repeatCount="indefinite" path="M 65 40 L 90 15" />
+                <animateMotion dur={`${getDuration(flows.borneWatts)}s`} repeatCount="indefinite" path="M 65 40 Q 80 40, 90 15" />
               </circle>
             )}
 
-            {/* 6. Maison to Cumulus (Diagonal) */}
-            <path d="M 65 40 L 90 65" className="stroke-muted/20" strokeWidth="1" fill="none" />
+            {/* 6. Maison to Cumulus (Courbe ascendante vers le bas) */}
+            <path d="M 65 40 Q 80 40, 90 65" className="stroke-muted/20" strokeWidth="1" fill="none" />
             {flows.cumulusWatts > 20 && (
               <circle r="1" fill="#f97316" filter="url(#glow-path)">
-                <animateMotion dur={`${getDuration(flows.cumulusWatts)}s`} repeatCount="indefinite" path="M 65 40 L 90 65" />
+                <animateMotion dur={`${getDuration(flows.cumulusWatts)}s`} repeatCount="indefinite" path="M 65 40 Q 80 40, 90 65" />
               </circle>
             )}
           </svg>
 
-          {/* Hub */}
+          {/* Hub Central discret */}
           <div className="absolute top-[50%] left-[40%] -translate-x-1/2 -translate-y-1/2 z-10">
-            <div className="w-3 h-3 rounded-full bg-background border border-muted/50 shadow-inner flex items-center justify-center">
+            <div className="w-3 h-3 rounded-full bg-background border border-muted/30 shadow-inner flex items-center justify-center">
               <div className="w-1 h-1 rounded-full bg-primary/20 animate-pulse" />
             </div>
           </div>
 
-          {/* Solaire (Top Hub) */}
+          {/* Solaire (Haut) */}
           <div className="absolute top-[0%] left-[40%] -translate-x-1/2 flex flex-col items-center gap-1 group">
             <div className="w-12 h-12 rounded-2xl bg-orange-500/5 border border-orange-500/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-500">
               <Sun className="w-6 h-6 text-orange-500" />
@@ -164,7 +167,7 @@ export function PowerFlowCard() {
             </div>
           </div>
 
-          {/* Réseau (Left Hub) */}
+          {/* Réseau (Gauche) */}
           <div className="absolute left-[0%] top-[50%] -translate-y-1/2 flex flex-col items-center gap-1 group">
             <div className={cn(
               "w-12 h-12 rounded-2xl border flex items-center justify-center shadow-md group-hover:scale-110 transition-all duration-500",
@@ -179,7 +182,7 @@ export function PowerFlowCard() {
             </div>
           </div>
 
-          {/* Batterie (Bottom Hub) */}
+          {/* Batterie (Bas) */}
           <div className="absolute bottom-[0%] left-[40%] -translate-x-1/2 flex flex-col items-center gap-1 group">
             <div className="w-12 h-12 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-all duration-500 relative overflow-hidden">
               <Battery className="w-6 h-6 text-emerald-500 z-10" />
@@ -193,7 +196,7 @@ export function PowerFlowCard() {
             </div>
           </div>
 
-          {/* Maison (Middle Right) */}
+          {/* Maison (Milieu Droite) */}
           <div className="absolute right-[25%] top-[50%] -translate-y-1/2 flex flex-col items-center gap-1 group">
             <div className="w-14 h-14 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500">
               <Home className="w-7 h-7 text-primary" />
@@ -203,7 +206,7 @@ export function PowerFlowCard() {
             </div>
           </div>
 
-          {/* Borne Recharge (Top Right) */}
+          {/* Borne Recharge (Haut Droite) */}
           <div className="absolute top-[6%] right-[0%] flex flex-col items-center gap-1 group">
             <div className="w-12 h-12 rounded-2xl bg-blue-500/5 border border-blue-500/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-500 relative overflow-hidden">
               <Car className="w-6 h-6 text-blue-500 z-10" />
@@ -217,7 +220,7 @@ export function PowerFlowCard() {
             </div>
           </div>
 
-          {/* Cumulus (Bottom Right) */}
+          {/* Cumulus (Bas Droite) */}
           <div className="absolute bottom-[6%] right-[0%] flex flex-col items-center gap-1 group">
             <div className="w-12 h-12 rounded-2xl bg-orange-600/5 border border-orange-600/10 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-500">
               <Flame className="w-6 h-6 text-orange-600" />
