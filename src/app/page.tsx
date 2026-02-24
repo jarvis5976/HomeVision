@@ -4,7 +4,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { MQTTProvider, useMQTT } from "@/hooks/use-mqtt";
 import { MetricCard } from "@/components/dashboard/MetricCard";
-import { PowerFlowCard } from "@/components/dashboard/PowerFlowCard";
 import { SolarHistoryChart } from "@/components/dashboard/SolarHistoryChart";
 import { SolarForecastChart } from "@/components/dashboard/SolarForecastChart";
 import { AnnualSummaryTable } from "@/components/dashboard/AnnualSummaryTable";
@@ -73,7 +72,6 @@ function DashboardContent() {
   const [startDate, setStartDate] = useState(todayStr);
   const [endDate, setEndDate] = useState(todayStr);
 
-  // Handle Hydration & Theme
   useEffect(() => {
     setMounted(true);
     const savedTheme = localStorage.getItem('homevision-theme') as 'light' | 'dark' | null;
@@ -127,11 +125,6 @@ function DashboardContent() {
     return 'border-slate-500 text-slate-400 bg-slate-500/10';
   };
 
-  const calculatePercent = (val: number, total: number) => {
-    if (!total || total === 0) return 0;
-    return Math.round((val / total) * 100);
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
       <header className="h-20 border-b border-border flex items-center justify-between px-8 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
@@ -149,7 +142,7 @@ function DashboardContent() {
             variant={view === 'history' ? "secondary" : "outline"} 
             size="sm" 
             onClick={() => setView(view === 'history' ? 'dashboard' : 'history')}
-            className="flex items-center gap-2 font-bold uppercase text-[10px] tracking-widest"
+            className="flex items-center gap-2 font-black uppercase text-[10px] tracking-widest"
           >
             {view === 'history' ? <ArrowLeft className="w-4 h-4" /> : <History className="w-4 h-4" />}
             {view === 'history' ? "Tableau de Bord" : "Historique"}
@@ -177,7 +170,7 @@ function DashboardContent() {
                 checked={!isSimulated} 
                 onCheckedChange={(val) => setIsSimulated(!val)}
               />
-              <Label htmlFor="mode-toggle" className="text-[10px] font-bold text-muted-foreground uppercase cursor-pointer whitespace-nowrap">
+              <Label htmlFor="mode-toggle" className="text-[10px] font-black text-muted-foreground uppercase cursor-pointer whitespace-nowrap">
                 {isSimulated ? "Simulation" : "Réel"}
               </Label>
             </div>
@@ -187,7 +180,7 @@ function DashboardContent() {
               ) : (
                 <Radio className="w-3.5 h-3.5 text-primary animate-pulse" />
               )}
-              <span className="text-[9px] text-muted-foreground font-medium uppercase tracking-wider">
+              <span className="text-[9px] text-muted-foreground font-black uppercase tracking-wider">
                 {isSimulated ? "Demo" : "192.168.0.3"}
               </span>
             </div>
@@ -223,23 +216,18 @@ function DashboardContent() {
                 <Badge variant="outline" className="flex items-center gap-3 px-5 py-3 bg-card border-border shadow-md">
                   <CloudSun className="w-5 h-5 text-orange-400" />
                   <div className="flex flex-col">
-                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Prévision du jour</span>
+                    <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Prévision du jour</span>
                     <span className="font-black text-xs">{latestData?.solCast?.today ?? 0} kWh</span>
                   </div>
                 </Badge>
                 <Badge variant="outline" className="flex items-center gap-3 px-5 py-3 bg-card border-border border-dashed shadow-sm">
                   <CloudSun className="w-5 h-5 text-orange-300 opacity-70" />
                   <div className="flex flex-col">
-                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Demain</span>
+                    <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Demain</span>
                     <span className="font-black text-xs">{latestData?.solCast?.tomorrow ?? 0} kWh</span>
                   </div>
                 </Badge>
               </div>
-            </section>
-
-            {/* Power Flow Section */}
-            <section>
-              <PowerFlowCard />
             </section>
 
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -249,9 +237,12 @@ function DashboardContent() {
                 unit="W" 
                 icon={Zap} 
                 status={gridPower > 6000 ? 'alert' : 'online'}
-                details={[
-                  { label: "Sens", value: latestData?.grid?.sens ?? "Achat" }
-                ]}
+                showSeparator={true}
+                valueExtra={
+                  <Badge variant="outline" className="text-[10px] font-black uppercase px-2 py-0 border-primary/30 text-primary">
+                    {latestData?.grid?.sens ?? "Achat"}
+                  </Badge>
+                }
               />
               <MetricCard 
                 title="Production Solaire" 
@@ -260,27 +251,30 @@ function DashboardContent() {
                 icon={Sun} 
                 details={[
                   { label: "SolarEdge", value: latestData?.production?.detail?.solarEdge ?? 0, unit: "W" },
-                  { label: "APsystems", value: latestData?.production?.detail?.apSystems ?? 0, unit: "W" }
+                  { label: "ApSystems", value: latestData?.production?.detail?.apSystems ?? 0, unit: "W" }
                 ]}
               />
               <MetricCard 
                 title="Batterie" 
+                titleExtra={
+                  <Badge className="bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5 ml-2">
+                    {latestData?.battery?.stateLabel || (batteryPower > 0 ? "En charge" : "En décharge")}
+                  </Badge>
+                }
                 value={batterySoc} 
                 unit="%" 
                 icon={BatteryIcon} 
                 status={batterySoc < 20 ? 'alert' : 'online'}
-                description={latestData?.victron?.batteryTitle}
                 details={[
                   { label: "Puissance", value: batteryPower, unit: "W" },
-                  { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" },
-                  { label: "Temp.", value: latestData?.battery?.temperature ?? 0, unit: "°C" }
+                  { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" }
                 ]}
               />
               <MetricCard 
-                title="Consommation Totale" 
+                title="Consommation" 
                 value={latestData?.energy?.total?.all ?? 0} 
                 unit="W" 
-                icon={Home} 
+                icon={Activity} 
                 details={[
                   { label: "Maison", value: houseConsumption, unit: "W" },
                   { label: "Annexe", value: annexeConsumption, unit: "W" }
@@ -292,21 +286,21 @@ function DashboardContent() {
               <div className="lg:col-span-2 space-y-8">
                 <Card className="border-border bg-card shadow-lg">
                   <CardHeader>
-                    <CardTitle className="text-lg font-bold flex items-center gap-2">
+                    <CardTitle className="text-lg font-black flex items-center gap-2">
                       <Zap className="w-5 h-5 text-primary" />
                       Détails de consommation
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="space-y-3">
-                      <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
+                      <div className="flex justify-between text-xs font-black uppercase tracking-wider">
                         <span className="flex items-center gap-2"><Home className="w-4 h-4 text-primary" /> Maison Principale</span>
                         <span className="text-primary">{houseConsumption} W</span>
                       </div>
                       <Progress value={(houseConsumption / (latestData?.energy?.total?.all || 1)) * 100} className="h-3 bg-secondary/50" />
                     </div>
                     <div className="space-y-3">
-                      <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
+                      <div className="flex justify-between text-xs font-black uppercase tracking-wider">
                         <span className="flex items-center gap-2"><Building2 className="w-4 h-4 text-accent" /> Annexe</span>
                         <span className="text-accent">{annexeConsumption} W</span>
                       </div>
@@ -321,11 +315,11 @@ function DashboardContent() {
                         </p>
                         <div className="grid grid-cols-2 gap-4 pt-3 border-t border-border/50">
                           <div>
-                            <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison</p>
+                            <p className="text-[9px] text-muted-foreground uppercase font-black tracking-wider">Maison</p>
                             <p className="text-sm font-black">{latestData?.chauffeEau?.maison ?? 0} <span className="text-[9px] font-normal">W</span></p>
                           </div>
                           <div>
-                            <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe</p>
+                            <p className="text-[9px] text-muted-foreground uppercase font-black tracking-wider">Annexe</p>
                             <p className="text-sm font-black">{latestData?.chauffeEau?.annexe ?? 0} <span className="text-[9px] font-normal">W</span></p>
                           </div>
                         </div>
@@ -338,15 +332,15 @@ function DashboardContent() {
                         </p>
                         <div className="grid grid-cols-3 gap-2 pt-3 border-t border-border/50">
                           <div>
-                            <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison</p>
+                            <p className="text-[9px] text-muted-foreground uppercase font-black tracking-wider">Maison</p>
                             <p className="text-sm font-black">{latestData?.eau?.maison ?? 0} <span className="text-[9px] font-normal">m³</span></p>
                           </div>
                           <div>
-                            <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe</p>
+                            <p className="text-[9px] text-muted-foreground uppercase font-black tracking-wider">Annexe</p>
                             <p className="text-sm font-black">{latestData?.eau?.annexe ?? 0} <span className="text-[9px] font-normal">m³</span></p>
                           </div>
                           <div>
-                            <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Compteur</p>
+                            <p className="text-[9px] text-muted-foreground uppercase font-black tracking-wider">Compteur</p>
                             <p className="text-sm font-black">{latestData?.eau?.compteur ?? 0} <span className="text-[9px] font-normal">m³</span></p>
                           </div>
                         </div>
@@ -366,29 +360,29 @@ function DashboardContent() {
                           <CarouselItem key={id}>
                             <Card className="border-border shadow-xl overflow-hidden bg-gradient-to-br from-card to-background">
                               <CardHeader className="pb-2">
-                                <CardTitle className="text-base font-bold flex items-center gap-2">
+                                <CardTitle className="text-base font-black flex items-center gap-2">
                                   <Car className="w-4 h-4 text-primary" />
-                                  {car.carModel}
+                                  {car.carModel || car.display_name}
                                 </CardTitle>
                               </CardHeader>
                               <CardContent className="p-6 pt-2">
                                 <div className="flex items-end justify-between mb-4">
                                   <div>
-                                    <p className="text-4xl font-black tracking-tighter">{car.batteryLevel}%</p>
-                                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mt-1">
-                                      Autonomie: {car.range ?? 0} km
+                                    <p className="text-4xl font-black tracking-tighter">{car.batteryLevel ?? car.battery_level}%</p>
+                                    <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1">
+                                      Autonomie: {Math.round(car.range ?? car.est_battery_range_km ?? 0)} km
                                     </p>
                                   </div>
                                   <div className="text-right">
                                     <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">
                                       {car.chargeStatus}
                                     </p>
-                                    <p className="text-[9px] text-muted-foreground font-medium">
+                                    <p className="text-[9px] text-muted-foreground font-black">
                                       Odo: {mounted ? Math.round(car.odometer ?? 0).toLocaleString() : Math.round(car.odometer ?? 0)} km
                                     </p>
                                   </div>
                                 </div>
-                                <Progress value={car.batteryLevel} className="h-2.5 bg-primary/10" />
+                                <Progress value={car.batteryLevel ?? car.battery_level} className="h-2.5 bg-primary/10" />
                               </CardContent>
                             </Card>
                           </CarouselItem>
@@ -408,7 +402,6 @@ function DashboardContent() {
           </>
         ) : (
           <div className="space-y-12 animate-in fade-in slide-in-from-left duration-500">
-            {/* Résumés Daily first */}
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                   <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
@@ -416,7 +409,7 @@ function DashboardContent() {
                       Résumé Journalier
                   </h2>
                   <div className="flex items-center gap-3">
-                    <Badge variant="secondary" className="px-4 py-1.5 font-bold uppercase tracking-widest text-[10px]">
+                    <Badge variant="secondary" className="px-4 py-1.5 font-black uppercase tracking-widest text-[10px]">
                         {mounted ? new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ""}
                     </Badge>
                     <Button 
@@ -433,86 +426,82 @@ function DashboardContent() {
               
               <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <MetricCard 
-                      title="Production journalière" 
-                      value={historyData?.Production ?? 0} 
-                      unit="kWh" 
-                      icon={Sun} 
-                      details={[
-                          { label: "SolarEdge", value: `${historyData?.SolarEdge ?? 0}`, unit: `kWh (${calculatePercent(historyData?.SolarEdge ?? 0, historyData?.Production ?? 0)}%)` },
-                          { label: "APsystems", value: `${historyData?.Ecu ?? 0}`, unit: `kWh (${calculatePercent(historyData?.Ecu ?? 0, historyData?.Production ?? 0)}%)` }
-                      ]}
+                    title="Production journalière" 
+                    value={historyData?.Production ?? 0} 
+                    unit="kWh" 
+                    icon={Sun} 
+                    details={[
+                      { label: "SolarEdge", value: historyData?.SolarEdge ?? 0, unit: "kWh" },
+                      { label: "ApSystems", value: historyData?.Ecu ?? 0, unit: "kWh" }
+                    ]}
                   />
 
                   <MetricCard 
-                      title="Utilisation production" 
-                      value={historyData?.Production ?? 0} 
-                      unit="kWh" 
-                      icon={PieChart} 
-                      details={[
-                          { label: "Auto-Conso.", value: `${historyData?.AutoConsommation ?? 0}`, unit: `kWh (${calculatePercent(historyData?.AutoConsommation ?? 0, historyData?.Production ?? 0)}%)` },
-                          { label: "Vente", value: `${historyData?.Vente ?? 0}`, unit: `kWh (${calculatePercent(historyData?.Vente ?? 0, historyData?.Production ?? 0)}%)` }
-                      ]}
+                    title="Utilisation" 
+                    value={historyData?.Production ?? 0} 
+                    unit="kWh" 
+                    icon={PieChart} 
+                    details={[
+                      { label: "Auto-Conso.", value: historyData?.AutoConsommation ?? 0, unit: "kWh" },
+                      { label: "Vente", value: historyData?.Vente ?? 0, unit: "kWh" }
+                    ]}
                   />
 
                   <MetricCard 
-                      title="Consommation journalière" 
-                      value={historyData?.Consommation ?? 0} 
-                      unit="kWh" 
-                      icon={Activity} 
-                      details={[
-                          { label: "Auto-Production", value: `${historyData?.AutoConsommation ?? 0}`, unit: `kWh (${calculatePercent(historyData?.AutoConsommation ?? 0, historyData?.Consommation ?? 0)}%)` },
-                          { label: "Achat", value: `${historyData?.Achat ?? 0}`, unit: `kWh (${calculatePercent(historyData?.Achat ?? 0, historyData?.Consommation ?? 0)}%)` }
-                      ]}
+                    title="Consommation journalière" 
+                    value={historyData?.Consommation ?? 0} 
+                    unit="kWh" 
+                    icon={Activity} 
+                    details={[
+                      { label: "Auto-Production", value: historyData?.AutoConsommation ?? 0, unit: "kWh" },
+                      { label: "Achat", value: historyData?.Achat ?? 0, unit: "kWh" }
+                    ]}
                   />
               </section>
             </div>
 
-            {/* Résumés Totaux second */}
             <div className="space-y-6">
-              <div className="flex items-center gap-3">
-                  <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
-                      <CalendarDays className="w-6 h-6 text-accent" />
-                      Résumé Total
-                  </h2>
-              </div>
+              <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
+                  <CalendarDays className="w-6 h-6 text-accent" />
+                  Résumé Total
+              </h2>
 
               <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <MetricCard 
-                      title="Production totale" 
-                      value={totalHistoryData?.production ?? 0} 
-                      unit="kWh" 
-                      icon={Sun} 
-                      details={[
-                          { label: "SolarEdge", value: `${((totalHistoryData?.production ?? 0) - (totalHistoryData?.apSystems ?? 0)).toFixed(2)}`, unit: `kWh (${calculatePercent((totalHistoryData?.production ?? 0) - (totalHistoryData?.apSystems ?? 0), totalHistoryData?.production ?? 0)}%)` },
-                          { label: "APsystems", value: `${totalHistoryData?.apSystems ?? 0}`, unit: `kWh (${calculatePercent(totalHistoryData?.apSystems ?? 0, totalHistoryData?.production ?? 0)}%)` }
-                      ]}
+                    title="Production totale" 
+                    value={totalHistoryData?.production ?? 0} 
+                    unit="kWh" 
+                    icon={Sun} 
+                    details={[
+                      { label: "SolarEdge", value: ((totalHistoryData?.production ?? 0) - (totalHistoryData?.apSystems ?? 0)).toFixed(2), unit: "kWh" },
+                      { label: "ApSystems", value: totalHistoryData?.apSystems ?? 0, unit: "kWh" }
+                    ]}
                   />
 
                   <MetricCard 
-                      title="Utilisation production totale" 
-                      value={totalHistoryData?.production ?? 0} 
-                      unit="kWh" 
-                      icon={PieChart} 
-                      details={[
-                          { label: "Auto-Conso.", value: `${totalHistoryData?.autoConsommation ?? 0}`, unit: `kWh (${calculatePercent(totalHistoryData?.autoConsommation ?? 0, totalHistoryData?.production ?? 0)}%)` },
-                          { label: "Vente", value: `${totalHistoryData?.vente ?? 0}`, unit: `kWh (${calculatePercent(totalHistoryData?.vente ?? 0, totalHistoryData?.production ?? 0)}%)` }
-                      ]}
+                    title="Utilisation totale" 
+                    value={totalHistoryData?.production ?? 0} 
+                    unit="kWh" 
+                    icon={PieChart} 
+                    details={[
+                      { label: "Auto-Conso.", value: totalHistoryData?.autoConsommation ?? 0, unit: "kWh" },
+                      { label: "Vente", value: totalHistoryData?.vente ?? 0, unit: "kWh" }
+                    ]}
                   />
 
                   <MetricCard 
-                      title="Consommation totale" 
-                      value={totalHistoryData?.consommation ?? 0} 
-                      unit="kWh" 
-                      icon={Activity} 
-                      details={[
-                          { label: "Auto-Production", value: `${totalHistoryData?.autoConsommation ?? 0}`, unit: `kWh (${calculatePercent(totalHistoryData?.autoConsommation ?? 0, totalHistoryData?.consommation ?? 0)}%)` },
-                          { label: "Achat", value: `${totalHistoryData?.achat ?? 0}`, unit: `kWh (${calculatePercent(totalHistoryData?.achat ?? 0, totalHistoryData?.consommation ?? 0)}%)` }
-                      ]}
+                    title="Consommation totale" 
+                    value={totalHistoryData?.consommation ?? 0} 
+                    unit="kWh" 
+                    icon={Activity} 
+                    details={[
+                      { label: "Auto-Production", value: totalHistoryData?.autoConsommation ?? 0, unit: "kWh" },
+                      { label: "Achat", value: totalHistoryData?.achat ?? 0, unit: "kWh" }
+                    ]}
                   />
               </section>
             </div>
 
-            {/* Solar History Chart */}
             <SolarHistoryChart 
               data={solarChartData} 
               startDate={startDate}
@@ -522,15 +511,8 @@ function DashboardContent() {
               onRefresh={refreshHistory}
             />
 
-            {/* Solar Forecast Chart */}
-            <SolarForecastChart 
-              data={solCastChartData}
-            />
-
-            {/* Daily History Table */}
+            <SolarForecastChart data={solCastChartData} />
             <DailyHistoryTable data={dailyHistoryData} />
-
-            {/* Annual Summary Table - Moved to the end */}
             <AnnualSummaryTable data={annualData} />
           </div>
         )}

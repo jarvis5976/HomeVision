@@ -5,12 +5,16 @@ import { useState, useEffect, createContext, useContext, useRef, useCallback } f
 
 export interface CarData {
   batteryLevel?: number;
+  battery_level?: number;
   odometer?: number;
   range?: number;
+  est_battery_range_km?: number;
   states?: number | string;
   chargeStatus?: string;
+  charging_state?: string;
   carModel?: string;
   display_name?: string;
+  model?: string;
   [key: string]: any;
 }
 
@@ -159,7 +163,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
     soc: 83, 
     temperature: 20.2, 
     voltage: 50.63, 
-    stateLabel: "charging",
+    stateLabel: "En charge",
     state: 1
   },
   victron: {
@@ -177,19 +181,26 @@ const BASE_MOCK_DATA: HomeDashboardData = {
   voiture: {
     tesla: {
       carModel: "Tesla Model Y",
-      batteryLevel: 70,
-      range: 343,
-      odometer: 51439,
-      chargeStatus: "Pas en charge",
-      display_name: "E-Ty"
+      battery_level: 81,
+      est_battery_range_km: 424.3,
+      odometer: 63401.93,
+      charging_state: "Complete",
+      display_name: "E-Ty",
+      model: "Y"
+    },
+    volvo: {
+      carModel: "Volvo XC40",
+      batteryLevel: 59,
+      odometer: 38316,
+      range: 230,
+      chargeStatus: "En attente"
     },
     zoe: {
-      carModel: "Renault Zoe",
-      batteryLevel: 100,
-      odometer: 51503,
-      range: 311,
-      chargeStatus: "Pas en charge",
-      display_name: "Zoe"
+      carModel: "Renault Zoé",
+      batteryLevel: 97,
+      odometer: 51571,
+      range: 313,
+      chargeStatus: "Pas en charge"
     }
   },
   zenFlex: {
@@ -281,7 +292,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const proxyUrl = `/api/proxy?url=${encodeURIComponent(targetUrl)}`;
       const instantRes = await fetch(proxyUrl, { signal: controller.signal });
       
-      if (!instantRes.ok) throw new Error(`Proxy status: ${instantRes.status}`);
+      if (!instantRes.ok) throw new Error(`Proxy error!`);
       const instantData = await instantRes.json();
       
       const adaptedData = { ...instantData };
@@ -291,17 +302,17 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
           car.batteryLevel = car.batteryLevel ?? car.battery_level;
           car.carModel = car.carModel ?? (car.model ? `Model ${car.model}` : undefined);
           car.range = car.range ?? car.est_battery_range_km;
-          car.chargeStatus = car.chargeStatus ?? car.charging_state;
+          car.chargeStatus = car.chargeStatus ?? car.charging_state ?? car.charge;
         });
       }
       setLatestData(adaptedData);
       setError(null);
     } catch (e: any) {
       if (e.name === 'AbortError') {
-        console.warn('Real data fetch timed out');
+        console.warn('Fetch timed out');
       } else {
-        console.error('Instant fetch error:', e);
-        setError(e.message || "Impossible de contacter l'endpoint local.");
+        console.error('Fetch error:', e);
+        setError(e.message || "Erreur de connexion");
       }
     } finally {
       clearTimeout(timeoutId);
@@ -417,8 +428,10 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updatedVoiture[key] = {
           ...car,
           batteryLevel: Math.round(Math.max(0, Math.min(100, fluctuate(car.batteryLevel || 50, 0.5)))),
+          battery_level: Math.round(Math.max(0, Math.min(100, fluctuate(car.battery_level || 50, 0.5)))),
           odometer: (car.odometer || 0) + 0.01,
-          range: Math.round(Math.max(0, fluctuate(car.range || 300, 2)))
+          range: Math.round(Math.max(0, fluctuate(car.range || 300, 2))),
+          est_battery_range_km: Math.round(Math.max(0, fluctuate(car.est_battery_range_km || 300, 2)))
         };
       });
       return {
