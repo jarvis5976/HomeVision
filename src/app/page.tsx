@@ -236,7 +236,6 @@ function DashboardContent() {
                 value={gridPower} 
                 unit="W" 
                 icon={Zap} 
-                status={gridPower > 6000 ? 'alert' : 'online'}
                 showSeparator={true}
                 valueExtra={
                   <Badge variant="outline" className="text-[10px] font-black uppercase px-2 py-0 border-primary/30 text-primary">
@@ -265,7 +264,6 @@ function DashboardContent() {
                 value={batterySoc} 
                 unit="%" 
                 icon={BatteryIcon} 
-                status={batterySoc < 20 ? 'alert' : 'online'}
                 showSeparator={true}
                 details={[
                   { label: "Puissance", value: batteryPower, unit: "W" },

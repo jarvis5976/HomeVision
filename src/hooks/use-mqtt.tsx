@@ -193,7 +193,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       batteryLevel: 59,
       odometer: 38316,
       range: 230,
-      chargeStatus: "En attente"
+      chargeStatus: "En charge"
     },
     zoe: {
       carModel: "Renault Zoé",
@@ -255,7 +255,8 @@ const SOLCAST_CHART_MOCK: SolCastChartData = [
 const ANNUAL_DATA_MOCK: AnnualData = {
   production: [
     { "mois": "TOTAL", "2023": 4534.9, "2024": 4466.79, "2025": 5582.11, "2026": 250.32 },
-    { "mois": "Janvier", "2023": 107.41, "2024": 124.04, "2025": 90.82, "2026": 109.76 }
+    { "mois": "Janvier", "2023": 107.41, "2024": 124.04, "2025": 90.82, "2026": 109.76 },
+    { "mois": "Février", "2023": 120.5, "2024": 130.2, "2025": 110.4, "2026": 140.56 }
   ],
   achat: [],
   vente: [],
