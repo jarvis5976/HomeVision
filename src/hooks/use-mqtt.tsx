@@ -290,7 +290,10 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const targetUrl = 'http://192.168.0.3/Dashboard/assets/instant_from_mqtt.php';
       const proxyUrl = `/api/proxy?url=${encodeURIComponent(targetUrl)}`;
-      const instantRes = await fetch(proxyUrl, { signal: controller.signal });
+      const instantRes = await fetch(proxyUrl, { 
+        signal: controller.signal,
+        headers: { 'Accept': 'application/json' }
+      });
       
       if (!instantRes.ok) throw new Error(`Proxy error!`);
       const instantData = await instantRes.json();
@@ -427,11 +430,11 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const car = updatedVoiture[key];
         updatedVoiture[key] = {
           ...car,
-          batteryLevel: Math.round(Math.max(0, Math.min(100, fluctuate(car.batteryLevel || 50, 0.5)))),
-          battery_level: Math.round(Math.max(0, Math.min(100, fluctuate(car.battery_level || 50, 0.5)))),
+          batteryLevel: Math.round(Math.max(0, Math.min(100, fluctuate(car.batteryLevel || car.battery_level || 50, 0.5)))),
+          battery_level: Math.round(Math.max(0, Math.min(100, fluctuate(car.battery_level || car.batteryLevel || 50, 0.5)))),
           odometer: (car.odometer || 0) + 0.01,
-          range: Math.round(Math.max(0, fluctuate(car.range || 300, 2))),
-          est_battery_range_km: Math.round(Math.max(0, fluctuate(car.est_battery_range_km || 300, 2)))
+          range: Math.round(Math.max(0, fluctuate(car.range || car.est_battery_range_km || 300, 2))),
+          est_battery_range_km: Math.round(Math.max(0, fluctuate(car.est_battery_range_km || car.range || 300, 2)))
         };
       });
       return {

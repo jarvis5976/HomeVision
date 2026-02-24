@@ -249,6 +249,7 @@ function DashboardContent() {
                 value={solarProduction} 
                 unit="W" 
                 icon={Sun} 
+                showSeparator={true}
                 details={[
                   { label: "SolarEdge", value: latestData?.production?.detail?.solarEdge ?? 0, unit: "W" },
                   { label: "ApSystems", value: latestData?.production?.detail?.apSystems ?? 0, unit: "W" }
@@ -265,6 +266,7 @@ function DashboardContent() {
                 unit="%" 
                 icon={BatteryIcon} 
                 status={batterySoc < 20 ? 'alert' : 'online'}
+                showSeparator={true}
                 details={[
                   { label: "Puissance", value: batteryPower, unit: "W" },
                   { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" }
@@ -275,6 +277,7 @@ function DashboardContent() {
                 value={latestData?.energy?.total?.all ?? 0} 
                 unit="W" 
                 icon={Activity} 
+                showSeparator={true}
                 details={[
                   { label: "Maison", value: houseConsumption, unit: "W" },
                   { label: "Annexe", value: annexeConsumption, unit: "W" }
@@ -430,6 +433,7 @@ function DashboardContent() {
                     value={historyData?.Production ?? 0} 
                     unit="kWh" 
                     icon={Sun} 
+                    showSeparator={true}
                     details={[
                       { label: "SolarEdge", value: historyData?.SolarEdge ?? 0, unit: "kWh" },
                       { label: "ApSystems", value: historyData?.Ecu ?? 0, unit: "kWh" }
@@ -441,6 +445,7 @@ function DashboardContent() {
                     value={historyData?.Production ?? 0} 
                     unit="kWh" 
                     icon={PieChart} 
+                    showSeparator={true}
                     details={[
                       { label: "Auto-Conso.", value: historyData?.AutoConsommation ?? 0, unit: "kWh" },
                       { label: "Vente", value: historyData?.Vente ?? 0, unit: "kWh" }
@@ -452,6 +457,7 @@ function DashboardContent() {
                     value={historyData?.Consommation ?? 0} 
                     unit="kWh" 
                     icon={Activity} 
+                    showSeparator={true}
                     details={[
                       { label: "Auto-Production", value: historyData?.AutoConsommation ?? 0, unit: "kWh" },
                       { label: "Achat", value: historyData?.Achat ?? 0, unit: "kWh" }
@@ -472,6 +478,7 @@ function DashboardContent() {
                     value={totalHistoryData?.production ?? 0} 
                     unit="kWh" 
                     icon={Sun} 
+                    showSeparator={true}
                     details={[
                       { label: "SolarEdge", value: ((totalHistoryData?.production ?? 0) - (totalHistoryData?.apSystems ?? 0)).toFixed(2), unit: "kWh" },
                       { label: "ApSystems", value: totalHistoryData?.apSystems ?? 0, unit: "kWh" }
@@ -483,6 +490,7 @@ function DashboardContent() {
                     value={totalHistoryData?.production ?? 0} 
                     unit="kWh" 
                     icon={PieChart} 
+                    showSeparator={true}
                     details={[
                       { label: "Auto-Conso.", value: totalHistoryData?.autoConsommation ?? 0, unit: "kWh" },
                       { label: "Vente", value: totalHistoryData?.vente ?? 0, unit: "kWh" }
@@ -494,6 +502,7 @@ function DashboardContent() {
                     value={totalHistoryData?.consommation ?? 0} 
                     unit="kWh" 
                     icon={Activity} 
+                    showSeparator={true}
                     details={[
                       { label: "Auto-Production", value: totalHistoryData?.autoConsommation ?? 0, unit: "kWh" },
                       { label: "Achat", value: totalHistoryData?.achat ?? 0, unit: "kWh" }
