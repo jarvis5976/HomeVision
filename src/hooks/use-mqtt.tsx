@@ -12,6 +12,7 @@ export interface CarData {
   states?: number | string;
   chargeStatus?: string;
   charging_state?: string;
+  charge?: string;
   carModel?: string;
   display_name?: string;
   model?: string;
@@ -156,7 +157,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
   grid: { watts: 7301, sens: "Achat", arrow: "" },
   production: { 
     total: 32,
-    detail: { solarEdge: 0, apSystems: 32, apsAnnexe: 32 }
+    detail: { solarEdge: 0, apSystems: 32 }
   },
   battery: { 
     watts: 2647, 
@@ -186,21 +187,24 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       odometer: 63401.93,
       charging_state: "Complete",
       display_name: "E-Ty",
-      model: "Y"
+      model: "Y",
+      chargeStatus: "Terminée"
     },
     volvo: {
       carModel: "Volvo XC40",
       batteryLevel: 59,
       odometer: 38316,
       range: 230,
-      chargeStatus: "En charge"
+      chargeStatus: "En charge",
+      charge: "En charge"
     },
     zoe: {
       carModel: "Renault Zoé",
       batteryLevel: 97,
       odometer: 51571,
       range: 313,
-      chargeStatus: "Pas en charge"
+      chargeStatus: "Pas en charge",
+      charge: "Pas en charge"
     }
   },
   zenFlex: {

@@ -105,9 +105,9 @@ function DashboardContent() {
   const solarProduction = latestData?.production?.total ?? 0;
   const batterySoc = latestData?.battery?.soc ?? 0;
   const batteryPower = latestData?.battery?.watts ?? 0;
-  const houseConsumption = latestData?.energy?.total?.maison ?? 0;
-  const annexeConsumption = latestData?.energy?.total?.annexe ?? 0;
-  const totalWater = latestData?.eau?.total ?? 0;
+  const houseConsumption = latestData?.energy?.total?.all ?? 0;
+  const houseMain = latestData?.energy?.total?.maison ?? 0;
+  const houseAnnexe = latestData?.energy?.total?.annexe ?? 0;
 
   const vehicles = Object.entries(latestData?.voiture || {});
 
@@ -272,13 +272,13 @@ function DashboardContent() {
               />
               <MetricCard 
                 title="Consommation" 
-                value={latestData?.energy?.total?.all ?? 0} 
+                value={houseConsumption} 
                 unit="W" 
                 icon={Activity} 
                 showSeparator={true}
                 details={[
-                  { label: "Maison", value: houseConsumption, unit: "W" },
-                  { label: "Annexe", value: annexeConsumption, unit: "W" }
+                  { label: "Maison", value: houseMain, unit: "W" },
+                  { label: "Annexe", value: houseAnnexe, unit: "W" }
                 ]}
               />
             </section>
@@ -289,23 +289,23 @@ function DashboardContent() {
                   <CardHeader>
                     <CardTitle className="text-lg font-black flex items-center gap-2">
                       <Zap className="w-5 h-5 text-primary" />
-                      Détails de consommation
+                      Répartition Énergie
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="space-y-3">
                       <div className="flex justify-between text-xs font-black uppercase tracking-wider">
                         <span className="flex items-center gap-2"><Home className="w-4 h-4 text-primary" /> Maison Principale</span>
-                        <span className="text-primary">{houseConsumption} W</span>
+                        <span className="text-primary">{houseMain} W</span>
                       </div>
-                      <Progress value={(houseConsumption / (latestData?.energy?.total?.all || 1)) * 100} className="h-3 bg-secondary/50" />
+                      <Progress value={(houseMain / (houseConsumption || 1)) * 100} className="h-3 bg-secondary/50" />
                     </div>
                     <div className="space-y-3">
                       <div className="flex justify-between text-xs font-black uppercase tracking-wider">
                         <span className="flex items-center gap-2"><Building2 className="w-4 h-4 text-accent" /> Annexe</span>
-                        <span className="text-accent">{annexeConsumption} W</span>
+                        <span className="text-accent">{houseAnnexe} W</span>
                       </div>
-                      <Progress value={(annexeConsumption / (latestData?.energy?.total?.all || 1)) * 100} className="h-3 bg-secondary/50" />
+                      <Progress value={(houseAnnexe / (houseConsumption || 1)) * 100} className="h-3 bg-secondary/50" />
                     </div>
                     <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
                       <div className="p-4 bg-secondary/20 rounded-2xl border border-border">
@@ -326,23 +326,23 @@ function DashboardContent() {
                         </div>
                       </div>
                       <div className="p-4 bg-secondary/20 rounded-2xl border border-border">
-                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-3">Consommation Eau</p>
+                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-3">Eau Totale</p>
                         <p className="text-2xl font-black flex items-center gap-2 mb-4">
                           <Droplets className="w-5 h-5 text-blue-400" />
-                          {totalWater} <span className="text-sm font-medium text-muted-foreground">m³</span>
+                          {latestData?.eau?.total ?? 0} <span className="text-sm font-medium text-muted-foreground">m³</span>
                         </p>
                         <div className="grid grid-cols-3 gap-2 pt-3 border-t border-border/50">
                           <div>
                             <p className="text-[9px] text-muted-foreground uppercase font-black tracking-wider">Maison</p>
-                            <p className="text-sm font-black">{latestData?.eau?.maison ?? 0} <span className="text-[9px] font-normal">m³</span></p>
+                            <p className="text-sm font-black">{latestData?.eau?.maison ?? 0}</p>
                           </div>
                           <div>
                             <p className="text-[9px] text-muted-foreground uppercase font-black tracking-wider">Annexe</p>
-                            <p className="text-sm font-black">{latestData?.eau?.annexe ?? 0} <span className="text-[9px] font-normal">m³</span></p>
+                            <p className="text-sm font-black">{latestData?.eau?.annexe ?? 0}</p>
                           </div>
                           <div>
                             <p className="text-[9px] text-muted-foreground uppercase font-black tracking-wider">Compteur</p>
-                            <p className="text-sm font-black">{latestData?.eau?.compteur ?? 0} <span className="text-[9px] font-normal">m³</span></p>
+                            <p className="text-sm font-black">{latestData?.eau?.compteur ?? 0}</p>
                           </div>
                         </div>
                       </div>
@@ -357,37 +357,56 @@ function DashboardContent() {
                     <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4 px-1">Flotte Véhicules</h3>
                     <Carousel className="w-full">
                       <CarouselContent>
-                        {vehicles.map(([id, car]) => (
-                          <CarouselItem key={id}>
-                            <Card className="border-border shadow-xl overflow-hidden bg-gradient-to-br from-card to-background">
-                              <CardHeader className="pb-2">
-                                <CardTitle className="text-base font-black flex items-center gap-2">
-                                  <Car className="w-4 h-4 text-primary" />
-                                  {car.carModel || car.display_name}
-                                </CardTitle>
-                              </CardHeader>
-                              <CardContent className="p-6 pt-2">
-                                <div className="flex items-end justify-between mb-4">
-                                  <div>
-                                    <p className="text-4xl font-black tracking-tighter">{car.batteryLevel ?? car.battery_level}%</p>
-                                    <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1">
-                                      Autonomie: {Math.round(car.range ?? car.est_battery_range_km ?? 0)} km
-                                    </p>
+                        {vehicles.map(([id, car]) => {
+                          const isCharging = car.chargeStatus?.toLowerCase().includes('charge') || 
+                                           car.charging_state?.toLowerCase().includes('charge') ||
+                                           car.charge?.toLowerCase().includes('charge');
+                          
+                          return (
+                            <CarouselItem key={id}>
+                              <Card className="border-border shadow-xl overflow-hidden bg-gradient-to-br from-card to-background relative">
+                                <CardHeader className="pb-2">
+                                  <div className="flex items-center justify-between">
+                                    <CardTitle className="text-base font-black flex items-center gap-2">
+                                      <Car className="w-4 h-4 text-primary" />
+                                      {car.carModel || car.display_name}
+                                    </CardTitle>
+                                    {isCharging && (
+                                      <Badge className="bg-emerald-500 text-white animate-pulse flex items-center gap-1 text-[9px] font-black uppercase">
+                                        <Zap className="w-3 h-3 fill-current" />
+                                        En Charge
+                                      </Badge>
+                                    )}
                                   </div>
-                                  <div className="text-right">
-                                    <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">
-                                      {car.chargeStatus}
-                                    </p>
-                                    <p className="text-[9px] text-muted-foreground font-black">
-                                      Odo: {mounted ? Math.round(car.odometer ?? 0).toLocaleString() : Math.round(car.odometer ?? 0)} km
-                                    </p>
+                                </CardHeader>
+                                <CardContent className="p-6 pt-2">
+                                  <div className="flex items-end justify-between mb-4">
+                                    <div>
+                                      <p className={cn("text-4xl font-black tracking-tighter", isCharging ? "text-emerald-500" : "")}>
+                                        {car.batteryLevel ?? car.battery_level}%
+                                      </p>
+                                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1">
+                                        Autonomie: {Math.round(car.range ?? car.est_battery_range_km ?? 0)} km
+                                      </p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className={cn("text-[10px] font-black uppercase tracking-widest mb-1", isCharging ? "text-emerald-500" : "text-primary")}>
+                                        {car.chargeStatus || "Stable"}
+                                      </p>
+                                      <p className="text-[9px] text-muted-foreground font-black">
+                                        Odo: {mounted ? Math.round(car.odometer ?? 0).toLocaleString() : Math.round(car.odometer ?? 0)} km
+                                      </p>
+                                    </div>
                                   </div>
-                                </div>
-                                <Progress value={car.batteryLevel ?? car.battery_level} className="h-2.5 bg-primary/10" />
-                              </CardContent>
-                            </Card>
-                          </CarouselItem>
-                        ))}
+                                  <Progress 
+                                    value={car.batteryLevel ?? car.battery_level} 
+                                    className={cn("h-2.5 bg-primary/10", isCharging ? "[&>div]:bg-emerald-500" : "")} 
+                                  />
+                                </CardContent>
+                              </Card>
+                            </CarouselItem>
+                          );
+                        })}
                       </CarouselContent>
                       {vehicles.length > 1 && (
                         <div className="flex justify-center gap-2 mt-4">
