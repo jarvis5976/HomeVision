@@ -358,9 +358,7 @@ function DashboardContent() {
                     <Carousel className="w-full">
                       <CarouselContent>
                         {vehicles.map(([id, car]) => {
-                          const isCharging = car.chargeStatus?.toLowerCase().includes('charge') || 
-                                           car.charging_state?.toLowerCase().includes('charge') ||
-                                           car.charge?.toLowerCase().includes('charge');
+                          const isCharging = car.charge === 'on';
                           
                           return (
                             <CarouselItem key={id}>
@@ -391,7 +389,7 @@ function DashboardContent() {
                                     </div>
                                     <div className="text-right">
                                       <p className={cn("text-[10px] font-black uppercase tracking-widest mb-1", isCharging ? "text-emerald-500" : "text-primary")}>
-                                        {car.chargeStatus || "Stable"}
+                                        {isCharging ? "Recharge active" : "Stationnaire"}
                                       </p>
                                       <p className="text-[9px] text-muted-foreground font-black">
                                         Odo: {mounted ? Math.round(car.odometer ?? 0).toLocaleString() : Math.round(car.odometer ?? 0)} km

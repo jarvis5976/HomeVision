@@ -188,7 +188,8 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       charging_state: "Complete",
       display_name: "E-Ty",
       model: "Y",
-      chargeStatus: "Terminée"
+      chargeStatus: "Terminée",
+      charge: "off"
     },
     volvo: {
       carModel: "Volvo XC40",
@@ -196,7 +197,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       odometer: 38316,
       range: 230,
       chargeStatus: "En charge",
-      charge: "En charge"
+      charge: "on"
     },
     zoe: {
       carModel: "Renault Zoé",
@@ -204,7 +205,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       odometer: 51571,
       range: 313,
       chargeStatus: "Pas en charge",
-      charge: "Pas en charge"
+      charge: "off"
     }
   },
   zenFlex: {
