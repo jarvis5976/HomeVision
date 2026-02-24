@@ -357,6 +357,11 @@ function DashboardContent() {
                           return (
                             <CarouselItem key={id}>
                               <Card className="border-border shadow-xl overflow-hidden bg-gradient-to-br from-card to-background relative">
+                                {isCharging && (
+                                  <Badge className="absolute top-4 right-4 bg-emerald-600 hover:bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5 animate-pulse z-10">
+                                    En charge
+                                  </Badge>
+                                )}
                                 <CardHeader className="pb-2">
                                   <div className="flex items-center justify-between">
                                     <CardTitle className="text-base font-black flex items-center gap-2">
@@ -375,7 +380,7 @@ function DashboardContent() {
                                         Autonomie: {Math.round(car.range ?? car.est_battery_range_km ?? 0)} km
                                       </p>
                                       <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
-                                        Odomètre: {mounted ? Math.round(car.odometer ?? 0).toLocaleString() : Math.round(car.odometer ?? 0)} km
+                                        Kilomètre: {mounted ? Math.round(car.odometer ?? 0).toLocaleString() : Math.round(car.odometer ?? 0)} km
                                       </p>
                                     </div>
                                   </div>
