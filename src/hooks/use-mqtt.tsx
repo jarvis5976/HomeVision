@@ -196,16 +196,16 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       batteryLevel: 59,
       odometer: 38316,
       range: 230,
-      chargeStatus: "En charge",
-      charge: true
+      charge: true,
+      chargeStatus: "En charge"
     },
     zoe: {
       carModel: "Renault Zoé",
       batteryLevel: 97,
       odometer: 51571,
       range: 313,
-      chargeStatus: "Pas en charge",
-      charge: false
+      charge: false,
+      chargeStatus: "Pas en charge"
     }
   },
   zenFlex: {
@@ -468,7 +468,6 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (pollInterval.current) clearInterval(pollInterval.current);
     if (isSimulated) {
       pollInterval.current = setInterval(runSimulation, 3000);
-      // Simulate history data calls
       fetchHistoryStats();
       fetchSolarChart(new Date().toISOString().split('T')[0], new Date().toISOString().split('T')[0]);
       fetchSolCastChart();

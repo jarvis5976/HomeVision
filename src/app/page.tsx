@@ -195,20 +195,14 @@ function DashboardContent() {
             <section className="flex flex-col sm:flex-row items-center justify-between gap-6 p-6 bg-secondary/10 rounded-3xl border border-border/50">
               <div className="flex flex-wrap items-center gap-4">
                 {latestData?.zenFlex?.couleurJourJ && (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest px-1">Aujourd'hui</span>
-                    <Badge className={cn("px-6 py-2.5 text-sm font-black shadow-lg transition-transform hover:scale-105", getZenFlexColor(latestData.zenFlex.couleurJourJ))}>
-                      {latestData.zenFlex.couleurJourJ}
-                    </Badge>
-                  </div>
+                  <Badge className={cn("px-6 py-2.5 text-sm font-black shadow-lg transition-transform hover:scale-105", getZenFlexColor(latestData.zenFlex.couleurJourJ))}>
+                    {latestData.zenFlex.couleurJourJ}
+                  </Badge>
                 )}
                 {latestData?.zenFlex?.couleurJourJ1 && (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest px-1">Demain</span>
-                    <Badge variant="outline" className={cn("px-6 py-2.5 text-sm font-black border-2 shadow-sm transition-transform hover:scale-105", getZenFlexOutlineColor(latestData.zenFlex.couleurJourJ1))}>
-                      {latestData.zenFlex.couleurJourJ1}
-                    </Badge>
-                  </div>
+                  <Badge variant="outline" className={cn("px-6 py-2.5 text-sm font-black border-2 shadow-sm transition-transform hover:scale-105", getZenFlexOutlineColor(latestData.zenFlex.couleurJourJ1))}>
+                    {latestData.zenFlex.couleurJourJ1}
+                  </Badge>
                 )}
               </div>
 
