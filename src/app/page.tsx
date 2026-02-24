@@ -111,20 +111,6 @@ function DashboardContent() {
 
   const vehicles = Object.entries(latestData?.voiture || {});
 
-  const getZenFlexColor = (text: string) => {
-    const lower = text.toLowerCase();
-    if (lower.includes('eco')) return 'bg-emerald-600 hover:bg-emerald-700 text-white border-none';
-    if (lower.includes('sobriété') || lower.includes('sobriete')) return 'bg-rose-600 hover:bg-rose-700 text-white border-none';
-    return 'bg-slate-600 text-white border-none';
-  };
-
-  const getZenFlexOutlineColor = (text: string) => {
-    const lower = text.toLowerCase();
-    if (lower.includes('eco')) return 'border-emerald-500 text-emerald-400 bg-emerald-500/10';
-    if (lower.includes('sobriété') || lower.includes('sobriete')) return 'border-rose-500 text-rose-400 bg-rose-500/10';
-    return 'border-slate-500 text-slate-400 bg-slate-500/10';
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
       <header className="h-20 border-b border-border flex items-center justify-between px-8 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
@@ -195,12 +181,12 @@ function DashboardContent() {
             <section className="flex flex-col sm:flex-row items-center justify-between gap-6 p-6 bg-secondary/10 rounded-3xl border border-border/50">
               <div className="flex flex-wrap items-center gap-4">
                 {latestData?.zenFlex?.couleurJourJ && (
-                  <Badge className={cn("px-6 py-2.5 text-sm font-black shadow-lg transition-transform hover:scale-105", getZenFlexColor(latestData.zenFlex.couleurJourJ))}>
+                  <Badge className="px-6 py-2.5 text-sm font-black shadow-lg transition-transform hover:scale-105 bg-emerald-600 text-white border-none">
                     {latestData.zenFlex.couleurJourJ}
                   </Badge>
                 )}
                 {latestData?.zenFlex?.couleurJourJ1 && (
-                  <Badge variant="outline" className={cn("px-6 py-2.5 text-sm font-black border-2 shadow-sm transition-transform hover:scale-105", getZenFlexOutlineColor(latestData.zenFlex.couleurJourJ1))}>
+                  <Badge variant="outline" className="px-6 py-2.5 text-sm font-black border-2 shadow-sm transition-transform hover:scale-105 border-rose-500 text-rose-400 bg-rose-500/10">
                     {latestData.zenFlex.couleurJourJ1}
                   </Badge>
                 )}
@@ -373,7 +359,7 @@ function DashboardContent() {
                                 <CardContent className="p-6 pt-2">
                                   <div className="flex flex-col mb-4">
                                     <p className={cn("text-4xl font-black tracking-tighter mb-2", isCharging ? "text-emerald-500" : "")}>
-                                      {car.batteryLevel ?? car.battery_level}%
+                                      {car.batteryLevel ?? car.battery_level ?? 0}%
                                     </p>
                                     <div className="space-y-1">
                                       <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
@@ -385,7 +371,7 @@ function DashboardContent() {
                                     </div>
                                   </div>
                                   <Progress 
-                                    value={car.batteryLevel ?? car.battery_level} 
+                                    value={car.batteryLevel ?? car.battery_level ?? 0} 
                                     className={cn("h-2.5 bg-primary/10", isCharging ? "[&>div]:bg-emerald-500" : "")} 
                                   />
                                 </CardContent>

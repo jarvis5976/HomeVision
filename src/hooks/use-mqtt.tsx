@@ -210,8 +210,8 @@ const BASE_MOCK_DATA: HomeDashboardData = {
   },
   zenFlex: {
     contratColor: "bg-success",
-    couleurJourJ: "Aujourd'hui : jour Eco",
-    couleurJourJ1: "Demain : jour Sobriété"
+    couleurJourJ: "jour Eco",
+    couleurJourJ1: "jour Sobriété"
   },
   solCast: { today: 8.75, tomorrow: 8.03 }
 };
