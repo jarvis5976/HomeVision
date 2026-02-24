@@ -358,7 +358,7 @@ function DashboardContent() {
                     <Carousel className="w-full">
                       <CarouselContent>
                         {vehicles.map(([id, car]) => {
-                          const isCharging = car.charge === 'on';
+                          const isCharging = car.charge === true;
                           
                           return (
                             <CarouselItem key={id}>

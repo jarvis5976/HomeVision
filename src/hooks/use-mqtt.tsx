@@ -12,7 +12,7 @@ export interface CarData {
   states?: number | string;
   chargeStatus?: string;
   charging_state?: string;
-  charge?: string;
+  charge?: boolean;
   carModel?: string;
   display_name?: string;
   model?: string;
@@ -189,7 +189,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       display_name: "E-Ty",
       model: "Y",
       chargeStatus: "Terminée",
-      charge: "off"
+      charge: false
     },
     volvo: {
       carModel: "Volvo XC40",
@@ -197,7 +197,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       odometer: 38316,
       range: 230,
       chargeStatus: "En charge",
-      charge: "on"
+      charge: true
     },
     zoe: {
       carModel: "Renault Zoé",
@@ -205,7 +205,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       odometer: 51571,
       range: 313,
       chargeStatus: "Pas en charge",
-      charge: "off"
+      charge: false
     }
   },
   zenFlex: {
@@ -311,7 +311,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
           car.batteryLevel = car.batteryLevel ?? car.battery_level;
           car.carModel = car.carModel ?? (car.model ? `Model ${car.model}` : undefined);
           car.range = car.range ?? car.est_battery_range_km;
-          car.chargeStatus = car.chargeStatus ?? car.charging_state ?? car.charge;
+          car.chargeStatus = car.chargeStatus ?? car.charging_state ?? (car.charge === true ? "En charge" : "Pas en charge");
         });
       }
       setLatestData(adaptedData);
@@ -468,6 +468,12 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (pollInterval.current) clearInterval(pollInterval.current);
     if (isSimulated) {
       pollInterval.current = setInterval(runSimulation, 3000);
+      // Simulate history data calls
+      fetchHistoryStats();
+      fetchSolarChart(new Date().toISOString().split('T')[0], new Date().toISOString().split('T')[0]);
+      fetchSolCastChart();
+      fetchAnnualData();
+      fetchDailyHistory();
     } else {
       fetchRealData(); 
       pollInterval.current = setInterval(fetchRealData, 5000);
@@ -475,7 +481,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       if (pollInterval.current) clearInterval(pollInterval.current);
     };
-  }, [isSimulated, fetchRealData, runSimulation]);
+  }, [isSimulated, fetchRealData, runSimulation, fetchHistoryStats, fetchSolarChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory]);
 
   return (
     <MQTTContext.Provider value={{ 
