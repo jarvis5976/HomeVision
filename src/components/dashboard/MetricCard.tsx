@@ -24,6 +24,7 @@ interface MetricCardProps {
   details?: DetailItem[];
   description?: string;
   showSeparator?: boolean;
+  detailsLayout?: 'side' | 'bottom';
 }
 
 export function MetricCard({ 
@@ -37,7 +38,8 @@ export function MetricCard({
   status = 'online', 
   details, 
   description,
-  showSeparator = false
+  showSeparator = false,
+  detailsLayout = 'side'
 }: MetricCardProps) {
 
   return (
@@ -66,22 +68,37 @@ export function MetricCard({
             {unit && <span className="text-sm font-bold text-muted-foreground uppercase">{unit}</span>}
           </div>
 
-          {(showSeparator || (details && details.length > 0) || valueExtra) && (
+          {detailsLayout === 'side' && (showSeparator || (details && details.length > 0) || valueExtra) && (
             <Separator orientation="vertical" className="h-10 bg-border/60" />
           )}
 
-          <div className="flex flex-col justify-center gap-1">
-            {valueExtra && <div>{valueExtra}</div>}
-            {details && details.map((detail, idx) => (
-              <div key={idx} className="flex items-center gap-2 leading-none">
-                <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">{detail.label} :</span>
-                <span className="text-[11px] font-black text-foreground">
-                  {detail.value} <span className="text-[9px] font-normal opacity-70">{detail.unit}</span>
-                </span>
+          {detailsLayout === 'side' && (
+            <div className="flex flex-col justify-center gap-1">
+              {valueExtra && <div>{valueExtra}</div>}
+              {details && details.map((detail, idx) => (
+                <div key={idx} className="flex items-center gap-2 leading-none">
+                  <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">{detail.label} :</span>
+                  <span className="text-[11px] font-black text-foreground">
+                    {detail.value} <span className="text-[9px] font-normal opacity-70">{detail.unit}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {detailsLayout === 'bottom' && details && details.length > 0 && (
+          <div className="mt-4 pt-3 border-t border-border/50 grid grid-cols-2 gap-4">
+            {details.map((detail, idx) => (
+              <div key={idx} className="flex flex-col">
+                <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">{detail.label}</p>
+                <p className="text-sm font-black text-foreground">
+                  {detail.value} <span className="text-[10px] font-normal opacity-60">{detail.unit}</span>
+                </p>
               </div>
             ))}
           </div>
-        </div>
+        )}
 
         {description && (
           <p className="text-[10px] font-black text-primary mt-4 leading-tight uppercase tracking-widest">

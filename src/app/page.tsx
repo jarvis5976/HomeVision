@@ -436,7 +436,7 @@ function DashboardContent() {
                     value={historyData?.Production ?? 0} 
                     unit="kWh" 
                     icon={Sun} 
-                    showSeparator={true}
+                    detailsLayout="bottom"
                     details={[
                       { label: "SolarEdge", value: historyData?.SolarEdge ?? 0, unit: "kWh" },
                       { label: "ApSystems", value: historyData?.Ecu ?? 0, unit: "kWh" }
@@ -448,7 +448,7 @@ function DashboardContent() {
                     value={historyData?.Production ?? 0} 
                     unit="kWh" 
                     icon={PieChart} 
-                    showSeparator={true}
+                    detailsLayout="bottom"
                     details={[
                       { label: "Auto-Conso.", value: historyData?.AutoConsommation ?? 0, unit: "kWh" },
                       { label: "Vente", value: historyData?.Vente ?? 0, unit: "kWh" }
@@ -460,7 +460,7 @@ function DashboardContent() {
                     value={historyData?.Consommation ?? 0} 
                     unit="kWh" 
                     icon={Activity} 
-                    showSeparator={true}
+                    detailsLayout="bottom"
                     details={[
                       { label: "Auto-Production", value: historyData?.AutoConsommation ?? 0, unit: "kWh" },
                       { label: "Achat", value: historyData?.Achat ?? 0, unit: "kWh" }
@@ -481,7 +481,7 @@ function DashboardContent() {
                     value={totalHistoryData?.production ?? 0} 
                     unit="kWh" 
                     icon={Sun} 
-                    showSeparator={true}
+                    detailsLayout="bottom"
                     details={[
                       { label: "SolarEdge", value: ((totalHistoryData?.production ?? 0) - (totalHistoryData?.apSystems ?? 0)).toFixed(2), unit: "kWh" },
                       { label: "ApSystems", value: totalHistoryData?.apSystems ?? 0, unit: "kWh" }
@@ -493,7 +493,7 @@ function DashboardContent() {
                     value={totalHistoryData?.production ?? 0} 
                     unit="kWh" 
                     icon={PieChart} 
-                    showSeparator={true}
+                    detailsLayout="bottom"
                     details={[
                       { label: "Auto-Conso.", value: totalHistoryData?.autoConsommation ?? 0, unit: "kWh" },
                       { label: "Vente", value: totalHistoryData?.vente ?? 0, unit: "kWh" }
@@ -505,7 +505,7 @@ function DashboardContent() {
                     value={totalHistoryData?.consommation ?? 0} 
                     unit="kWh" 
                     icon={Activity} 
-                    showSeparator={true}
+                    detailsLayout="bottom"
                     details={[
                       { label: "Auto-Production", value: totalHistoryData?.autoConsommation ?? 0, unit: "kWh" },
                       { label: "Achat", value: totalHistoryData?.achat ?? 0, unit: "kWh" }
