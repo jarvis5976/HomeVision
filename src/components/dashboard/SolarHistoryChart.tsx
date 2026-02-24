@@ -63,7 +63,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
                   <span className="text-black uppercase">{name}:</span>
                 </span>
-                <span className="text-black font-black">{entry.value.toFixed(2)} kWh</span>
+                <span className="text-black font-black">{Math.abs(entry.value).toFixed(2)} kWh</span>
               </div>
             );
           })}
@@ -103,7 +103,8 @@ export function SolarHistoryChart({
         autoConsommation: parseFloat((data.multi.AutoConsommation[i] || 0).toFixed(2)),
         production: parseFloat((data.multi.Production[i] || 0).toFixed(2)),
         chargeBatterie: parseFloat((data.multi.BatterieCharge[i] || 0).toFixed(2)),
-        dechargeBatterie: parseFloat((data.multi.BatterieDecharge[i] || 0).toFixed(2)),
+        // Inversion pour affichage en dessous de zéro
+        dechargeBatterie: -Math.abs(parseFloat((data.multi.BatterieDecharge[i] || 0).toFixed(2))),
         estimation: parseFloat((data.multi.Estimation[i] || 0).toFixed(2)),
         batterieSoc: data.multi.BatterieSoc ? data.multi.BatterieSoc[i] : null,
       };
@@ -226,11 +227,11 @@ export function SolarHistoryChart({
               <ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={1} />
               
               <Bar dataKey="achat" stackId="a" fill={COLORS.achat} />
-              <Bar dataKey="dechargeBatterie" stackId="a" fill={COLORS.dechargeBatterie} />
               <Bar dataKey="autoConsommation" stackId="a" fill={COLORS.autoConsommation} />
               
               <Bar dataKey="vente" stackId="a" fill={COLORS.vente} />
               <Bar dataKey="chargeBatterie" stackId="a" fill={COLORS.chargeBatterie} />
+              <Bar dataKey="dechargeBatterie" stackId="a" fill={COLORS.dechargeBatterie} />
               
               <Line type="monotone" dataKey="production" stroke={COLORS.production} strokeWidth={2} dot={false} />
               <Line type="monotone" dataKey="estimation" stroke={COLORS.estimation} strokeWidth={2} strokeDasharray="5 5" dot={false} />
