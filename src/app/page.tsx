@@ -363,30 +363,19 @@ function DashboardContent() {
                                       <Car className="w-4 h-4 text-primary" />
                                       {car.carModel || car.display_name}
                                     </CardTitle>
-                                    {isCharging && (
-                                      <Badge className="bg-emerald-500 text-white animate-pulse flex items-center gap-1 text-[9px] font-black uppercase">
-                                        <Zap className="w-3 h-3 fill-current" />
-                                        En Charge
-                                      </Badge>
-                                    )}
                                   </div>
                                 </CardHeader>
                                 <CardContent className="p-6 pt-2">
-                                  <div className="flex items-end justify-between mb-4">
-                                    <div>
-                                      <p className={cn("text-4xl font-black tracking-tighter", isCharging ? "text-emerald-500" : "")}>
-                                        {car.batteryLevel ?? car.battery_level}%
-                                      </p>
-                                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1">
+                                  <div className="flex flex-col mb-4">
+                                    <p className={cn("text-4xl font-black tracking-tighter mb-2", isCharging ? "text-emerald-500" : "")}>
+                                      {car.batteryLevel ?? car.battery_level}%
+                                    </p>
+                                    <div className="space-y-1">
+                                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
                                         Autonomie: {Math.round(car.range ?? car.est_battery_range_km ?? 0)} km
                                       </p>
-                                    </div>
-                                    <div className="text-right">
-                                      <p className={cn("text-[10px] font-black uppercase tracking-widest mb-1", isCharging ? "text-emerald-500" : "text-primary")}>
-                                        {isCharging ? "Recharge active" : "Stationnaire"}
-                                      </p>
-                                      <p className="text-[9px] text-muted-foreground font-black">
-                                        Odo: {mounted ? Math.round(car.odometer ?? 0).toLocaleString() : Math.round(car.odometer ?? 0)} km
+                                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
+                                        Odomètre: {mounted ? Math.round(car.odometer ?? 0).toLocaleString() : Math.round(car.odometer ?? 0)} km
                                       </p>
                                     </div>
                                   </div>
