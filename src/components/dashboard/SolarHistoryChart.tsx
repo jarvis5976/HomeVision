@@ -99,12 +99,14 @@ export function SolarHistoryChart({
         label,
         rangeLabel: `${label} - ${nextLabel}`,
         achat: parseFloat((data.multi.Achat[i] || 0).toFixed(2)),
-        vente: parseFloat((data.multi.Vente[i] || 0).toFixed(2)),
+        // Vente en négatif pour affichage en dessous de zéro
+        vente: -Math.abs(parseFloat((data.multi.Vente[i] || 0).toFixed(2))),
         autoConsommation: parseFloat((data.multi.AutoConsommation[i] || 0).toFixed(2)),
         production: parseFloat((data.multi.Production[i] || 0).toFixed(2)),
-        chargeBatterie: parseFloat((data.multi.BatterieCharge[i] || 0).toFixed(2)),
-        // Inversion pour affichage en dessous de zéro
-        dechargeBatterie: -Math.abs(parseFloat((data.multi.BatterieDecharge[i] || 0).toFixed(2))),
+        // Charge Batterie en négatif (en dessous de zéro)
+        chargeBatterie: -Math.abs(parseFloat((data.multi.BatterieCharge[i] || 0).toFixed(2))),
+        // Décharge Batterie en positif (au dessus de zéro)
+        dechargeBatterie: Math.abs(parseFloat((data.multi.BatterieDecharge[i] || 0).toFixed(2))),
         estimation: parseFloat((data.multi.Estimation[i] || 0).toFixed(2)),
         batterieSoc: data.multi.BatterieSoc ? data.multi.BatterieSoc[i] : null,
       };
@@ -228,10 +230,10 @@ export function SolarHistoryChart({
               
               <Bar dataKey="achat" stackId="a" fill={COLORS.achat} />
               <Bar dataKey="autoConsommation" stackId="a" fill={COLORS.autoConsommation} />
+              <Bar dataKey="dechargeBatterie" stackId="a" fill={COLORS.dechargeBatterie} />
               
               <Bar dataKey="vente" stackId="a" fill={COLORS.vente} />
               <Bar dataKey="chargeBatterie" stackId="a" fill={COLORS.chargeBatterie} />
-              <Bar dataKey="dechargeBatterie" stackId="a" fill={COLORS.dechargeBatterie} />
               
               <Line type="monotone" dataKey="production" stroke={COLORS.production} strokeWidth={2} dot={false} />
               <Line type="monotone" dataKey="estimation" stroke={COLORS.estimation} strokeWidth={2} strokeDasharray="5 5" dot={false} />
