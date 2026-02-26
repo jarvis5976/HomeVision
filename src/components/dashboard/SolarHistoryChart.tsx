@@ -95,9 +95,9 @@ export function SolarHistoryChart({
       const nextHour = (parseInt(hours) + 1).toString().padStart(2, '0');
       const nextLabel = `${nextHour}:${minutes}`;
 
-      // Charge est déjà négative dans l'API, on la maintient négative pour l'affichage sous l'axe
+      // Charge est déjà négative dans l'API
       const chargeVal = parseFloat((data.multi.BatterieCharge[i] || 0).toFixed(2));
-      // Décharge est positive, on la force positive pour l'affichage au-dessus de l'axe
+      // Décharge est affichée au-dessus de l'axe (flux sortant vers la maison)
       const dechargeVal = Math.abs(parseFloat((data.multi.BatterieDecharge[i] || 0).toFixed(2)));
 
       return {
@@ -107,7 +107,7 @@ export function SolarHistoryChart({
         vente: -Math.abs(parseFloat((data.multi.Vente[i] || 0).toFixed(2))),
         autoConsommation: Math.abs(parseFloat((data.multi.AutoConsommation[i] || 0).toFixed(2))),
         production: Math.abs(parseFloat((data.multi.Production[i] || 0).toFixed(2))),
-        chargeBatterie: -Math.abs(chargeVal),
+        chargeBatterie: chargeVal < 0 ? chargeVal : -chargeVal,
         dechargeBatterie: dechargeVal,
         estimation: Math.abs(parseFloat((data.multi.Estimation[i] || 0).toFixed(2))),
         batterieSoc: data.multi.BatterieSoc ? data.multi.BatterieSoc[i] : null,
@@ -186,7 +186,11 @@ export function SolarHistoryChart({
       <CardContent>
         <div className="h-[450px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+            <ComposedChart 
+              data={chartData} 
+              stackOffset="sign"
+              margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+            >
               <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
               <XAxis 
                 dataKey="label" 
@@ -230,10 +234,12 @@ export function SolarHistoryChart({
               
               <ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={1} />
               
+              {/* Stack Positif */}
               <Bar dataKey="achat" stackId="a" fill={COLORS.achat} />
               <Bar dataKey="autoConsommation" stackId="a" fill={COLORS.autoConsommation} />
               <Bar dataKey="dechargeBatterie" stackId="a" fill={COLORS.dechargeBatterie} />
               
+              {/* Stack Négatif */}
               <Bar dataKey="vente" stackId="a" fill={COLORS.vente} />
               <Bar dataKey="chargeBatterie" stackId="a" fill={COLORS.chargeBatterie} />
               
