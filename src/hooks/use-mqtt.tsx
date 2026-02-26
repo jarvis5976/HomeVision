@@ -167,10 +167,6 @@ const BASE_MOCK_DATA: HomeDashboardData = {
     stateLabel: "En charge",
     state: 1
   },
-  victron: {
-    batteryTitle: "En charge",
-    EssState: { label: "Optimized mode w/o BatteryLife" }
-  },
   energy: { 
     total: { all: 4686, maison: 3365, annexe: 1289 },
     detail: {
@@ -185,10 +181,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       battery_level: 81,
       est_battery_range_km: 424.3,
       odometer: 63401.93,
-      charging_state: "Complete",
       display_name: "E-Ty",
-      model: "Y",
-      chargeStatus: "Terminée",
       charge: false
     },
     volvo: {
@@ -196,16 +189,14 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       batteryLevel: 59,
       odometer: 38316,
       range: 230,
-      charge: true,
-      chargeStatus: "En charge"
+      charge: true
     },
     zoe: {
       carModel: "Renault Zoé",
       batteryLevel: 97,
       odometer: 51571,
       range: 313,
-      charge: false,
-      chargeStatus: "Pas en charge"
+      charge: false
     }
   },
   zenFlex: {
@@ -263,9 +254,18 @@ const ANNUAL_DATA_MOCK: AnnualData = {
     { "mois": "Janvier", "2023": 107.41, "2024": 124.04, "2025": 90.82, "2026": 109.76 },
     { "mois": "Février", "2023": 120.5, "2024": 130.2, "2025": 110.4, "2026": 140.56 }
   ],
-  achat: [],
-  vente: [],
-  autoConsommation: []
+  achat: [
+    { "mois": "TOTAL", "2023": 2130.45, "2024": 2210.15, "2025": 1950.40 },
+    { "mois": "Janvier", "2023": 240.12, "2024": 210.45, "2025": 190.22 }
+  ],
+  vente: [
+    { "mois": "TOTAL", "2023": 890.22, "2024": 950.12, "2025": 780.45 },
+    { "mois": "Janvier", "2023": 10.45, "2024": 12.15, "2025": 8.50 }
+  ],
+  autoConsommation: [
+    { "mois": "TOTAL", "2023": 3677.58, "2024": 3510.12, "2025": 4800.50 },
+    { "mois": "Janvier", "2023": 90.15, "2024": 110.22, "2025": 82.32 }
+  ]
 };
 
 const DAILY_HISTORY_MOCK: DailyHistoryData = {
@@ -311,7 +311,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
           car.batteryLevel = car.batteryLevel ?? car.battery_level;
           car.carModel = car.carModel ?? (car.model ? `Model ${car.model}` : undefined);
           car.range = car.range ?? car.est_battery_range_km;
-          car.chargeStatus = car.chargeStatus ?? car.charging_state ?? (car.charge === true ? "En charge" : "Pas en charge");
+          car.charge = car.charge === true || car.charge === 'on';
         });
       }
       setLatestData(adaptedData);

@@ -60,7 +60,7 @@ export function MetricCard({
         <div className="flex items-center gap-4 flex-1">
           <div className="flex items-baseline gap-1">
             <h3 className="text-3xl font-black text-foreground tracking-tighter">{value}</h3>
-            {unit && <span className="text-sm font-bold text-muted-foreground uppercase">{unit}</span>}
+            {unit && <span className="text-sm font-bold text-muted-foreground uppercase ml-1">{unit}</span>}
           </div>
 
           {detailsLayout === 'side' && (showSeparator || (details && details.length > 0) || valueExtra) && (

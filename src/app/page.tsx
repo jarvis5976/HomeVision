@@ -164,7 +164,7 @@ function DashboardContent() {
               {isSimulated ? (
                 <PlayCircle className="w-3.5 h-3.5 text-accent" />
               ) : (
-                <Radio className="w-3.5 h-3.5 text-primary animate-pulse" />
+                <Radio className="w-3.5 h-3.5 text-primary" />
               )}
               <span className="text-[9px] text-muted-foreground font-black uppercase tracking-wider">
                 {isSimulated ? "Demo" : "192.168.0.3"}
@@ -217,6 +217,7 @@ function DashboardContent() {
                 unit="W" 
                 icon={Zap} 
                 showSeparator={true}
+                detailsLayout="side"
                 valueExtra={
                   <Badge variant="outline" className="text-[10px] font-black uppercase px-2 py-0 border-primary/30 text-primary">
                     {latestData?.grid?.sens ?? "Achat"}
@@ -229,6 +230,7 @@ function DashboardContent() {
                 unit="W" 
                 icon={Sun} 
                 showSeparator={true}
+                detailsLayout="side"
                 details={[
                   { label: "SolarEdge", value: latestData?.production?.detail?.solarEdge ?? 0, unit: "W" },
                   { label: "ApSystems", value: latestData?.production?.detail?.apSystems ?? 0, unit: "W" }
@@ -245,8 +247,9 @@ function DashboardContent() {
                 unit="%" 
                 icon={BatteryIcon} 
                 showSeparator={true}
+                detailsLayout="side"
                 details={[
-                  { label: "Puissance", value: batteryPower, unit: "W" },
+                  { label: "Puissance", value: Math.abs(batteryPower), unit: "W" },
                   { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" }
                 ]}
               />
@@ -256,6 +259,7 @@ function DashboardContent() {
                 unit="W" 
                 icon={Activity} 
                 showSeparator={true}
+                detailsLayout="side"
                 details={[
                   { label: "Maison", value: houseMain, unit: "W" },
                   { label: "Annexe", value: houseAnnexe, unit: "W" }
