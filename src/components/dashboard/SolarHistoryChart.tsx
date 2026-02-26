@@ -95,9 +95,9 @@ export function SolarHistoryChart({
       const nextHour = (parseInt(hours) + 1).toString().padStart(2, '0');
       const nextLabel = `${nextHour}:${minutes}`;
 
-      // API: Charge est déjà négative. On s'assure qu'elle est bien < 0
+      // API: Charge est déjà négative. On s'assure qu'elle est bien < 0 pour le graph.
       const chargeVal = parseFloat((data.multi.BatterieCharge[i] || 0).toFixed(2));
-      // API: Décharge est positive. On s'assure qu'elle est bien > 0
+      // API: Décharge est positive. On s'assure qu'elle est bien > 0 pour s'empiler en haut.
       const dechargeVal = parseFloat((data.multi.BatterieDecharge[i] || 0).toFixed(2));
 
       return {
@@ -108,9 +108,9 @@ export function SolarHistoryChart({
         vente: -Math.abs(parseFloat((data.multi.Vente[i] || 0).toFixed(2))),
         autoConsommation: Math.abs(parseFloat((data.multi.AutoConsommation[i] || 0).toFixed(2))),
         production: Math.abs(parseFloat((data.multi.Production[i] || 0).toFixed(2))),
-        // Charge Batterie en négatif (en dessous de zéro)
+        // Charge Batterie en négatif (dessous zéro)
         chargeBatterie: -Math.abs(chargeVal),
-        // Décharge Batterie en positif (au dessus de zéro)
+        // Décharge Batterie en positif (au dessus zéro)
         dechargeBatterie: Math.abs(dechargeVal),
         estimation: Math.abs(parseFloat((data.multi.Estimation[i] || 0).toFixed(2))),
         batterieSoc: data.multi.BatterieSoc ? data.multi.BatterieSoc[i] : null,

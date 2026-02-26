@@ -45,21 +45,16 @@ export function MetricCard({
   return (
     <Card className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow h-full bg-card">
       <CardContent className="p-5 flex flex-col h-full">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Icon className="w-5 h-5 text-primary" />
-            </div>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">{title}</p>
-                {titleExtra && <div className="flex items-center">{titleExtra}</div>}
-              </div>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Icon className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">{title}</p>
+              {titleExtra && <div className="flex items-center">{titleExtra}</div>}
             </div>
           </div>
-          {status === 'alert' && (
-            <span className="flex h-2 w-2 rounded-full bg-destructive animate-ping" />
-          )}
         </div>
 
         <div className="flex items-center gap-4 flex-1">
