@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -8,7 +9,7 @@ import { SolarForecastChart } from "@/components/dashboard/SolarForecastChart";
 import { AnnualSummaryTable } from "@/components/dashboard/AnnualSummaryTable";
 import { DailyHistoryTable } from "@/components/dashboard/DailyHistoryTable";
 import { 
-  Zap, Battery as BatteryIcon, Car, Droplets, Sun, Home, Building2, CloudSun, Radio, PlayCircle, Moon, SunMedium, History, Flame, ArrowLeft, TrendingUp, PieChart, Activity, CalendarDays, RefreshCw, Clock, MapPin
+  Zap, Battery as BatteryIcon, Car, Droplets, Sun, Home, History, Flame, ArrowLeft, TrendingUp, PieChart, Activity, Clock, MapPin, CloudSun, Moon, SunMedium
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,7 +24,7 @@ type ViewType = 'dashboard' | 'history';
 
 function DashboardContent() {
   const { 
-    latestData, historyData, totalHistoryData, solarChartData, solCastChartData, annualData, dailyHistoryData, isSimulated, setIsSimulated, setIsPaused, fetchHistoryStats, fetchSolarChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory
+    latestData, historyData, solarChartData, solCastChartData, annualData, dailyHistoryData, isSimulated, setIsSimulated, setIsPaused, fetchHistoryStats, fetchSolarChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory
   } = useMQTT();
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [mounted, setMounted] = useState(false);

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, createContext, useContext, useRef, useCallback } from 'react';
@@ -99,6 +100,7 @@ export interface HomeDashboardData {
   zenFlex?: { couleurJourJ: string; couleurJourJ1: string };
   solCast?: { today: number; tomorrow: number };
   chauffeEau?: { total: number; maison: number; annexe: number };
+  eau?: { total: number };
 }
 
 interface MQTTContextType {
@@ -129,6 +131,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
   battery: { watts: 2647, soc: 83, stateLabel: "En charge", voltage: 50.63, state: 1 },
   energy: { total: { all: 4686, maison: 3365, annexe: 1289 }, detail: {} },
   chauffeEau: { total: 1255.2, maison: 1253, annexe: 2.2 },
+  eau: { total: 456.78 },
   voiture: {
     "tesla": {
       "batteryLevel": 54,
@@ -151,7 +154,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       "batteryLevel": 76,
       "odometer": 51687,
       "range": 242,
-      "charge": true,
+      "charge": false,
       "carModel": "Renault Zoé",
       "charger_time_charging_minutes": 65,
       "localisation": "home"
