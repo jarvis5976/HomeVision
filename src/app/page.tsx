@@ -128,7 +128,7 @@ function DashboardContent() {
                 {latestData?.voiture && Object.entries(latestData.voiture).length > 0 && (
                   <div>
                     <h3 className="text-xs font-black uppercase text-muted-foreground mb-4 px-1">Flotte Véhicules</h3>
-                    <Carousel className="w-full">
+                    <Carousel className="w-full relative group">
                       <CarouselContent>
                         {Object.entries(latestData.voiture).map(([id, car]) => {
                           const isCharging = car.charge === true;
@@ -164,6 +164,10 @@ function DashboardContent() {
                           );
                         })}
                       </CarouselContent>
+                      <div className="flex justify-center gap-4 mt-4">
+                        <CarouselPrevious className="static translate-y-0" />
+                        <CarouselNext className="static translate-y-0" />
+                      </div>
                     </Carousel>
                   </div>
                 )}
