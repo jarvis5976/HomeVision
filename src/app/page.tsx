@@ -58,6 +58,7 @@ function DashboardContent() {
     dailyHistoryData,
     isSimulated, 
     setIsSimulated,
+    setIsPaused,
     fetchHistoryStats,
     fetchSolarChart,
     fetchSolCastChart,
@@ -79,6 +80,11 @@ function DashboardContent() {
     setTheme(initialTheme);
     document.documentElement.classList.toggle('dark', initialTheme === 'dark');
   }, []);
+
+  // Désactiver le polling instant_from_mqtt.php quand on est sur l'historique
+  useEffect(() => {
+    setIsPaused(view === 'history');
+  }, [view, setIsPaused]);
 
   const refreshHistory = useCallback(() => {
     fetchHistoryStats();

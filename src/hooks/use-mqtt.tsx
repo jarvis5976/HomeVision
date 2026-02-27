@@ -132,6 +132,8 @@ interface MQTTMessage {
 interface MQTTContextType {
   isSimulated: boolean;
   setIsSimulated: (val: boolean) => void;
+  isPaused: boolean;
+  setIsPaused: (val: boolean) => void;
   messages: MQTTMessage[];
   latestData: HomeDashboardData | null;
   historyData: HistoryData | null;
@@ -275,6 +277,7 @@ const DAILY_HISTORY_MOCK: DailyHistoryData = {
 
 export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSimulated, setIsSimulated] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [messages, setMessages] = useState<MQTTMessage[]>([]);
   const [latestData, setLatestData] = useState<HomeDashboardData | null>(BASE_MOCK_DATA);
   const [historyData, setHistoryData] = useState<HistoryData | null>(BASE_HISTORY_MOCK);
@@ -288,7 +291,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
 
   const fetchRealData = useCallback(async () => {
-    if (isSimulated) return;
+    if (isSimulated || isPaused) return;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
@@ -311,7 +314,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
           car.batteryLevel = car.batteryLevel ?? car.battery_level;
           car.carModel = car.carModel ?? (car.model ? `Model ${car.model}` : undefined);
           car.range = car.range ?? car.est_battery_range_km;
-          car.charge = car.charge === true || car.charge === 'on';
+          car.charge = car.charge === true;
         });
       }
       setLatestData(adaptedData);
@@ -326,7 +329,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       clearTimeout(timeoutId);
     }
-  }, [isSimulated]);
+  }, [isSimulated, isPaused]);
 
   const fetchHistoryStats = useCallback(async () => {
     if (isSimulated) {
@@ -366,7 +369,6 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     try {
       const url = `http://192.168.0.3/Dashboard/assets/Solaire/getSolaire.php`;
-      // Appel en POST avec startDate et endDate dans le payload via le proxy
       const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`, {
         method: 'POST',
         headers: {
@@ -438,6 +440,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isSimulated]);
 
   const runSimulation = useCallback(() => {
+    if (isPaused) return;
     setLatestData(prev => {
       if (!prev) return BASE_MOCK_DATA;
       const fluctuate = (val: number, range: number = 10) => val + (Math.random() * range - range/2);
@@ -472,10 +475,13 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
         voiture: updatedVoiture
       };
     });
-  }, []);
+  }, [isPaused]);
 
   useEffect(() => {
     if (pollInterval.current) clearInterval(pollInterval.current);
+    
+    if (isPaused) return;
+
     if (isSimulated) {
       pollInterval.current = setInterval(runSimulation, 3000);
       fetchHistoryStats();
@@ -490,12 +496,14 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       if (pollInterval.current) clearInterval(pollInterval.current);
     };
-  }, [isSimulated, fetchRealData, runSimulation, fetchHistoryStats, fetchSolarChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory]);
+  }, [isSimulated, isPaused, fetchRealData, runSimulation, fetchHistoryStats, fetchSolarChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory]);
 
   return (
     <MQTTContext.Provider value={{ 
       isSimulated, 
       setIsSimulated, 
+      isPaused,
+      setIsPaused,
       messages, 
       latestData, 
       historyData, 
