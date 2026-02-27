@@ -17,6 +17,12 @@ export interface CarData {
   display_name?: string;
   model?: string;
   charger_time_charging_minutes?: number;
+  location?: {
+    latitude?: number;
+    longitude?: number;
+    address?: string;
+    name?: string;
+  };
   [key: string]: any;
 }
 
@@ -186,7 +192,8 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       odometer: 63401.93,
       display_name: "E-Ty",
       charge: false,
-      charger_time_charging_minutes: 0
+      charger_time_charging_minutes: 0,
+      location: { name: "Maison" }
     },
     volvo: {
       carModel: "Volvo XC40",
@@ -194,7 +201,8 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       odometer: 38316,
       range: 230,
       charge: true,
-      charger_time_charging_minutes: 85
+      charger_time_charging_minutes: 85,
+      location: { name: "Borne Publique" }
     },
     zoe: {
       carModel: "Renault Zoé",
@@ -202,7 +210,8 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       odometer: 51571,
       range: 313,
       charge: false,
-      charger_time_charging_minutes: 0
+      charger_time_charging_minutes: 0,
+      location: { name: "Travail" }
     }
   },
   zenFlex: {

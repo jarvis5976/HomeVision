@@ -29,7 +29,8 @@ import {
   Activity,
   CalendarDays,
   RefreshCw,
-  Clock
+  Clock,
+  MapPin
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -398,6 +399,14 @@ function DashboardContent() {
                                       <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
                                         Kilomètre: {mounted ? Math.round(car.odometer ?? 0).toLocaleString() : Math.round(car.odometer ?? 0)} km
                                       </p>
+                                      {car.location && (
+                                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest flex items-center gap-1.5 mt-1">
+                                          <MapPin className="w-3 h-3 text-muted-foreground/60" />
+                                          <span className="truncate">
+                                            {typeof car.location === 'object' ? (car.location.name || car.location.address || `${car.location.latitude?.toFixed(2)}, ${car.location.longitude?.toFixed(2)}`) : car.location}
+                                          </span>
+                                        </p>
+                                      )}
                                     </div>
                                   </div>
                                   <Progress 
