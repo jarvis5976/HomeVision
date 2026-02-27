@@ -146,8 +146,9 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       "batteryLevel": 59,
       "odometer": 38316,
       "range": 230,
-      "charge": false,
+      "charge": true,
       "carModel": "Volvo XC40",
+      "charger_time_charging_minutes": 45,
       "localisation": "home"
     },
     "zoe": {
