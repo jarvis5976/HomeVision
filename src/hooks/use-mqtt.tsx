@@ -375,8 +375,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          startDate: start,
-          endDate: end
+          date: start
         })
       });
       if (res.ok) {
