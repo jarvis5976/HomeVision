@@ -365,8 +365,18 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     try {
-      const url = `http://192.168.0.3/Dashboard/assets/Solaire/getSolaire.php?startDate=${start}&endDate=${end}`;
-      const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`);
+      const url = `http://192.168.0.3/Dashboard/assets/Solaire/getSolaire.php`;
+      // Appel en POST avec startDate et endDate dans le payload via le proxy
+      const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          startDate: start,
+          endDate: end
+        })
+      });
       if (res.ok) {
         const data = await res.json();
         setSolarChartData(data);
