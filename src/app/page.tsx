@@ -364,9 +364,19 @@ function DashboardContent() {
                             <CarouselItem key={id}>
                               <Card className="border-border shadow-xl overflow-hidden bg-gradient-to-br from-card to-background relative">
                                 {isCharging && (
-                                  <Badge className="absolute top-4 right-4 bg-emerald-600 hover:bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5 animate-pulse z-10">
-                                    En charge
-                                  </Badge>
+                                  <div className="absolute top-4 right-4 flex flex-col items-end gap-1.5 z-10">
+                                    <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5 animate-pulse">
+                                      En charge
+                                    </Badge>
+                                    {remainingTime && (
+                                      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-2 py-1 flex items-center gap-1.5 shadow-sm backdrop-blur-sm">
+                                        <Clock className="w-3 h-3 text-emerald-500" />
+                                        <span className="text-[9px] text-emerald-500 font-black uppercase tracking-widest whitespace-nowrap">
+                                          {remainingTime}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
                                 )}
                                 <CardHeader className="pb-2">
                                   <div className="flex items-center justify-between">
@@ -388,12 +398,6 @@ function DashboardContent() {
                                       <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
                                         Kilomètre: {mounted ? Math.round(car.odometer ?? 0).toLocaleString() : Math.round(car.odometer ?? 0)} km
                                       </p>
-                                      {isCharging && remainingTime && (
-                                        <p className="text-[10px] text-emerald-500 uppercase font-black tracking-widest flex items-center gap-1.5 mt-1">
-                                          <Clock className="w-3 h-3" />
-                                          Restant: {remainingTime}
-                                        </p>
-                                      )}
                                     </div>
                                   </div>
                                   <Progress 
