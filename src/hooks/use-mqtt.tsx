@@ -16,6 +16,7 @@ export interface CarData {
   carModel?: string;
   display_name?: string;
   model?: string;
+  charger_time_charging_minutes?: number;
   [key: string]: any;
 }
 
@@ -184,21 +185,24 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       est_battery_range_km: 424.3,
       odometer: 63401.93,
       display_name: "E-Ty",
-      charge: false
+      charge: false,
+      charger_time_charging_minutes: 0
     },
     volvo: {
       carModel: "Volvo XC40",
       batteryLevel: 59,
       odometer: 38316,
       range: 230,
-      charge: true
+      charge: true,
+      charger_time_charging_minutes: 85
     },
     zoe: {
       carModel: "Renault Zoé",
       batteryLevel: 97,
       odometer: 51571,
       range: 313,
-      charge: false
+      charge: false,
+      charger_time_charging_minutes: 0
     }
   },
   zenFlex: {
@@ -452,7 +456,8 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
           battery_level: Math.round(Math.max(0, Math.min(100, fluctuate(car.battery_level || car.batteryLevel || 50, 0.5)))),
           odometer: (car.odometer || 0) + 0.01,
           range: Math.round(Math.max(0, fluctuate(car.range || car.est_battery_range_km || 300, 2))),
-          est_battery_range_km: Math.round(Math.max(0, fluctuate(car.est_battery_range_km || car.range || 300, 2)))
+          est_battery_range_km: Math.round(Math.max(0, fluctuate(car.est_battery_range_km || car.range || 300, 2))),
+          charger_time_charging_minutes: car.charge ? Math.max(0, Math.round(fluctuate(car.charger_time_charging_minutes || 60, 2))) : 0
         };
       });
       return {

@@ -28,7 +28,8 @@ import {
   PieChart,
   Activity,
   CalendarDays,
-  RefreshCw
+  RefreshCw,
+  Clock
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -114,6 +115,16 @@ function DashboardContent() {
   const houseAnnexe = latestData?.energy?.total?.annexe ?? 0;
 
   const vehicles = Object.entries(latestData?.voiture || {});
+
+  const formatRemainingTime = (minutes: number | undefined) => {
+    if (!minutes || minutes <= 0) return null;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours > 0) {
+      return `${hours}h ${mins}min`;
+    }
+    return `${mins}min`;
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
@@ -347,6 +358,7 @@ function DashboardContent() {
                       <CarouselContent>
                         {vehicles.map(([id, car]) => {
                           const isCharging = car.charge === true;
+                          const remainingTime = formatRemainingTime(car.charger_time_charging_minutes);
                           
                           return (
                             <CarouselItem key={id}>
@@ -376,6 +388,12 @@ function DashboardContent() {
                                       <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
                                         Kilomètre: {mounted ? Math.round(car.odometer ?? 0).toLocaleString() : Math.round(car.odometer ?? 0)} km
                                       </p>
+                                      {isCharging && remainingTime && (
+                                        <p className="text-[10px] text-emerald-500 uppercase font-black tracking-widest flex items-center gap-1.5 mt-1">
+                                          <Clock className="w-3 h-3" />
+                                          Restant: {remainingTime}
+                                        </p>
+                                      )}
                                     </div>
                                   </div>
                                   <Progress 
