@@ -360,13 +360,21 @@ function DashboardContent() {
                         {vehicles.map(([id, car]) => {
                           const isCharging = car.charge === true;
                           const remainingTime = formatRemainingTime(car.charger_time_charging_minutes);
+                          const locationName = (typeof car.location === 'object' ? car.location.name : car.location) || "";
+                          const isHome = locationName.toString().toLowerCase() === 'home';
                           
                           return (
                             <CarouselItem key={id}>
                               <Card className="border-border shadow-xl overflow-hidden bg-gradient-to-br from-card to-background relative">
                                 <div className="absolute top-4 right-4 flex flex-col items-end gap-1.5 z-10">
+                                  {car.location && (
+                                    <Badge variant="outline" className="bg-background/80 backdrop-blur-sm border-border text-[9px] font-black uppercase px-2 py-0.5 flex items-center gap-1 shadow-sm">
+                                      <MapPin className="w-3 h-3 text-muted-foreground" />
+                                      {isHome ? "Maison" : "Absent"}
+                                    </Badge>
+                                  )}
                                   {isCharging && (
-                                    <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5 animate-pulse">
+                                    <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5 animate-pulse shadow-sm">
                                       En charge
                                     </Badge>
                                   )}
@@ -399,14 +407,6 @@ function DashboardContent() {
                                       <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
                                         Kilomètre: {mounted ? Math.round(car.odometer ?? 0).toLocaleString() : Math.round(car.odometer ?? 0)} km
                                       </p>
-                                      {car.location && (
-                                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest flex items-center gap-1.5 mt-1">
-                                          <MapPin className="w-3 h-3 text-muted-foreground/60" />
-                                          <span className="truncate">
-                                            {((typeof car.location === 'object' ? car.location.name : car.location) || "").toString().toLowerCase() === 'home' ? "Maison" : "Absent"}
-                                          </span>
-                                        </p>
-                                      )}
                                     </div>
                                   </div>
                                   <Progress 
