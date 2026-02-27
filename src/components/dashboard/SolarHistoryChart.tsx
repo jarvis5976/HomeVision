@@ -22,10 +22,8 @@ import { Calendar, RefreshCw } from "lucide-react";
 
 interface SolarHistoryChartProps {
   data: SolarChartData | null;
-  startDate: string;
-  endDate: string;
-  onStartDateChange: (val: string) => void;
-  onEndDateChange: (val: string) => void;
+  date: string;
+  onDateChange: (val: string) => void;
   onRefresh: () => void;
 }
 
@@ -81,10 +79,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export function SolarHistoryChart({ 
   data, 
-  startDate, 
-  endDate, 
-  onStartDateChange, 
-  onEndDateChange, 
+  date,
+  onDateChange, 
   onRefresh 
 }: SolarHistoryChartProps) {
   const chartData = useMemo(() => {
@@ -165,16 +161,9 @@ export function SolarHistoryChart({
             <Calendar className="w-4 h-4 text-primary" />
             <Input 
               type="date" 
-              value={startDate} 
-              onChange={(e) => onStartDateChange(e.target.value)} 
-              className="h-8 w-36 text-[11px] font-bold"
-            />
-            <span className="text-[10px] font-bold text-muted-foreground uppercase">au</span>
-            <Input 
-              type="date" 
-              value={endDate} 
-              onChange={(e) => onEndDateChange(e.target.value)} 
-              className="h-8 w-36 text-[11px] font-bold"
+              value={date} 
+              onChange={(e) => onDateChange(e.target.value)} 
+              className="h-8 w-40 text-[11px] font-bold"
             />
           </div>
           <Button size="sm" variant="secondary" onClick={onRefresh} className="h-8 px-3 gap-2">

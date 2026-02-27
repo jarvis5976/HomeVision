@@ -70,8 +70,7 @@ function DashboardContent() {
   const [view, setView] = useState<ViewType>('dashboard');
   
   const todayStr = new Date().toISOString().split('T')[0];
-  const [startDate, setStartDate] = useState(todayStr);
-  const [endDate, setEndDate] = useState(todayStr);
+  const [selectedDate, setSelectedDate] = useState(todayStr);
 
   useEffect(() => {
     setMounted(true);
@@ -81,18 +80,17 @@ function DashboardContent() {
     document.documentElement.classList.toggle('dark', initialTheme === 'dark');
   }, []);
 
-  // Désactiver le polling instant_from_mqtt.php quand on est sur l'historique
   useEffect(() => {
     setIsPaused(view === 'history');
   }, [view, setIsPaused]);
 
   const refreshHistory = useCallback(() => {
     fetchHistoryStats();
-    fetchSolarChart(startDate, endDate);
+    fetchSolarChart(selectedDate);
     fetchSolCastChart();
     fetchAnnualData();
     fetchDailyHistory();
-  }, [fetchHistoryStats, fetchSolarChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory, startDate, endDate]);
+  }, [fetchHistoryStats, fetchSolarChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory, selectedDate]);
 
   useEffect(() => {
     if (view === 'history') {
@@ -512,10 +510,8 @@ function DashboardContent() {
 
             <SolarHistoryChart 
               data={solarChartData} 
-              startDate={startDate}
-              endDate={endDate}
-              onStartDateChange={setStartDate}
-              onEndDateChange={setEndDate}
+              date={selectedDate}
+              onDateChange={setSelectedDate}
               onRefresh={refreshHistory}
             />
 

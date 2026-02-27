@@ -145,7 +145,7 @@ interface MQTTContextType {
   error: string | null;
   refreshAll: () => Promise<void>;
   fetchHistoryStats: () => Promise<void>;
-  fetchSolarChart: (start: string, end: string) => Promise<void>;
+  fetchSolarChart: (date: string) => Promise<void>;
   fetchSolCastChart: () => Promise<void>;
   fetchAnnualData: () => Promise<void>;
   fetchDailyHistory: () => Promise<void>;
@@ -362,7 +362,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [isSimulated]);
 
-  const fetchSolarChart = useCallback(async (start: string, end: string) => {
+  const fetchSolarChart = useCallback(async (date: string) => {
     if (isSimulated) {
       setSolarChartData(SOLAR_CHART_MOCK);
       return;
@@ -375,7 +375,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          date: start
+          date: date
         })
       });
       if (res.ok) {
@@ -484,7 +484,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isSimulated) {
       pollInterval.current = setInterval(runSimulation, 3000);
       fetchHistoryStats();
-      fetchSolarChart(new Date().toISOString().split('T')[0], new Date().toISOString().split('T')[0]);
+      fetchSolarChart(new Date().toISOString().split('T')[0]);
       fetchSolCastChart();
       fetchAnnualData();
       fetchDailyHistory();
