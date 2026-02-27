@@ -364,21 +364,21 @@ function DashboardContent() {
                           return (
                             <CarouselItem key={id}>
                               <Card className="border-border shadow-xl overflow-hidden bg-gradient-to-br from-card to-background relative">
-                                {isCharging && (
-                                  <div className="absolute top-4 right-4 flex flex-col items-end gap-1.5 z-10">
+                                <div className="absolute top-4 right-4 flex flex-col items-end gap-1.5 z-10">
+                                  {isCharging && (
                                     <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5 animate-pulse">
                                       En charge
                                     </Badge>
-                                    {remainingTime && (
-                                      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-2 py-1 flex items-center gap-1.5 shadow-sm backdrop-blur-sm">
-                                        <Clock className="w-3 h-3 text-emerald-500" />
-                                        <span className="text-[9px] text-emerald-500 font-black uppercase tracking-widest whitespace-nowrap">
-                                          {remainingTime}
-                                        </span>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
+                                  )}
+                                  {isCharging && remainingTime && (
+                                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-2 py-1 flex items-center gap-1.5 shadow-sm backdrop-blur-sm">
+                                      <Clock className="w-3 h-3 text-emerald-500" />
+                                      <span className="text-[9px] text-emerald-500 font-black uppercase tracking-widest whitespace-nowrap">
+                                        {remainingTime}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
                                 <CardHeader className="pb-2">
                                   <div className="flex items-center justify-between">
                                     <CardTitle className="text-base font-black flex items-center gap-2">
@@ -403,7 +403,7 @@ function DashboardContent() {
                                         <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest flex items-center gap-1.5 mt-1">
                                           <MapPin className="w-3 h-3 text-muted-foreground/60" />
                                           <span className="truncate">
-                                            {typeof car.location === 'object' ? (car.location.name || car.location.address || `${car.location.latitude?.toFixed(2)}, ${car.location.longitude?.toFixed(2)}`) : car.location}
+                                            {((typeof car.location === 'object' ? car.location.name : car.location) || "").toString().toLowerCase() === 'home' ? "Maison" : "Absent"}
                                           </span>
                                         </p>
                                       )}

@@ -193,7 +193,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       display_name: "E-Ty",
       charge: false,
       charger_time_charging_minutes: 0,
-      location: { name: "Maison" }
+      location: { name: "Home" }
     },
     volvo: {
       carModel: "Volvo XC40",
