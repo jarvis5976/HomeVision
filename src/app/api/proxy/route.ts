@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
@@ -40,17 +39,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const contentType = request.headers.get('content-type');
-    let bodyData;
+    const bodyData = await request.json();
 
-    if (contentType?.includes('application/json')) {
-      bodyData = await request.json();
-    } else {
-      // Si ce n'est pas du JSON, on essaie de récupérer le texte brut ou on ignore
-      bodyData = await request.text();
-    }
-
-    // Préparation du corps pour l'API PHP cible (souvent x-www-form-urlencoded)
+    // Préparation du corps pour l'API PHP cible (x-www-form-urlencoded)
     const formData = new URLSearchParams();
     if (typeof bodyData === 'object') {
       for (const key in bodyData) {
