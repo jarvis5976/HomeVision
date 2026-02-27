@@ -132,8 +132,8 @@ function DashboardContent() {
                       <CarouselContent>
                         {Object.entries(latestData.voiture).map(([id, car]) => {
                           const isCharging = car.charge === true;
-                          const locStr = (typeof car.location === 'object' ? car.location.name : car.location) || "";
-                          const isHome = locStr.toString().toLowerCase() === 'home';
+                          const locStr = (car.localisation || (typeof car.location === 'object' ? car.location.name : car.location) || "").toString().toLowerCase();
+                          const isHome = locStr === 'home' || locStr === 'maison';
                           return (
                             <CarouselItem key={id}>
                               <Card className="border-border shadow-xl overflow-hidden bg-gradient-to-br from-card to-background relative h-full">

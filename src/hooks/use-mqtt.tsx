@@ -12,6 +12,7 @@ export interface CarData {
   carModel?: string;
   display_name?: string;
   charger_time_charging_minutes?: number;
+  localisation?: string;
   location?: {
     name?: string;
     address?: string;
@@ -129,8 +130,32 @@ const BASE_MOCK_DATA: HomeDashboardData = {
   energy: { total: { all: 4686, maison: 3365, annexe: 1289 }, detail: {} },
   chauffeEau: { total: 1255.2, maison: 1253, annexe: 2.2 },
   voiture: {
-    tesla: { carModel: "Tesla Model Y", battery_level: 81, odometer: 63401, range: 424, charge: false, location: { name: "home" } },
-    volvo: { carModel: "Volvo XC40", batteryLevel: 59, odometer: 38316, range: 230, charge: true, charger_time_charging_minutes: 85, location: { name: "Travail" } }
+    "tesla": {
+      "batteryLevel": 54,
+      "odometer": 64148,
+      "range": 262,
+      "charge": false,
+      "carModel": "Tesla Model Y",
+      "charger_time_charging_minutes": 0,
+      "localisation": "not_home"
+    },
+    "volvo": {
+      "batteryLevel": 59,
+      "odometer": 38316,
+      "range": 230,
+      "charge": false,
+      "carModel": "Volvo XC40",
+      "localisation": "home"
+    },
+    "zoe": {
+      "batteryLevel": 76,
+      "odometer": 51687,
+      "range": 242,
+      "charge": true,
+      "carModel": "Renault Zoé",
+      "charger_time_charging_minutes": 65,
+      "localisation": "home"
+    }
   },
   zenFlex: { couleurJourJ: "jour Eco", couleurJourJ1: "jour Sobriété" },
   solCast: { today: 8.75, tomorrow: 8.03 }
