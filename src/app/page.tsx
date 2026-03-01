@@ -65,30 +65,39 @@ function DashboardContent() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
-      <header className="h-20 border-b border-border flex items-center justify-between px-8 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-            <Home className="w-6 h-6 text-primary-foreground" />
+      <header className="h-20 border-b border-border flex items-center justify-between px-4 sm:px-8 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
+            <Home className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
           </div>
-          <h1 className="text-xl font-black tracking-tight uppercase">HomeVision</h1>
+          <h1 className="text-sm sm:text-xl font-black tracking-tight uppercase truncate">HomeVision</h1>
         </div>
 
-        <div className="flex items-center gap-4">
-          <Button variant={view === 'history' ? "secondary" : "outline"} size="sm" onClick={() => setView(view === 'history' ? 'dashboard' : 'history')} className="flex items-center gap-2 font-black uppercase text-[10px] tracking-widest">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Button 
+            variant={view === 'history' ? "secondary" : "outline"} 
+            size="sm" 
+            onClick={() => setView(view === 'history' ? 'dashboard' : 'history')} 
+            className="flex items-center gap-2 font-black uppercase text-[10px] tracking-widest px-2 sm:px-3"
+          >
             {view === 'history' ? <ArrowLeft className="w-4 h-4" /> : <History className="w-4 h-4" />}
-            {view === 'history' ? "Tableau de Bord" : "Historique"}
+            <span className="hidden sm:inline">{view === 'history' ? "Tableau de Bord" : "Historique"}</span>
           </Button>
-          <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full w-10 h-10">
-            {theme === 'dark' ? <SunMedium className="w-5 h-5 text-orange-400" /> : <Moon className="w-5 h-5 text-primary" />}
+          
+          <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full w-8 h-8 sm:w-10 sm:h-10 shrink-0">
+            {theme === 'dark' ? <SunMedium className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" /> : <Moon className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />}
           </Button>
-          <div className="flex items-center gap-4 bg-secondary/30 p-2 rounded-xl border border-border">
-            <Switch id="mode" checked={!isSimulated} onCheckedChange={v => setIsSimulated(!v)} />
-            <Label htmlFor="mode" className="text-[10px] font-black uppercase cursor-pointer">{isSimulated ? "Simulation" : "Réel"}</Label>
+
+          <div className="flex items-center gap-2 sm:gap-4 bg-secondary/30 p-1.5 sm:p-2 rounded-xl border border-border">
+            <Switch id="mode" checked={!isSimulated} onCheckedChange={v => setIsSimulated(!v)} className="scale-75 sm:scale-100" />
+            <Label htmlFor="mode" className="text-[10px] font-black uppercase cursor-pointer hidden md:inline">
+              {isSimulated ? "Simulation" : "Réel"}
+            </Label>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 p-8 max-w-7xl mx-auto w-full space-y-8 animate-in fade-in slide-up duration-500">
+      <main className="flex-1 p-4 sm:p-8 max-w-7xl mx-auto w-full space-y-8 animate-in fade-in slide-up duration-500">
         {view === 'dashboard' ? (
           <>
             <section className="flex flex-col sm:flex-row items-center justify-between gap-6 p-6 bg-secondary/10 rounded-3xl border border-border/50">
@@ -129,7 +138,7 @@ function DashboardContent() {
                     <div className="space-y-3"><div className="flex justify-between text-xs font-black uppercase"><span>Maison Principale</span><span>{latestData?.energy?.total?.maison ?? 0} W</span></div><Progress value={((latestData?.energy?.total?.maison ?? 0) / (latestData?.energy?.total?.all || 1)) * 100} className="h-3" /></div>
                     <div className="space-y-3"><div className="flex justify-between text-xs font-black uppercase"><span>Annexe</span><span>{latestData?.energy?.total?.annexe ?? 0} W</span></div><Progress value={((latestData?.energy?.total?.annexe ?? 0) / (latestData?.energy?.total?.all || 1)) * 100} className="h-3" /></div>
                     <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      <div className="p-5 bg-secondary/20 rounded-2xl border border-border">
+                      <div className="p-4 sm:p-5 bg-secondary/20 rounded-2xl border border-border">
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex items-center gap-2">
                             <Flame className={cn("w-3.5 h-3.5", latestData?.chauffeEau?.cumulusActif ? "text-orange-500" : "text-muted-foreground")} />
@@ -139,63 +148,63 @@ function DashboardContent() {
                             Douches : {latestData?.chauffeEau?.cumulusDouche ?? 0}
                           </Badge>
                         </div>
-                        <div className="flex items-center gap-4 sm:gap-6">
-                          <div className="flex items-baseline gap-2 shrink-0">
-                            <span className="text-3xl font-black tracking-tighter">{latestData?.chauffeEau?.total ?? 0}</span>
-                            <span className="text-xs font-bold text-muted-foreground uppercase">W</span>
+                        <div className="flex items-center gap-3 sm:gap-6">
+                          <div className="flex items-baseline gap-1 sm:gap-2 shrink-0">
+                            <span className="text-2xl sm:text-3xl font-black tracking-tighter">{latestData?.chauffeEau?.total ?? 0}</span>
+                            <span className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase">W</span>
                           </div>
                           
                           <div className="w-px h-10 bg-border/60 shrink-0" />
 
                           <div className="flex flex-col justify-center gap-1 overflow-hidden">
                             <div className="flex items-center gap-2 leading-none whitespace-nowrap">
-                              <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison :</span>
-                              <span className="text-[11px] font-black text-foreground">
-                                {latestData?.chauffeEau?.maison ?? 0} <span className="text-[9px] font-normal opacity-70">W</span>
+                              <span className="text-[8px] sm:text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison :</span>
+                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">
+                                {latestData?.chauffeEau?.maison ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">W</span>
                               </span>
                             </div>
                             <div className="flex items-center gap-2 leading-none whitespace-nowrap">
-                              <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe :</span>
-                              <span className="text-[11px] font-black text-foreground">
-                                {latestData?.chauffeEau?.annexe ?? 0} <span className="text-[9px] font-normal opacity-70">W</span>
+                              <span className="text-[8px] sm:text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe :</span>
+                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">
+                                {latestData?.chauffeEau?.annexe ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">W</span>
                               </span>
                             </div>
                           </div>
                         </div>
                       </div>
                       
-                      <div className="p-5 bg-secondary/20 rounded-2xl border border-border">
+                      <div className="p-4 sm:p-5 bg-secondary/20 rounded-2xl border border-border">
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex items-center gap-2">
                             <Droplets className="w-3.5 h-3.5 text-blue-400" />
                             <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Eau</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-4 sm:gap-6">
-                          <div className="flex items-baseline gap-2 shrink-0">
-                            <span className="text-3xl font-black tracking-tighter">{latestData?.eau?.total ?? 0}</span>
-                            <span className="text-xs font-bold text-muted-foreground uppercase">m³</span>
+                        <div className="flex items-center gap-3 sm:gap-6">
+                          <div className="flex items-baseline gap-1 sm:gap-2 shrink-0">
+                            <span className="text-2xl sm:text-3xl font-black tracking-tighter">{latestData?.eau?.total ?? 0}</span>
+                            <span className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase">m³</span>
                           </div>
                           
                           <div className="w-px h-10 bg-border/60 shrink-0" />
 
                           <div className="flex flex-col justify-center gap-1 overflow-hidden">
                             <div className="flex items-center gap-2 leading-none whitespace-nowrap">
-                              <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Compteur :</span>
-                              <span className="text-[11px] font-black text-foreground">
-                                {latestData?.eau?.compteur ?? 0} <span className="text-[9px] font-normal opacity-70">m³</span>
+                              <span className="text-[8px] sm:text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Compteur :</span>
+                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">
+                                {latestData?.eau?.compteur ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">m³</span>
                               </span>
                             </div>
                             <div className="flex items-center gap-2 leading-none whitespace-nowrap">
-                              <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison :</span>
-                              <span className="text-[11px] font-black text-foreground">
-                                {latestData?.eau?.maison ?? 0} <span className="text-[9px] font-normal opacity-70">m³</span>
+                              <span className="text-[8px] sm:text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison :</span>
+                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">
+                                {latestData?.eau?.maison ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">m³</span>
                               </span>
                             </div>
                             <div className="flex items-center gap-2 leading-none whitespace-nowrap">
-                              <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe :</span>
-                              <span className="text-[11px] font-black text-foreground">
-                                {latestData?.eau?.annexe ?? 0} <span className="text-[9px] font-normal opacity-70">m³</span>
+                              <span className="text-[8px] sm:text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe :</span>
+                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">
+                                {latestData?.eau?.annexe ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">m³</span>
                               </span>
                             </div>
                           </div>
