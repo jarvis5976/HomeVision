@@ -139,22 +139,22 @@ function DashboardContent() {
                             Douches : {latestData?.chauffeEau?.cumulusDouche ?? 0}
                           </Badge>
                         </div>
-                        <div className="flex items-center gap-6">
-                          <div className="flex items-baseline gap-2">
+                        <div className="flex items-center gap-4 sm:gap-6">
+                          <div className="flex items-baseline gap-2 shrink-0">
                             <span className="text-3xl font-black tracking-tighter">{latestData?.chauffeEau?.total ?? 0}</span>
                             <span className="text-xs font-bold text-muted-foreground uppercase">W</span>
                           </div>
                           
-                          <div className="w-px h-10 bg-border/60" />
+                          <div className="w-px h-10 bg-border/60 shrink-0" />
 
-                          <div className="flex flex-col justify-center gap-1">
-                            <div className="flex items-center gap-2 leading-none">
+                          <div className="flex flex-col justify-center gap-1 overflow-hidden">
+                            <div className="flex items-center gap-2 leading-none whitespace-nowrap">
                               <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison :</span>
                               <span className="text-[11px] font-black text-foreground">
                                 {latestData?.chauffeEau?.maison ?? 0} <span className="text-[9px] font-normal opacity-70">W</span>
                               </span>
                             </div>
-                            <div className="flex items-center gap-2 leading-none">
+                            <div className="flex items-center gap-2 leading-none whitespace-nowrap">
                               <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe :</span>
                               <span className="text-[11px] font-black text-foreground">
                                 {latestData?.chauffeEau?.annexe ?? 0} <span className="text-[9px] font-normal opacity-70">W</span>
@@ -168,31 +168,31 @@ function DashboardContent() {
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex items-center gap-2">
                             <Droplets className="w-3.5 h-3.5 text-blue-400" />
-                            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Eau Totale</p>
+                            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Eau</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-6">
-                          <div className="flex items-baseline gap-2">
+                        <div className="flex items-center gap-4 sm:gap-6">
+                          <div className="flex items-baseline gap-2 shrink-0">
                             <span className="text-3xl font-black tracking-tighter">{latestData?.eau?.total ?? 0}</span>
                             <span className="text-xs font-bold text-muted-foreground uppercase">m³</span>
                           </div>
                           
-                          <div className="w-px h-10 bg-border/60" />
+                          <div className="w-px h-10 bg-border/60 shrink-0" />
 
-                          <div className="flex flex-col justify-center gap-1">
-                            <div className="flex items-center gap-2 leading-none">
+                          <div className="flex flex-col justify-center gap-1 overflow-hidden">
+                            <div className="flex items-center gap-2 leading-none whitespace-nowrap">
                               <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Compteur :</span>
                               <span className="text-[11px] font-black text-foreground">
                                 {latestData?.eau?.compteur ?? 0} <span className="text-[9px] font-normal opacity-70">m³</span>
                               </span>
                             </div>
-                            <div className="flex items-center gap-2 leading-none">
+                            <div className="flex items-center gap-2 leading-none whitespace-nowrap">
                               <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison :</span>
                               <span className="text-[11px] font-black text-foreground">
                                 {latestData?.eau?.maison ?? 0} <span className="text-[9px] font-normal opacity-70">m³</span>
                               </span>
                             </div>
-                            <div className="flex items-center gap-2 leading-none">
+                            <div className="flex items-center gap-2 leading-none whitespace-nowrap">
                               <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe :</span>
                               <span className="text-[11px] font-black text-foreground">
                                 {latestData?.eau?.annexe ?? 0} <span className="text-[9px] font-normal opacity-70">m³</span>
