@@ -100,7 +100,7 @@ export interface HomeDashboardData {
   zenFlex?: { couleurJourJ: string; couleurJourJ1: string };
   solCast?: { today: number; tomorrow: number };
   chauffeEau?: { total: number; maison: number; annexe: number; cumulusActif?: boolean; cumulusDouche?: number };
-  eau?: { total: number };
+  eau?: { total: number; compteur?: number; maison?: number; annexe?: number };
 }
 
 interface MQTTContextType {
@@ -131,7 +131,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
   battery: { watts: 2647, soc: 83, stateLabel: "En charge", voltage: 50.63, state: 1 },
   energy: { total: { all: 4686, maison: 3365, annexe: 1289 }, detail: {} },
   chauffeEau: { maison: 0, annexe: 1190.9, total: 1190.9, cumulusDouche: 3, cumulusActif: false },
-  eau: { total: 456.78 },
+  eau: { total: 1130.5, compteur: 1217.76, maison: 798.63, annexe: 331.88 },
   voiture: {
     "tesla": {
       "batteryLevel": 54,

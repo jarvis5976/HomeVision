@@ -158,7 +158,42 @@ function DashboardContent() {
                           </div>
                         </div>
                       </div>
-                      <div className="p-4 bg-secondary/20 rounded-2xl border border-border"><p className="text-[10px] text-muted-foreground uppercase font-black mb-3">Eau Totale</p><p className="text-2xl font-black flex items-center gap-2 mb-4"><Droplets className="w-5 h-5 text-blue-400" />{latestData?.eau?.total ?? 0} m³</p></div>
+                      
+                      <div className="p-5 bg-secondary/20 rounded-2xl border border-border">
+                        <div className="flex justify-between items-start mb-4">
+                          <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Eau Totale</p>
+                        </div>
+                        <div className="flex items-center gap-6">
+                          <div className="flex items-baseline gap-2">
+                            <Droplets className="w-6 h-6 text-blue-400" />
+                            <span className="text-3xl font-black tracking-tighter">{latestData?.eau?.total ?? 0}</span>
+                            <span className="text-xs font-bold text-muted-foreground uppercase">m³</span>
+                          </div>
+                          
+                          <div className="w-px h-10 bg-border/60" />
+
+                          <div className="flex flex-col justify-center gap-1">
+                            <div className="flex items-center gap-2 leading-none">
+                              <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Compteur :</span>
+                              <span className="text-[11px] font-black text-foreground">
+                                {latestData?.eau?.compteur ?? 0} <span className="text-[9px] font-normal opacity-70">m³</span>
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 leading-none">
+                              <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison :</span>
+                              <span className="text-[11px] font-black text-foreground">
+                                {latestData?.eau?.maison ?? 0} <span className="text-[9px] font-normal opacity-70">m³</span>
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 leading-none">
+                              <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe :</span>
+                              <span className="text-[11px] font-black text-foreground">
+                                {latestData?.eau?.annexe ?? 0} <span className="text-[9px] font-normal opacity-70">m³</span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
