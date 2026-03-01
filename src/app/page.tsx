@@ -131,14 +131,16 @@ function DashboardContent() {
                     <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
                       <div className="p-5 bg-secondary/20 rounded-2xl border border-border">
                         <div className="flex justify-between items-start mb-4">
-                          <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Chauffe-eau</p>
+                          <div className="flex items-center gap-2">
+                            <Flame className={cn("w-3.5 h-3.5", latestData?.chauffeEau?.cumulusActif ? "text-orange-500" : "text-muted-foreground")} />
+                            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Chauffe-eau</p>
+                          </div>
                           <Badge variant="outline" className="text-[8px] font-black uppercase px-2 py-0 h-4 border-primary/30 text-primary bg-primary/5">
                             Douches : {latestData?.chauffeEau?.cumulusDouche ?? 0}
                           </Badge>
                         </div>
                         <div className="flex items-center gap-6">
                           <div className="flex items-baseline gap-2">
-                            <Flame className={cn("w-6 h-6", latestData?.chauffeEau?.cumulusActif ? "text-orange-500" : "text-muted-foreground")} />
                             <span className="text-3xl font-black tracking-tighter">{latestData?.chauffeEau?.total ?? 0}</span>
                             <span className="text-xs font-bold text-muted-foreground uppercase">W</span>
                           </div>
@@ -164,11 +166,13 @@ function DashboardContent() {
                       
                       <div className="p-5 bg-secondary/20 rounded-2xl border border-border">
                         <div className="flex justify-between items-start mb-4">
-                          <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Eau Totale</p>
+                          <div className="flex items-center gap-2">
+                            <Droplets className="w-3.5 h-3.5 text-blue-400" />
+                            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Eau Totale</p>
+                          </div>
                         </div>
                         <div className="flex items-center gap-6">
                           <div className="flex items-baseline gap-2">
-                            <Droplets className="w-6 h-6 text-blue-400" />
                             <span className="text-3xl font-black tracking-tighter">{latestData?.eau?.total ?? 0}</span>
                             <span className="text-xs font-bold text-muted-foreground uppercase">m³</span>
                           </div>
@@ -210,8 +214,8 @@ function DashboardContent() {
                       <CarouselContent>
                         {Object.entries(latestData.voiture).map(([id, car]) => {
                           const isCharging = car.charge === true;
-                          const locStr = (car.localisation || (typeof car.location === 'object' ? car.location.name : car.location) || "").toString().toLowerCase();
-                          const isHome = locStr === 'home' || locStr === 'maison';
+                          const locVal = (car.localisation || (typeof car.location === 'object' ? car.location.name : car.location) || "").toString().toLowerCase();
+                          const isHome = locVal === 'home';
                           return (
                             <CarouselItem key={id}>
                               <Card className="border-border shadow-xl overflow-hidden bg-gradient-to-br from-card to-background relative h-full">
