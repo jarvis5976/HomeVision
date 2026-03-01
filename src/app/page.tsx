@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -133,11 +132,9 @@ function DashboardContent() {
                       <div className="p-5 bg-secondary/20 rounded-2xl border border-border">
                         <div className="flex justify-between items-start mb-4">
                           <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Chauffe-eau</p>
-                          {latestData?.chauffeEau?.cumulusActif !== undefined && (
-                            <Badge variant={latestData.chauffeEau.cumulusActif ? "default" : "secondary"} className={cn("text-[8px] font-black uppercase px-2 py-0 h-4 border-none", latestData.chauffeEau.cumulusActif ? "bg-emerald-600 text-white" : "bg-secondary/40 text-muted-foreground")}>
-                              {latestData.chauffeEau.cumulusActif ? "Actif" : "Inactif"}
-                            </Badge>
-                          )}
+                          <Badge variant="outline" className="text-[8px] font-black uppercase px-2 py-0 h-4 border-primary/30 text-primary bg-primary/5">
+                            Douches : {latestData?.chauffeEau?.cumulusDouche ?? 0}
+                          </Badge>
                         </div>
                         <div className="flex items-center gap-6">
                           <div className="flex items-baseline gap-2">
@@ -148,11 +145,17 @@ function DashboardContent() {
                           
                           <div className="w-px h-10 bg-border/60" />
 
-                          <div className="flex flex-col justify-center">
+                          <div className="flex flex-col justify-center gap-1">
                             <div className="flex items-center gap-2 leading-none">
-                              <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Douches :</span>
+                              <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison :</span>
                               <span className="text-[11px] font-black text-foreground">
-                                {latestData?.chauffeEau?.cumulusDouche ?? 0}
+                                {latestData?.chauffeEau?.maison ?? 0} <span className="text-[9px] font-normal opacity-70">W</span>
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 leading-none">
+                              <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe :</span>
+                              <span className="text-[11px] font-black text-foreground">
+                                {latestData?.chauffeEau?.annexe ?? 0} <span className="text-[9px] font-normal opacity-70">W</span>
                               </span>
                             </div>
                           </div>
