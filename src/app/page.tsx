@@ -105,7 +105,19 @@ function DashboardContent() {
 
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <MetricCard title="Réseau Electrique" value={latestData?.grid?.watts ?? 0} unit="W" icon={Zap} valueExtra={<Badge variant="outline" className="text-[10px] font-black uppercase px-2 py-0 border-primary/30 text-primary">{latestData?.grid?.sens ?? "Achat"}</Badge>} />
-              <MetricCard title="Production Solaire" value={latestData?.production?.total ?? 0} unit="W" icon={Sun} detailsLayout="side" details={[{ label: "SolarEdge", value: latestData?.production?.detail?.solarEdge ?? 0, unit: "W" }, { label: "ApSystems", value: latestData?.production?.detail?.apSystems ?? 0, unit: "W" }]} />
+              <MetricCard 
+                title="Production Solaire" 
+                titleExtra={latestData?.production?.percentageProduction !== undefined && (
+                  <Badge className="bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5 ml-2">
+                    {latestData.production.percentageProduction}%
+                  </Badge>
+                )}
+                value={latestData?.production?.total ?? 0} 
+                unit="W" 
+                icon={Sun} 
+                detailsLayout="side" 
+                details={[{ label: "SolarEdge", value: latestData?.production?.detail?.solarEdge ?? 0, unit: "W" }, { label: "ApSystems", value: latestData?.production?.detail?.apSystems ?? 0, unit: "W" }]} 
+              />
               <MetricCard title="Batterie" value={latestData?.battery?.soc ?? 0} unit="%" icon={BatteryIcon} titleExtra={<Badge className="bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5 ml-2">{latestData?.battery?.stateLabel}</Badge>} detailsLayout="side" details={[{ label: "Puissance", value: Math.abs(latestData?.battery?.watts ?? 0), unit: "W" }, { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" }]} />
               <MetricCard title="Consommation" value={latestData?.energy?.total?.all ?? 0} unit="W" icon={Activity} detailsLayout="side" details={[{ label: "Maison", value: latestData?.energy?.total?.maison ?? 0, unit: "W" }, { label: "Annexe", value: latestData?.energy?.total?.annexe ?? 0, unit: "W" }]} />
             </section>

@@ -63,16 +63,16 @@ export type SolCastChartData = [
   { Energy: number[] }
 ];
 
-export interface AnnualMetricItem {
-  mois: string;
-  [year: string]: number | string;
-}
-
 export interface AnnualData {
   production: AnnualMetricItem[];
   achat: AnnualMetricItem[];
   vente: AnnualMetricItem[];
   autoConsommation: AnnualMetricItem[];
+}
+
+export interface AnnualMetricItem {
+  mois: string;
+  [year: string]: number | string;
 }
 
 export interface DailyHistoryItem {
@@ -93,7 +93,7 @@ export interface DailyHistoryData {
 
 export interface HomeDashboardData {
   grid?: { watts: number; sens: string; arrow: string };
-  production?: { total: number; detail: any };
+  production?: { total: number; detail: any; percentageProduction?: number };
   battery?: { watts: number; soc: number; stateLabel: string; voltage: number; state: number };
   voiture?: Record<string, CarData>;
   energy?: { total: { all: number; maison: number; annexe: number }; detail: any };
@@ -127,7 +127,7 @@ const MQTTContext = createContext<MQTTContextType | undefined>(undefined);
 
 const BASE_MOCK_DATA: HomeDashboardData = {
   grid: { watts: 7301, sens: "Achat", arrow: "" },
-  production: { total: 32, detail: { solarEdge: 0, apSystems: 32 } },
+  production: { total: 32, detail: { solarEdge: 0, apSystems: 32 }, percentageProduction: 85 },
   battery: { watts: 2647, soc: 83, stateLabel: "En charge", voltage: 50.63, state: 1 },
   energy: { total: { all: 4686, maison: 3365, annexe: 1289 }, detail: {} },
   chauffeEau: { total: 1255.2, maison: 1253, annexe: 2.2 },
@@ -139,7 +139,6 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       "range": 262,
       "charge": false,
       "carModel": "Tesla Model Y",
-      "charger_time_charging_minutes": 0,
       "localisation": "not_home"
     },
     "volvo": {
