@@ -130,7 +130,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
   production: { total: 32, detail: { solarEdge: 0, apSystems: 32 }, percentageProduction: 85 },
   battery: { watts: 2647, soc: 83, stateLabel: "En charge", voltage: 50.63, state: 1 },
   energy: { total: { all: 4686, maison: 3365, annexe: 1289 }, detail: {} },
-  chauffeEau: { total: 1255.2, maison: 1253, annexe: 2.2, cumulusActif: true, cumulusDouche: 3 },
+  chauffeEau: { maison: 0, annexe: 1190.9, total: 1190.9, cumulusDouche: 3, cumulusActif: false },
   eau: { total: 456.78 },
   voiture: {
     "tesla": {
