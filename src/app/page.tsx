@@ -178,14 +178,6 @@ function DashboardContent() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
-                <Card className="border-border bg-card shadow-lg">
-                  <CardHeader><CardTitle className="text-lg font-black flex items-center gap-2"><Zap className="w-5 h-5 text-primary" /> Répartition Énergie</CardTitle></CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="space-y-3"><div className="flex justify-between text-xs font-black uppercase"><span>Maison Principale</span><span>{latestData?.energy?.total?.maison ?? 0} W</span></div><Progress value={((latestData?.energy?.total?.maison ?? 0) / (latestData?.energy?.total?.all || 1)) * 100} className="h-3" /></div>
-                    <div className="space-y-3"><div className="flex justify-between text-xs font-black uppercase"><span>Annexe</span><span>{latestData?.energy?.total?.annexe ?? 0} W</span></div><Progress value={((latestData?.energy?.total?.annexe ?? 0) / (latestData?.energy?.total?.all || 1)) * 100} className="h-3" /></div>
-                  </CardContent>
-                </Card>
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <MetricCard 
                     title="Chauffe-eau"
