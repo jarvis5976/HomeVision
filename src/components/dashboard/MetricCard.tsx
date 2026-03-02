@@ -25,6 +25,7 @@ interface MetricCardProps {
   unit?: string;
   valueExtra?: React.ReactNode;
   icon: LucideIcon;
+  iconClassName?: string;
   trend?: number;
   status?: 'online' | 'offline' | 'alert';
   details?: DetailItem[];
@@ -41,6 +42,7 @@ export function MetricCard({
   unit, 
   valueExtra,
   icon: Icon, 
+  iconClassName,
   trend, 
   status = 'online', 
   details, 
@@ -55,7 +57,7 @@ export function MetricCard({
       <CardContent className="p-5 flex flex-col h-full">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 bg-primary/10 rounded-lg">
-            <Icon className="w-5 h-5 text-primary" />
+            <Icon className={cn("w-5 h-5", iconClassName || "text-primary")} />
           </div>
           <div className="flex flex-col">
             <div className="flex items-center gap-2">

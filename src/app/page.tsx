@@ -73,6 +73,16 @@ function DashboardContent() {
   const solarEdgePct = Math.round(((latestData?.production?.detail?.solarEdge || 0) / totalProd) * 100);
   const apSystemsPct = 100 - solarEdgePct;
 
+  // Calcul distribution chauffe-eau
+  const chauffeEauTotal = latestData?.chauffeEau?.total || 1;
+  const chauffeEauMaisonPct = Math.round(((latestData?.chauffeEau?.maison || 0) / chauffeEauTotal) * 100);
+  const chauffeEauAnnexePct = 100 - chauffeEauMaisonPct;
+
+  // Calcul distribution eau
+  const eauTotal = latestData?.eau?.total || 1;
+  const eauMaisonPct = Math.round(((latestData?.eau?.maison || 0) / eauTotal) * 100);
+  const eauAnnexePct = 100 - eauMaisonPct;
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
       <header className="h-20 border-b border-border flex items-center justify-between px-4 sm:px-8 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
@@ -174,68 +184,49 @@ function DashboardContent() {
                     <div className="space-y-3"><div className="flex justify-between text-xs font-black uppercase"><span>Annexe</span><span>{latestData?.energy?.total?.annexe ?? 0} W</span></div><Progress value={((latestData?.energy?.total?.annexe ?? 0) / (latestData?.energy?.total?.all || 1)) * 100} className="h-3" /></div>
                     
                     <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      <div className="p-4 sm:p-5 bg-secondary/20 rounded-2xl border border-border">
-                        <div className="flex justify-between items-start mb-4">
-                          <div className="flex items-center gap-2">
-                            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest flex items-center gap-2">
-                              <Flame className={cn("w-3.5 h-3.5", latestData?.chauffeEau?.cumulusActif ? "text-orange-500" : "text-muted-foreground")} />
-                              Chauffe-eau
-                            </p>
-                          </div>
-                          <Badge variant="outline" className="text-[8px] font-black uppercase px-2 py-0 h-4 border-primary/30 text-primary bg-primary/5">
+                      <MetricCard 
+                        title="Chauffe-eau"
+                        titleExtra={
+                          <Badge variant="outline" className="text-[10px] font-black uppercase px-2 py-0 border-primary/30 text-primary">
                             Douches : {latestData?.chauffeEau?.cumulusDouche ?? 0}
                           </Badge>
-                        </div>
-                        <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
-                          <div className="flex items-baseline gap-1 shrink-0">
-                            <span className="text-2xl sm:text-3xl font-black tracking-tighter">{latestData?.chauffeEau?.total ?? 0}</span>
-                            <span className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase">W</span>
-                          </div>
-                          <div className="w-px h-10 bg-border/60 shrink-0" />
-                          <div className="flex flex-col justify-center gap-1 overflow-hidden">
-                            <div className="flex items-center gap-2 leading-none whitespace-nowrap">
-                              <span className="text-[8px] sm:text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison :</span>
-                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">{latestData?.chauffeEau?.maison ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">W</span></span>
-                            </div>
-                            <div className="flex items-center gap-2 leading-none whitespace-nowrap">
-                              <span className="text-[8px] sm:text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe :</span>
-                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">{latestData?.chauffeEau?.annexe ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">W</span></span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                        }
+                        value={latestData?.chauffeEau?.total ?? 0}
+                        unit="W"
+                        icon={Flame}
+                        iconClassName={latestData?.chauffeEau?.cumulusActif ? "text-orange-500" : "text-muted-foreground"}
+                        detailsLayout="side"
+                        details={[
+                          { label: "Maison", value: latestData?.chauffeEau?.maison ?? 0, unit: "W" },
+                          { label: "Annexe", value: latestData?.chauffeEau?.annexe ?? 0, unit: "W" }
+                        ]}
+                        distribution={{
+                          leftLabel: "Maison",
+                          leftValue: chauffeEauMaisonPct,
+                          rightLabel: "Annexe",
+                          rightValue: chauffeEauAnnexePct
+                        }}
+                      />
                       
-                      <div className="p-4 sm:p-5 bg-secondary/20 rounded-2xl border border-border">
-                        <div className="flex justify-between items-start mb-4">
-                          <div className="flex items-center gap-2">
-                            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest flex items-center gap-2">
-                              <Droplets className="w-3.5 h-3.5 text-blue-400" />
-                              Eau
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
-                          <div className="flex items-baseline gap-1 shrink-0">
-                            <span className="text-2xl sm:text-3xl font-black tracking-tighter">{latestData?.eau?.total ?? 0}</span>
-                            <span className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase">m³</span>
-                          </div>
-                          <div className="w-px h-10 bg-border/60 shrink-0" />
-                          <div className="flex flex-col justify-center gap-1 overflow-hidden">
-                            <div className="flex items-center gap-2 leading-none whitespace-nowrap">
-                              <span className="text-[8px] sm:text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Compteur :</span>
-                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">{latestData?.eau?.compteur ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">m³</span></span>
-                            </div>
-                            <div className="flex items-center gap-2 leading-none whitespace-nowrap">
-                              <span className="text-[8px] sm:text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison :</span>
-                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">{latestData?.eau?.maison ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">m³</span></span>
-                            </div>
-                            <div className="flex items-center gap-2 leading-none whitespace-nowrap">
-                              <span className="text-[8px] sm:text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe :</span>
-                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">{latestData?.eau?.annexe ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">m³</span></span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      <MetricCard 
+                        title="Eau"
+                        value={latestData?.eau?.total ?? 0}
+                        unit="m³"
+                        icon={Droplets}
+                        iconClassName="text-blue-400"
+                        detailsLayout="side"
+                        details={[
+                          { label: "Compteur", value: latestData?.eau?.compteur ?? 0, unit: "m³" },
+                          { label: "Maison", value: latestData?.eau?.maison ?? 0, unit: "m³" },
+                          { label: "Annexe", value: latestData?.eau?.annexe ?? 0, unit: "m³" }
+                        ]}
+                        distribution={{
+                          leftLabel: "Maison",
+                          leftValue: eauMaisonPct,
+                          rightLabel: "Annexe",
+                          rightValue: eauAnnexePct
+                        }}
+                      />
                     </div>
                   </CardContent>
                 </Card>
