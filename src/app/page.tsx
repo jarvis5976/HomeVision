@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -182,54 +183,54 @@ function DashboardContent() {
                   <CardContent className="space-y-6">
                     <div className="space-y-3"><div className="flex justify-between text-xs font-black uppercase"><span>Maison Principale</span><span>{latestData?.energy?.total?.maison ?? 0} W</span></div><Progress value={((latestData?.energy?.total?.maison ?? 0) / (latestData?.energy?.total?.all || 1)) * 100} className="h-3" /></div>
                     <div className="space-y-3"><div className="flex justify-between text-xs font-black uppercase"><span>Annexe</span><span>{latestData?.energy?.total?.annexe ?? 0} W</span></div><Progress value={((latestData?.energy?.total?.annexe ?? 0) / (latestData?.energy?.total?.all || 1)) * 100} className="h-3" /></div>
-                    
-                    <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      <MetricCard 
-                        title="Chauffe-eau"
-                        titleExtra={
-                          <Badge variant="outline" className="text-[10px] font-black uppercase px-2 py-0 border-primary/30 text-primary">
-                            Douches : {latestData?.chauffeEau?.cumulusDouche ?? 0}
-                          </Badge>
-                        }
-                        value={latestData?.chauffeEau?.total ?? 0}
-                        unit="W"
-                        icon={Flame}
-                        iconClassName={latestData?.chauffeEau?.cumulusActif ? "text-orange-500" : "text-muted-foreground"}
-                        detailsLayout="side"
-                        details={[
-                          { label: "Maison", value: latestData?.chauffeEau?.maison ?? 0, unit: "W" },
-                          { label: "Annexe", value: latestData?.chauffeEau?.annexe ?? 0, unit: "W" }
-                        ]}
-                        distribution={{
-                          leftLabel: "Maison",
-                          leftValue: chauffeEauMaisonPct,
-                          rightLabel: "Annexe",
-                          rightValue: chauffeEauAnnexePct
-                        }}
-                      />
-                      
-                      <MetricCard 
-                        title="Eau"
-                        value={latestData?.eau?.total ?? 0}
-                        unit="m³"
-                        icon={Droplets}
-                        iconClassName="text-blue-400"
-                        detailsLayout="side"
-                        details={[
-                          { label: "Compteur", value: latestData?.eau?.compteur ?? 0, unit: "m³" },
-                          { label: "Maison", value: latestData?.eau?.maison ?? 0, unit: "m³" },
-                          { label: "Annexe", value: latestData?.eau?.annexe ?? 0, unit: "m³" }
-                        ]}
-                        distribution={{
-                          leftLabel: "Maison",
-                          leftValue: eauMaisonPct,
-                          rightLabel: "Annexe",
-                          rightValue: eauAnnexePct
-                        }}
-                      />
-                    </div>
                   </CardContent>
                 </Card>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <MetricCard 
+                    title="Chauffe-eau"
+                    titleExtra={
+                      <Badge variant="outline" className="text-[10px] font-black uppercase px-2 py-0 border-primary/30 text-primary">
+                        Douches : {latestData?.chauffeEau?.cumulusDouche ?? 0}
+                      </Badge>
+                    }
+                    value={latestData?.chauffeEau?.total ?? 0}
+                    unit="W"
+                    icon={Flame}
+                    iconClassName={latestData?.chauffeEau?.cumulusActif ? "text-orange-500" : "text-muted-foreground"}
+                    detailsLayout="side"
+                    details={[
+                      { label: "Maison", value: latestData?.chauffeEau?.maison ?? 0, unit: "W" },
+                      { label: "Annexe", value: latestData?.chauffeEau?.annexe ?? 0, unit: "W" }
+                    ]}
+                    distribution={{
+                      leftLabel: "Maison",
+                      leftValue: chauffeEauMaisonPct,
+                      rightLabel: "Annexe",
+                      rightValue: chauffeEauAnnexePct
+                    }}
+                  />
+                  
+                  <MetricCard 
+                    title="Eau"
+                    value={latestData?.eau?.total ?? 0}
+                    unit="m³"
+                    icon={Droplets}
+                    iconClassName="text-blue-400"
+                    detailsLayout="side"
+                    details={[
+                      { label: "Compteur", value: latestData?.eau?.compteur ?? 0, unit: "m³" },
+                      { label: "Maison", value: latestData?.eau?.maison ?? 0, unit: "m³" },
+                      { label: "Annexe", value: latestData?.eau?.annexe ?? 0, unit: "m³" }
+                    ]}
+                    distribution={{
+                      leftLabel: "Maison",
+                      leftValue: eauMaisonPct,
+                      rightLabel: "Annexe",
+                      rightValue: eauAnnexePct
+                    }}
+                  />
+                </div>
               </div>
 
               <aside className="space-y-8">
@@ -253,7 +254,7 @@ function DashboardContent() {
                                   {isCharging && <Badge className="bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5 animate-pulse shadow-sm">En charge</Badge>}
                                   {isCharging && car.charger_time_charging_minutes && (
                                     <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-2 py-1 flex items-center gap-1.5 shadow-sm">
-                                      <Clock className="w-3 h-3 text-emerald-500" />
+                                      <Clock className="h-3 w-3 text-emerald-500" />
                                       <span className="text-[9px] text-emerald-500 font-black uppercase tracking-widest">{formatTime(car.charger_time_charging_minutes)}</span>
                                     </div>
                                   )}
