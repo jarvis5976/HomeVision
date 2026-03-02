@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -228,7 +227,6 @@ function DashboardContent() {
               <aside className="space-y-8">
                 {latestData?.voiture && Object.entries(latestData.voiture).length > 0 && (
                   <div>
-                    <h3 className="text-xs font-black uppercase text-muted-foreground mb-4 px-1">Flotte Véhicules</h3>
                     <Carousel className="w-full relative group">
                       <CarouselContent>
                         {Object.entries(latestData.voiture).map(([id, car]) => {
