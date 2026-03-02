@@ -63,9 +63,15 @@ function DashboardContent() {
     return h > 0 ? `${h}h ${m}min` : `${m}min`;
   };
 
+  // Calcul distribution consommation
   const totalCons = latestData?.energy?.total?.all || 1;
   const maisonPct = Math.round(((latestData?.energy?.total?.maison || 0) / totalCons) * 100);
   const annexePct = 100 - maisonPct;
+
+  // Calcul distribution production
+  const totalProd = latestData?.production?.total || 1;
+  const solarEdgePct = Math.round(((latestData?.production?.detail?.solarEdge || 0) / totalProd) * 100);
+  const apSystemsPct = 100 - solarEdgePct;
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
@@ -128,7 +134,16 @@ function DashboardContent() {
                 unit="W" 
                 icon={Sun} 
                 detailsLayout="side" 
-                details={[{ label: "SolarEdge", value: latestData?.production?.detail?.solarEdge ?? 0, unit: "W" }, { label: "ApSystems", value: latestData?.production?.detail?.apSystems ?? 0, unit: "W" }]} 
+                details={[
+                  { label: "SolarEdge", value: latestData?.production?.detail?.solarEdge ?? 0, unit: "W" }, 
+                  { label: "ApSystems", value: latestData?.production?.detail?.apSystems ?? 0, unit: "W" }
+                ]}
+                distribution={{
+                  leftLabel: "SolarEdge",
+                  leftValue: solarEdgePct,
+                  rightLabel: "ApSystems",
+                  rightValue: apSystemsPct
+                }}
               />
               <MetricCard title="Batterie" value={latestData?.battery?.soc ?? 0} unit="%" icon={BatteryIcon} titleExtra={<Badge className="bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5 ml-2">{latestData?.battery?.stateLabel}</Badge>} detailsLayout="side" details={[{ label: "Puissance", value: Math.abs(latestData?.battery?.watts ?? 0), unit: "W" }, { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" }]} />
               <MetricCard 
@@ -162,8 +177,10 @@ function DashboardContent() {
                       <div className="p-4 sm:p-5 bg-secondary/20 rounded-2xl border border-border">
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex items-center gap-2">
-                            <Flame className={cn("w-3.5 h-3.5", latestData?.chauffeEau?.cumulusActif ? "text-orange-500" : "text-muted-foreground")} />
-                            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Chauffe-eau</p>
+                            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest flex items-center gap-2">
+                              <Flame className={cn("w-3.5 h-3.5", latestData?.chauffeEau?.cumulusActif ? "text-orange-500" : "text-muted-foreground")} />
+                              Chauffe-eau
+                            </p>
                           </div>
                           <Badge variant="outline" className="text-[8px] font-black uppercase px-2 py-0 h-4 border-primary/30 text-primary bg-primary/5">
                             Douches : {latestData?.chauffeEau?.cumulusDouche ?? 0}
@@ -191,8 +208,10 @@ function DashboardContent() {
                       <div className="p-4 sm:p-5 bg-secondary/20 rounded-2xl border border-border">
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex items-center gap-2">
-                            <Droplets className="w-3.5 h-3.5 text-blue-400" />
-                            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Eau</p>
+                            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest flex items-center gap-2">
+                              <Droplets className="w-3.5 h-3.5 text-blue-400" />
+                              Eau
+                            </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
