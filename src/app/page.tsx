@@ -63,6 +63,10 @@ function DashboardContent() {
     return h > 0 ? `${h}h ${m}min` : `${m}min`;
   };
 
+  const totalCons = latestData?.energy?.total?.all || 1;
+  const maisonPct = Math.round(((latestData?.energy?.total?.maison || 0) / totalCons) * 100);
+  const annexePct = 100 - maisonPct;
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
       <header className="h-20 border-b border-border flex items-center justify-between px-4 sm:px-8 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
@@ -127,7 +131,23 @@ function DashboardContent() {
                 details={[{ label: "SolarEdge", value: latestData?.production?.detail?.solarEdge ?? 0, unit: "W" }, { label: "ApSystems", value: latestData?.production?.detail?.apSystems ?? 0, unit: "W" }]} 
               />
               <MetricCard title="Batterie" value={latestData?.battery?.soc ?? 0} unit="%" icon={BatteryIcon} titleExtra={<Badge className="bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5 ml-2">{latestData?.battery?.stateLabel}</Badge>} detailsLayout="side" details={[{ label: "Puissance", value: Math.abs(latestData?.battery?.watts ?? 0), unit: "W" }, { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" }]} />
-              <MetricCard title="Consommation" value={latestData?.energy?.total?.all ?? 0} unit="W" icon={Activity} detailsLayout="side" details={[{ label: "Maison", value: latestData?.energy?.total?.maison ?? 0, unit: "W" }, { label: "Annexe", value: latestData?.energy?.total?.annexe ?? 0, unit: "W" }]} />
+              <MetricCard 
+                title="Consommation" 
+                value={latestData?.energy?.total?.all ?? 0} 
+                unit="W" 
+                icon={Activity} 
+                detailsLayout="side" 
+                details={[
+                  { label: "Maison", value: latestData?.energy?.total?.maison ?? 0, unit: "W" }, 
+                  { label: "Annexe", value: latestData?.energy?.total?.annexe ?? 0, unit: "W" }
+                ]}
+                distribution={{
+                  leftLabel: "Maison",
+                  leftValue: maisonPct,
+                  rightLabel: "Annexe",
+                  rightValue: annexePct
+                }}
+              />
             </section>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -137,6 +157,7 @@ function DashboardContent() {
                   <CardContent className="space-y-6">
                     <div className="space-y-3"><div className="flex justify-between text-xs font-black uppercase"><span>Maison Principale</span><span>{latestData?.energy?.total?.maison ?? 0} W</span></div><Progress value={((latestData?.energy?.total?.maison ?? 0) / (latestData?.energy?.total?.all || 1)) * 100} className="h-3" /></div>
                     <div className="space-y-3"><div className="flex justify-between text-xs font-black uppercase"><span>Annexe</span><span>{latestData?.energy?.total?.annexe ?? 0} W</span></div><Progress value={((latestData?.energy?.total?.annexe ?? 0) / (latestData?.energy?.total?.all || 1)) * 100} className="h-3" /></div>
+                    
                     <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
                       <div className="p-4 sm:p-5 bg-secondary/20 rounded-2xl border border-border">
                         <div className="flex justify-between items-start mb-4">
@@ -148,26 +169,20 @@ function DashboardContent() {
                             Douches : {latestData?.chauffeEau?.cumulusDouche ?? 0}
                           </Badge>
                         </div>
-                        <div className="flex items-center gap-3 sm:gap-6">
-                          <div className="flex items-baseline gap-1 sm:gap-2 shrink-0">
+                        <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
+                          <div className="flex items-baseline gap-1 shrink-0">
                             <span className="text-2xl sm:text-3xl font-black tracking-tighter">{latestData?.chauffeEau?.total ?? 0}</span>
                             <span className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase">W</span>
                           </div>
-                          
                           <div className="w-px h-10 bg-border/60 shrink-0" />
-
                           <div className="flex flex-col justify-center gap-1 overflow-hidden">
                             <div className="flex items-center gap-2 leading-none whitespace-nowrap">
                               <span className="text-[8px] sm:text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison :</span>
-                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">
-                                {latestData?.chauffeEau?.maison ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">W</span>
-                              </span>
+                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">{latestData?.chauffeEau?.maison ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">W</span></span>
                             </div>
                             <div className="flex items-center gap-2 leading-none whitespace-nowrap">
                               <span className="text-[8px] sm:text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe :</span>
-                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">
-                                {latestData?.chauffeEau?.annexe ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">W</span>
-                              </span>
+                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">{latestData?.chauffeEau?.annexe ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">W</span></span>
                             </div>
                           </div>
                         </div>
@@ -180,32 +195,24 @@ function DashboardContent() {
                             <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Eau</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3 sm:gap-6">
-                          <div className="flex items-baseline gap-1 sm:gap-2 shrink-0">
+                        <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
+                          <div className="flex items-baseline gap-1 shrink-0">
                             <span className="text-2xl sm:text-3xl font-black tracking-tighter">{latestData?.eau?.total ?? 0}</span>
                             <span className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase">m³</span>
                           </div>
-                          
                           <div className="w-px h-10 bg-border/60 shrink-0" />
-
                           <div className="flex flex-col justify-center gap-1 overflow-hidden">
                             <div className="flex items-center gap-2 leading-none whitespace-nowrap">
                               <span className="text-[8px] sm:text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Compteur :</span>
-                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">
-                                {latestData?.eau?.compteur ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">m³</span>
-                              </span>
+                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">{latestData?.eau?.compteur ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">m³</span></span>
                             </div>
                             <div className="flex items-center gap-2 leading-none whitespace-nowrap">
                               <span className="text-[8px] sm:text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Maison :</span>
-                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">
-                                {latestData?.eau?.maison ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">m³</span>
-                              </span>
+                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">{latestData?.eau?.maison ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">m³</span></span>
                             </div>
                             <div className="flex items-center gap-2 leading-none whitespace-nowrap">
                               <span className="text-[8px] sm:text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Annexe :</span>
-                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">
-                                {latestData?.eau?.annexe ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">m³</span>
-                              </span>
+                              <span className="text-[10px] sm:text-[11px] font-black text-foreground">{latestData?.eau?.annexe ?? 0} <span className="text-[8px] sm:text-[9px] font-normal opacity-70">m³</span></span>
                             </div>
                           </div>
                         </div>

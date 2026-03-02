@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,6 +11,13 @@ interface DetailItem {
   unit?: string;
 }
 
+interface DistributionInfo {
+  leftLabel: string;
+  leftValue: number;
+  rightLabel: string;
+  rightValue: number;
+}
+
 interface MetricCardProps {
   title: string;
   titleExtra?: React.ReactNode;
@@ -22,6 +28,7 @@ interface MetricCardProps {
   trend?: number;
   status?: 'online' | 'offline' | 'alert';
   details?: DetailItem[];
+  distribution?: DistributionInfo;
   description?: string;
   showSeparator?: boolean;
   detailsLayout?: 'side' | 'bottom';
@@ -37,6 +44,7 @@ export function MetricCard({
   trend, 
   status = 'online', 
   details, 
+  distribution,
   description,
   showSeparator = false,
   detailsLayout = 'side'
@@ -81,6 +89,25 @@ export function MetricCard({
             </div>
           )}
         </div>
+
+        {distribution && (
+          <div className="mt-4 pt-3 border-t border-border/50 space-y-1.5">
+            <div className="flex justify-between text-[9px] font-black uppercase tracking-widest">
+              <span className="text-primary">{distribution.leftLabel} {distribution.leftValue}%</span>
+              <span className="text-accent-foreground/60">{distribution.rightLabel} {distribution.rightValue}%</span>
+            </div>
+            <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden flex">
+              <div 
+                className="h-full bg-primary transition-all duration-500" 
+                style={{ width: `${distribution.leftValue}%` }} 
+              />
+              <div 
+                className="h-full bg-accent transition-all duration-500" 
+                style={{ width: `${distribution.rightValue}%` }} 
+              />
+            </div>
+          </div>
+        )}
 
         {detailsLayout === 'bottom' && details && details.length > 0 && (
           <div className="mt-4 pt-3 border-t border-border/50 grid grid-cols-2 gap-4">
