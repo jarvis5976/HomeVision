@@ -181,6 +181,11 @@ function DashboardContent() {
                     valueClassName: isTargetReached ? "text-emerald-500" : "text-rose-500"
                   }
                 ]} 
+                targetProgress={{
+                  current: currentSoc,
+                  target: nextTarget,
+                  unit: "%"
+                }}
               />
               <MetricCard 
                 title="Consommation" 

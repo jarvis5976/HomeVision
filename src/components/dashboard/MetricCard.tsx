@@ -19,6 +19,12 @@ interface DistributionInfo {
   rightValue: number;
 }
 
+interface TargetProgress {
+  current: number;
+  target: number;
+  unit?: string;
+}
+
 interface MetricCardProps {
   title: string;
   titleExtra?: React.ReactNode;
@@ -31,6 +37,7 @@ interface MetricCardProps {
   status?: 'online' | 'offline' | 'alert';
   details?: DetailItem[];
   distribution?: DistributionInfo;
+  targetProgress?: TargetProgress;
   description?: string;
   showSeparator?: boolean;
   detailsLayout?: 'side' | 'bottom';
@@ -48,10 +55,13 @@ export function MetricCard({
   status = 'online', 
   details, 
   distribution,
+  targetProgress,
   description,
   showSeparator = false,
   detailsLayout = 'side'
 }: MetricCardProps) {
+
+  const isTargetReached = targetProgress && targetProgress.current >= targetProgress.target;
 
   return (
     <Card className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow h-full bg-card">
@@ -108,6 +118,44 @@ export function MetricCard({
                 className="h-full bg-accent transition-all duration-500" 
                 style={{ width: `${distribution.rightValue}%` }} 
               />
+            </div>
+          </div>
+        )}
+
+        {targetProgress && (
+          <div className="mt-4 pt-3 border-t border-border/50 pb-6">
+            <div className="relative h-2 w-full bg-secondary rounded-full">
+              {/* Progress Fill */}
+              <div 
+                className={cn(
+                  "absolute h-full rounded-full transition-all duration-500",
+                  isTargetReached ? "bg-emerald-500" : "bg-primary"
+                )}
+                style={{ width: `${Math.min(100, targetProgress.current)}%` }}
+              />
+              
+              {/* Target Marker (Cursor) */}
+              <div 
+                className={cn(
+                  "absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border-2 border-background shadow-lg transition-all duration-500 z-10",
+                  isTargetReached ? "bg-emerald-500" : "bg-rose-500"
+                )}
+                style={{ left: `${targetProgress.target}%`, transform: 'translate(-50%, -50%)' }}
+              />
+              
+              {/* Target Label below marker */}
+              <div 
+                className="absolute top-4 -translate-x-1/2 flex flex-col items-center"
+                style={{ left: `${targetProgress.target}%` }}
+              >
+                <div className="w-px h-1 bg-border/50 mb-1" />
+                <span className={cn(
+                  "text-[9px] font-black uppercase whitespace-nowrap",
+                  isTargetReached ? "text-emerald-500" : "text-rose-500"
+                )}>
+                  Cible {targetProgress.target}{targetProgress.unit}
+                </span>
+              </div>
             </div>
           </div>
         )}
