@@ -173,13 +173,7 @@ function DashboardContent() {
                 detailsLayout="side" 
                 details={[
                   { label: "Puissance", value: Math.abs(latestData?.battery?.watts ?? 0), unit: "W" }, 
-                  { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" },
-                  { 
-                    label: "Cible", 
-                    value: nextTarget, 
-                    unit: "%", 
-                    valueClassName: isTargetReached ? "text-emerald-500" : "text-rose-500"
-                  }
+                  { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" }
                 ]} 
                 targetProgress={{
                   current: currentSoc,

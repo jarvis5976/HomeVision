@@ -123,7 +123,7 @@ export function MetricCard({
         )}
 
         {targetProgress && (
-          <div className="mt-4 pt-3 border-t border-border/50 pb-6">
+          <div className="mt-8 pt-3 border-t border-border/50 relative">
             <div className="relative h-2 w-full bg-secondary rounded-full">
               {/* Progress Fill */}
               <div 
@@ -143,18 +143,18 @@ export function MetricCard({
                 style={{ left: `${targetProgress.target}%`, transform: 'translate(-50%, -50%)' }}
               />
               
-              {/* Target Label below marker */}
+              {/* Target Label ABOVE marker */}
               <div 
-                className="absolute top-4 -translate-x-1/2 flex flex-col items-center"
+                className="absolute -top-6 -translate-x-1/2 flex flex-col items-center"
                 style={{ left: `${targetProgress.target}%` }}
               >
-                <div className="w-px h-1 bg-border/50 mb-1" />
                 <span className={cn(
                   "text-[9px] font-black uppercase whitespace-nowrap",
                   isTargetReached ? "text-emerald-500" : "text-rose-500"
                 )}>
                   Cible {targetProgress.target}{targetProgress.unit}
                 </span>
+                <div className="w-px h-1 bg-border/50 mt-1" />
               </div>
             </div>
           </div>
