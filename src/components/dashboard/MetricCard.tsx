@@ -123,7 +123,7 @@ export function MetricCard({
         )}
 
         {targetProgress && (
-          <div className="mt-8 pt-3 border-t border-border/50 relative">
+          <div className="mt-4 pt-8 border-t border-border/50 relative">
             <div className="relative h-2 w-full bg-secondary rounded-full">
               {/* Progress Fill */}
               <div 
