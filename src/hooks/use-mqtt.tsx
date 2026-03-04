@@ -94,6 +94,7 @@ export interface HomeDashboardData {
   grid?: { watts: number; sens: string; arrow: string };
   production?: { total: number; detail: any; percentageProduction?: number };
   battery?: { watts: number; soc: number; stateLabel: string; voltage: number; state: number };
+  victron?: { nextBatteryChargePourc: number };
   voiture?: Record<string, CarData>;
   energy?: { total: { all: number; maison: number; annexe: number }; detail: any };
   zenFlex?: { couleurJourJ: string; couleurJourJ1: string };
@@ -128,6 +129,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
   grid: { watts: 7301, sens: "Achat", arrow: "" },
   production: { total: 32, detail: { solarEdge: 0, apSystems: 32 }, percentageProduction: 85 },
   battery: { watts: 2647, soc: 83, stateLabel: "En charge", voltage: 50.63, state: 1 },
+  victron: { nextBatteryChargePourc: 90 },
   energy: { total: { all: 4686, maison: 3365, annexe: 1289 }, detail: {} },
   chauffeEau: { maison: 0, annexe: 1190.9, total: 1190.9, cumulusDouche: 0, cumulusActif: false },
   eau: { total: 1130.5, compteur: 1217.76, maison: 798.63, annexe: 331.88 },

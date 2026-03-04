@@ -9,6 +9,7 @@ interface DetailItem {
   label: string;
   value: string | number;
   unit?: string;
+  valueClassName?: string;
 }
 
 interface DistributionInfo {
@@ -56,13 +57,13 @@ export function MetricCard({
     <Card className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow h-full bg-card">
       <CardContent className="p-5 flex flex-col h-full">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-primary/10 rounded-lg">
+          <div className="p-2 bg-primary/10 rounded-lg shrink-0">
             <Icon className={cn("w-5 h-5", iconClassName || "text-primary")} />
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-0">
             <div className="flex items-center gap-2">
-              <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">{title}</p>
-              {titleExtra && <div className="flex items-center">{titleExtra}</div>}
+              <p className="text-xs font-black text-muted-foreground uppercase tracking-widest truncate">{title}</p>
+              {titleExtra && <div className="flex items-center shrink-0">{titleExtra}</div>}
             </div>
           </div>
         </div>
@@ -78,12 +79,12 @@ export function MetricCard({
           )}
 
           {detailsLayout === 'side' && (
-            <div className="flex flex-col justify-center gap-1">
+            <div className="flex flex-col justify-center gap-1 min-w-0">
               {valueExtra && <div>{valueExtra}</div>}
               {details && details.map((detail, idx) => (
-                <div key={idx} className="flex items-center gap-2 leading-none">
+                <div key={idx} className="flex items-center gap-2 leading-none whitespace-nowrap">
                   <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">{detail.label} :</span>
-                  <span className="text-[11px] font-black text-foreground">
+                  <span className={cn("text-[11px] font-black text-foreground", detail.valueClassName)}>
                     {detail.value} <span className="text-[9px] font-normal opacity-70">{detail.unit}</span>
                   </span>
                 </div>
@@ -116,7 +117,7 @@ export function MetricCard({
             {details.map((detail, idx) => (
               <div key={idx} className="flex flex-col">
                 <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">{detail.label}</p>
-                <p className="text-sm font-black text-foreground">
+                <p className={cn("text-sm font-black text-foreground", detail.valueClassName)}>
                   {detail.value} <span className="text-[10px] font-normal opacity-60">{detail.unit}</span>
                 </p>
               </div>

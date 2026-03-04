@@ -83,6 +83,11 @@ function DashboardContent() {
   const eauMaisonPct = Math.round(((latestData?.eau?.maison || 0) / eauTotal) * 100);
   const eauAnnexePct = 100 - eauMaisonPct;
 
+  // Cible batterie Victron
+  const currentSoc = latestData?.battery?.soc ?? 0;
+  const nextTarget = latestData?.victron?.nextBatteryChargePourc ?? 0;
+  const isTargetReached = currentSoc >= nextTarget;
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
       <header className="h-20 border-b border-border flex items-center justify-between px-4 sm:px-8 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
@@ -155,7 +160,28 @@ function DashboardContent() {
                   rightValue: apSystemsPct
                 }}
               />
-              <MetricCard title="Batterie" value={latestData?.battery?.soc ?? 0} unit="%" icon={BatteryIcon} titleExtra={<Badge className="bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5 ml-2">{latestData?.battery?.stateLabel}</Badge>} detailsLayout="side" details={[{ label: "Puissance", value: Math.abs(latestData?.battery?.watts ?? 0), unit: "W" }, { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" }]} />
+              <MetricCard 
+                title="Batterie" 
+                value={currentSoc} 
+                unit="%" 
+                icon={BatteryIcon} 
+                titleExtra={
+                  <Badge className="bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5 ml-2">
+                    {latestData?.battery?.stateLabel}
+                  </Badge>
+                } 
+                detailsLayout="side" 
+                details={[
+                  { label: "Puissance", value: Math.abs(latestData?.battery?.watts ?? 0), unit: "W" }, 
+                  { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" },
+                  { 
+                    label: "Cible", 
+                    value: nextTarget, 
+                    unit: "%", 
+                    valueClassName: isTargetReached ? "text-emerald-500" : "text-rose-500"
+                  }
+                ]} 
+              />
               <MetricCard 
                 title="Consommation" 
                 value={latestData?.energy?.total?.all ?? 0} 
@@ -175,103 +201,99 @@ function DashboardContent() {
               />
             </section>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <MetricCard 
-                    title="Chauffe-eau"
-                    titleExtra={
-                      <Badge variant="outline" className="text-[10px] font-black uppercase px-2 py-0 border-primary/30 text-primary">
-                        Douches : {latestData?.chauffeEau?.cumulusDouche ?? 0}
-                      </Badge>
-                    }
-                    value={latestData?.chauffeEau?.total ?? 0}
-                    unit="W"
-                    icon={Flame}
-                    iconClassName={latestData?.chauffeEau?.cumulusActif ? "text-orange-500" : "text-muted-foreground"}
-                    detailsLayout="side"
-                    details={[
-                      { label: "Maison", value: latestData?.chauffeEau?.maison ?? 0, unit: "W" },
-                      { label: "Annexe", value: latestData?.chauffeEau?.annexe ?? 0, unit: "W" }
-                    ]}
-                    distribution={{
-                      leftLabel: "Maison",
-                      leftValue: chauffeEauMaisonPct,
-                      rightLabel: "Annexe",
-                      rightValue: chauffeEauAnnexePct
-                    }}
-                  />
-                  
-                  <MetricCard 
-                    title="Eau"
-                    value={latestData?.eau?.total ?? 0}
-                    unit="m³"
-                    icon={Droplets}
-                    iconClassName="text-blue-400"
-                    detailsLayout="side"
-                    details={[
-                      { label: "Compteur", value: latestData?.eau?.compteur ?? 0, unit: "m³" },
-                      { label: "Maison", value: latestData?.eau?.maison ?? 0, unit: "m³" },
-                      { label: "Annexe", value: latestData?.eau?.annexe ?? 0, unit: "m³" }
-                    ]}
-                    distribution={{
-                      leftLabel: "Maison",
-                      leftValue: eauMaisonPct,
-                      rightLabel: "Annexe",
-                      rightValue: eauAnnexePct
-                    }}
-                  />
-                </div>
-              </div>
-
-              <aside className="space-y-8">
-                {latestData?.voiture && Object.entries(latestData.voiture).length > 0 && (
-                  <div>
-                    <Carousel className="w-full relative group">
-                      <CarouselContent>
-                        {Object.entries(latestData.voiture).map(([id, car]) => {
-                          const isCharging = car.charge === true;
-                          const locVal = (car.localisation || (typeof car.location === 'object' ? car.location.name : car.location) || "").toString().toLowerCase();
-                          const isHome = locVal === 'home';
-                          return (
-                            <CarouselItem key={id}>
-                              <Card className="border-border shadow-xl overflow-hidden bg-gradient-to-br from-card to-background relative h-full">
-                                <div className="absolute top-4 right-4 flex flex-col items-end gap-1.5 z-10">
-                                  <Badge variant="outline" className="bg-background/80 backdrop-blur-sm border-border text-[9px] font-black uppercase px-2 py-0.5 flex items-center gap-1 shadow-sm">
-                                    <MapPin className="w-3 h-3 text-muted-foreground" />
-                                    {isHome ? "Maison" : "Absent"}
-                                  </Badge>
-                                  {isCharging && <Badge className="bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5 animate-pulse shadow-sm">En charge</Badge>}
-                                  {isCharging && car.charger_time_charging_minutes && (
-                                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-2 py-1 flex items-center gap-1.5 shadow-sm">
-                                      <Clock className="h-3 w-3 text-emerald-500" />
-                                      <span className="text-[9px] text-emerald-500 font-black uppercase tracking-widest">{formatTime(car.charger_time_charging_minutes)}</span>
-                                    </div>
-                                  )}
-                                </div>
-                                <CardHeader className="pb-2"><CardTitle className="text-base font-black flex items-center gap-2"><Car className="w-4 h-4 text-primary" />{car.carModel || car.display_name}</CardTitle></CardHeader>
-                                <CardContent className="p-6 pt-2">
-                                  <p className={cn("text-4xl font-black tracking-tighter mb-2", isCharging ? "text-emerald-500" : "")}>{car.batteryLevel ?? car.battery_level ?? 0}%</p>
-                                  <div className="space-y-1 mb-4">
-                                    <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Autonomie: {Math.round(car.range ?? car.est_battery_range_km ?? 0)} km</p>
-                                    <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Kilomètre: {mounted ? Math.round(car.odometer ?? 0).toLocaleString() : 0} km</p>
-                                  </div>
-                                  <Progress value={car.batteryLevel ?? car.battery_level ?? 0} className={cn("h-2.5", isCharging ? "[&>div]:bg-emerald-500" : "")} />
-                                </CardContent>
-                              </Card>
-                            </CarouselItem>
-                          );
-                        })}
-                      </CarouselContent>
-                      <div className="flex justify-center gap-4 mt-4">
-                        <CarouselPrevious className="static translate-y-0" />
-                        <CarouselNext className="static translate-y-0" />
-                      </div>
-                    </Carousel>
-                  </div>
-                )}
-              </aside>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <MetricCard 
+                title="Chauffe-eau"
+                titleExtra={
+                  <Badge variant="outline" className="text-[10px] font-black uppercase px-2 py-0 border-primary/30 text-primary">
+                    Douches : {latestData?.chauffeEau?.cumulusDouche ?? 0}
+                  </Badge>
+                }
+                value={latestData?.chauffeEau?.total ?? 0}
+                unit="W"
+                icon={Flame}
+                iconClassName={latestData?.chauffeEau?.cumulusActif ? "text-orange-500" : "text-muted-foreground"}
+                detailsLayout="side"
+                details={[
+                  { label: "Maison", value: latestData?.chauffeEau?.maison ?? 0, unit: "W" },
+                  { label: "Annexe", value: latestData?.chauffeEau?.annexe ?? 0, unit: "W" }
+                ]}
+                distribution={{
+                  leftLabel: "Maison",
+                  leftValue: chauffeEauMaisonPct,
+                  rightLabel: "Annexe",
+                  rightValue: chauffeEauAnnexePct
+                }}
+              />
+              
+              <MetricCard 
+                title="Eau"
+                value={latestData?.eau?.total ?? 0}
+                unit="m³"
+                icon={Droplets}
+                iconClassName="text-blue-400"
+                detailsLayout="side"
+                details={[
+                  { label: "Compteur", value: latestData?.eau?.compteur ?? 0, unit: "m³" },
+                  { label: "Maison", value: latestData?.eau?.maison ?? 0, unit: "m³" },
+                  { label: "Annexe", value: latestData?.eau?.annexe ?? 0, unit: "m³" }
+                ]}
+                distribution={{
+                  leftLabel: "Maison",
+                  leftValue: eauMaisonPct,
+                  rightLabel: "Annexe",
+                  rightValue: eauAnnexePct
+                }}
+              />
             </div>
+
+            <aside className="space-y-8">
+              {latestData?.voiture && Object.entries(latestData.voiture).length > 0 && (
+                <div>
+                  <Carousel className="w-full relative group">
+                    <CarouselContent>
+                      {Object.entries(latestData.voiture).map(([id, car]) => {
+                        const isCharging = car.charge === true;
+                        const locVal = (car.localisation || (typeof car.location === 'object' ? car.location.name : car.location) || "").toString().toLowerCase();
+                        const isHome = locVal === 'home';
+                        return (
+                          <CarouselItem key={id}>
+                            <Card className="border-border shadow-xl overflow-hidden bg-gradient-to-br from-card to-background relative h-full">
+                              <div className="absolute top-4 right-4 flex flex-col items-end gap-1.5 z-10">
+                                <Badge variant="outline" className="bg-background/80 backdrop-blur-sm border-border text-[9px] font-black uppercase px-2 py-0.5 flex items-center gap-1 shadow-sm">
+                                  <MapPin className="w-3 h-3 text-muted-foreground" />
+                                  {isHome ? "Maison" : "Absent"}
+                                </Badge>
+                                {isCharging && <Badge className="bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5 animate-pulse shadow-sm">En charge</Badge>}
+                                {isCharging && car.charger_time_charging_minutes && (
+                                  <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-2 py-1 flex items-center gap-1.5 shadow-sm">
+                                    <Clock className="h-3 w-3 text-emerald-500" />
+                                    <span className="text-[9px] text-emerald-500 font-black uppercase tracking-widest">{formatTime(car.charger_time_charging_minutes)}</span>
+                                  </div>
+                                )}
+                              </div>
+                              <CardHeader className="pb-2"><CardTitle className="text-base font-black flex items-center gap-2"><Car className="w-4 h-4 text-primary" />{car.carModel || car.display_name}</CardTitle></CardHeader>
+                              <CardContent className="p-6 pt-2">
+                                <p className={cn("text-4xl font-black tracking-tighter mb-2", isCharging ? "text-emerald-500" : "")}>{car.batteryLevel ?? car.battery_level ?? 0}%</p>
+                                <div className="space-y-1 mb-4">
+                                  <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Autonomie: {Math.round(car.range ?? car.est_battery_range_km ?? 0)} km</p>
+                                  <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Kilomètre: {mounted ? Math.round(car.odometer ?? 0).toLocaleString() : 0} km</p>
+                                </div>
+                                <Progress value={car.batteryLevel ?? car.battery_level ?? 0} className={cn("h-2.5", isCharging ? "[&>div]:bg-emerald-500" : "")} />
+                              </CardContent>
+                            </Card>
+                          </CarouselItem>
+                        );
+                      })}
+                    </CarouselContent>
+                    <div className="flex justify-center gap-4 mt-4">
+                      <CarouselPrevious className="static translate-y-0" />
+                      <CarouselNext className="static translate-y-0" />
+                    </div>
+                  </Carousel>
+                </div>
+              )}
+            </aside>
           </>
         ) : (
           <div className="space-y-12 animate-in fade-in slide-in-from-left duration-500">
