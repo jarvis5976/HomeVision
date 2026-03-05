@@ -164,7 +164,9 @@ export function MetricCard({
           <div className="mt-4 pt-3 border-t border-border/50 grid grid-cols-2 gap-4">
             {details.map((detail, idx) => (
               <div key={idx} className="flex flex-col">
-                <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">{detail.label}</p>
+                {detail.label && (
+                  <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">{detail.label}</p>
+                )}
                 <p className={cn("text-sm font-black text-foreground", detail.valueClassName)}>
                   {detail.value} <span className="text-[10px] font-normal opacity-60">{detail.unit}</span>
                 </p>

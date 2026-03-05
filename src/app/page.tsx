@@ -11,13 +11,13 @@ import {
   Zap, Battery as BatteryIcon, Car, Droplets, Sun, Home, History, Flame, ArrowLeft, TrendingUp, PieChart, Activity, Clock, MapPin, CloudSun, Moon, SunMedium
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 type ViewType = 'dashboard' | 'history';
 
@@ -90,7 +90,7 @@ function DashboardContent() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
       <header className="h-20 border-b border-border flex items-center justify-between px-4 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2">
           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
             <Home className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
           </div>
@@ -105,17 +105,17 @@ function DashboardContent() {
             className="flex items-center gap-2 font-black uppercase text-[10px] tracking-widest px-2 sm:px-3"
           >
             {view === 'history' ? <ArrowLeft className="w-4 h-4" /> : <History className="w-4 h-4" />}
-            <span className="hidden sm:inline">{view === 'history' ? "Tableau de Bord" : "Historique"}</span>
+            <span className="hidden sm:inline">{view === 'history' ? "Dashboard" : "Historique"}</span>
           </Button>
           
-          <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full w-8 h-8 sm:w-10 sm:h-10 shrink-0">
-            {theme === 'dark' ? <SunMedium className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" /> : <Moon className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />}
+          <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full w-8 h-8 shrink-0">
+            {theme === 'dark' ? <SunMedium className="w-4 h-4 text-orange-400" /> : <Moon className="w-4 h-4 text-primary" />}
           </Button>
 
-          <div className="flex items-center gap-2 sm:gap-4 bg-secondary/30 p-1.5 sm:p-2 rounded-xl border border-border">
+          <div className="flex items-center gap-2 bg-secondary/30 p-1.5 rounded-xl border border-border">
             <Switch id="mode" checked={!isSimulated} onCheckedChange={v => setIsSimulated(!v)} className="scale-75 sm:scale-100" />
             <Label htmlFor="mode" className="text-[10px] font-black uppercase cursor-pointer hidden md:inline">
-              {isSimulated ? "Simulation" : "Réel"}
+              {isSimulated ? "Sim" : "Réel"}
             </Label>
           </div>
         </div>
@@ -141,7 +141,7 @@ function DashboardContent() {
                 titleExtra={
                   latestData?.zenFlex?.periode && (
                     <div className={cn(
-                      "w-2 h-2 rounded-full animate-pulse ml-2 shrink-0",
+                      "w-2.5 h-2.5 rounded-full animate-pulse ml-2 shrink-0",
                       latestData.zenFlex.periode === "HP" ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]" : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"
                     )} />
                   )
@@ -152,8 +152,8 @@ function DashboardContent() {
                 valueExtra={<Badge variant="outline" className="text-[10px] font-black uppercase px-2 py-0 border-primary/30 text-primary">{latestData?.grid?.sens ?? "Achat"}</Badge>}
                 detailsLayout="bottom"
                 details={[
-                  { label: "HP", value: latestData?.zenFlex?.totalHP ?? 0, unit: "kWh", valueClassName: "text-rose-500" },
-                  { label: "HC", value: latestData?.zenFlex?.totalHC ?? 0, unit: "kWh", valueClassName: "text-emerald-500" }
+                  { label: "", value: latestData?.zenFlex?.totalHP ?? 0, unit: "kWh", valueClassName: "text-rose-500" },
+                  { label: "", value: latestData?.zenFlex?.totalHC ?? 0, unit: "kWh", valueClassName: "text-emerald-500" }
                 ]}
               />
               <MetricCard 
@@ -222,14 +222,16 @@ function DashboardContent() {
               <MetricCard 
                 title="Chauffe-eau"
                 titleExtra={
-                  <Badge variant="outline" className="text-[10px] font-black uppercase px-2 py-0 border-primary/30 text-primary">
-                    Douches : {latestData?.chauffeEau?.cumulusDouche ?? 0}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Flame className={cn("w-3.5 h-3.5", latestData?.chauffeEau?.cumulusActif ? "text-orange-500" : "text-muted-foreground")} />
+                    <Badge variant="outline" className="text-[9px] font-black uppercase px-2 py-0 border-primary/30 text-primary">
+                      Douches : {latestData?.chauffeEau?.cumulusDouche ?? 0}
+                    </Badge>
+                  </div>
                 }
                 value={latestData?.chauffeEau?.total ?? 0}
                 unit="W"
                 icon={Flame}
-                iconClassName={latestData?.chauffeEau?.cumulusActif ? "text-orange-500" : "text-muted-foreground"}
                 detailsLayout="side"
                 details={[
                   { label: "Maison", value: latestData?.chauffeEau?.maison ?? 0, unit: "W" },
@@ -245,13 +247,19 @@ function DashboardContent() {
               
               <MetricCard 
                 title="Eau"
+                titleExtra={
+                  <div className="flex items-center gap-2">
+                    <Droplets className="w-3.5 h-3.5 text-blue-400" />
+                    <Badge variant="outline" className="text-[9px] font-black uppercase px-2 py-0 border-primary/30 text-primary">
+                      Compteur: {latestData?.eau?.compteur ?? 0}m³
+                    </Badge>
+                  </div>
+                }
                 value={latestData?.eau?.total ?? 0}
                 unit="m³"
                 icon={Droplets}
-                iconClassName="text-blue-400"
                 detailsLayout="side"
                 details={[
-                  { label: "Compteur", value: latestData?.eau?.compteur ?? 0, unit: "m³" },
                   { label: "Maison", value: latestData?.eau?.maison ?? 0, unit: "m³" },
                   { label: "Annexe", value: latestData?.eau?.annexe ?? 0, unit: "m³" }
                 ]}
