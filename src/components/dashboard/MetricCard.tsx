@@ -84,6 +84,13 @@ export function MetricCard({
             {unit && <span className="text-sm font-bold text-muted-foreground uppercase ml-1">{unit}</span>}
           </div>
 
+          {/* Restore valueExtra visibility for bottom layout */}
+          {detailsLayout === 'bottom' && valueExtra && (
+            <div className="shrink-0 ml-auto">
+              {valueExtra}
+            </div>
+          )}
+
           {detailsLayout === 'side' && (showSeparator || (details && details.length > 0) || valueExtra) && (
             <Separator orientation="vertical" className="h-10 bg-border/60" />
           )}
