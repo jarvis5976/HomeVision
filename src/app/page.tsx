@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -160,10 +161,12 @@ function DashboardContent() {
                 ]}
                 footerCenter={
                   latestData?.zenFlex?.periode && (
-                    <div className={cn(
-                      "w-2 h-2 rounded-full animate-pulse",
-                      latestData.zenFlex.periode === "HP" ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]" : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"
-                    )} />
+                    <span className={cn(
+                      "text-[11px] font-black uppercase tracking-widest",
+                      latestData.zenFlex.periode === "HP" ? "text-rose-500" : "text-emerald-500"
+                    )}>
+                      {latestData.zenFlex.periode}
+                    </span>
                   )
                 }
               />
