@@ -154,6 +154,10 @@ function DashboardContent() {
                   { label: "Total Achat", value: latestData?.energy?.total?.achat ?? 0, unit: "kWh" },
                   { label: "Total Vente", value: latestData?.energy?.total?.vente ?? 0, unit: "kWh" }
                 ]}
+                footerDetails={[
+                  { label: "", value: latestData?.zenFlex?.totalHP ?? 0, unit: "kWh", valueClassName: "text-rose-500" },
+                  { label: "", value: latestData?.zenFlex?.totalHC ?? 0, unit: "kWh", valueClassName: "text-emerald-500" }
+                ]}
               />
               <MetricCard 
                 title="Production Solaire" 

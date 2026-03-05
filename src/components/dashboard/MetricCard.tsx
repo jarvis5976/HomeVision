@@ -36,6 +36,7 @@ interface MetricCardProps {
   trend?: number;
   status?: 'online' | 'offline' | 'alert';
   details?: DetailItem[];
+  footerDetails?: DetailItem[];
   distribution?: DistributionInfo;
   targetProgress?: TargetProgress;
   description?: string;
@@ -54,6 +55,7 @@ export function MetricCard({
   trend, 
   status = 'online', 
   details, 
+  footerDetails,
   distribution,
   targetProgress,
   description,
@@ -84,23 +86,21 @@ export function MetricCard({
             {unit && <span className="text-sm font-bold text-muted-foreground uppercase ml-1">{unit}</span>}
           </div>
 
-          {/* Restore valueExtra visibility for bottom layout */}
-          {detailsLayout === 'bottom' && valueExtra && (
+          {valueExtra && (
             <div className="shrink-0 ml-auto">
               {valueExtra}
             </div>
           )}
 
-          {detailsLayout === 'side' && (showSeparator || (details && details.length > 0) || valueExtra) && (
+          {detailsLayout === 'side' && (showSeparator || (details && details.length > 0)) && (
             <Separator orientation="vertical" className="h-10 bg-border/60" />
           )}
 
           {detailsLayout === 'side' && (
             <div className="flex flex-col justify-center gap-1 min-w-0">
-              {valueExtra && <div>{valueExtra}</div>}
               {details && details.map((detail, idx) => (
                 <div key={idx} className="flex items-center gap-2 leading-none whitespace-nowrap">
-                  <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">{detail.label} :</span>
+                  {detail.label && <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">{detail.label} :</span>}
                   <span className={cn("text-[11px] font-black text-foreground", detail.valueClassName)}>
                     {detail.value} <span className="text-[9px] font-normal opacity-70">{detail.unit}</span>
                   </span>
@@ -132,7 +132,6 @@ export function MetricCard({
         {targetProgress && (
           <div className="mt-4 pt-8 border-t border-border/50 relative">
             <div className="relative h-2 w-full bg-secondary rounded-full">
-              {/* Progress Fill */}
               <div 
                 className={cn(
                   "absolute h-full rounded-full transition-all duration-500",
@@ -140,8 +139,6 @@ export function MetricCard({
                 )}
                 style={{ width: `${Math.min(100, targetProgress.current)}%` }}
               />
-              
-              {/* Target Marker (Cursor) */}
               <div 
                 className={cn(
                   "absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border-2 border-background shadow-lg transition-all duration-500 z-10",
@@ -149,8 +146,6 @@ export function MetricCard({
                 )}
                 style={{ left: `${targetProgress.target}%`, transform: 'translate(-50%, -50%)' }}
               />
-              
-              {/* Target Label ABOVE marker */}
               <div 
                 className="absolute -top-6 -translate-x-1/2 flex flex-col items-center"
                 style={{ left: `${targetProgress.target}%` }}
@@ -167,9 +162,10 @@ export function MetricCard({
           </div>
         )}
 
-        {detailsLayout === 'bottom' && details && details.length > 0 && (
+        {/* Bottom Details Section */}
+        {((detailsLayout === 'bottom' && details && details.length > 0) || (footerDetails && footerDetails.length > 0)) && (
           <div className="mt-4 pt-3 border-t border-border/50 grid grid-cols-2 gap-4">
-            {details.map((detail, idx) => (
+            {(footerDetails && footerDetails.length > 0 ? footerDetails : (detailsLayout === 'bottom' ? details : [])).map((detail, idx) => (
               <div key={idx} className="flex flex-col">
                 {detail.label && (
                   <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">{detail.label}</p>
