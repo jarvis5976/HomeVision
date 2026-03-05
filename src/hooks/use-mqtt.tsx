@@ -97,7 +97,7 @@ export interface HomeDashboardData {
   victron?: { nextBatteryChargePourc: number };
   voiture?: Record<string, CarData>;
   energy?: { total: { all: number; maison: number; annexe: number }; detail: any };
-  zenFlex?: { couleurJourJ: string; couleurJourJ1: string; periode?: string };
+  zenFlex?: { couleurJourJ: string; couleurJourJ1: string; periode?: string; totalHP?: number; totalHC?: number };
   solCast?: { today: number; tomorrow: number };
   chauffeEau?: { total: number; maison: number; annexe: number; cumulusActif?: boolean; cumulusDouche?: number };
   eau?: { total: number; compteur?: number; maison?: number; annexe?: number };
@@ -160,7 +160,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       "localisation": "home"
     }
   },
-  zenFlex: { couleurJourJ: "jour Eco", couleurJourJ1: "jour Sobriété", periode: "HP" },
+  zenFlex: { couleurJourJ: "jour Eco", couleurJourJ1: "jour Sobriété", periode: "HP", totalHP: 12.5, totalHC: 8.2 },
   solCast: { today: 8.75, tomorrow: 8.03 }
 };
 

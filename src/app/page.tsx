@@ -86,11 +86,10 @@ function DashboardContent() {
   // Cible batterie Victron
   const currentSoc = latestData?.battery?.soc ?? 0;
   const nextTarget = latestData?.victron?.nextBatteryChargePourc ?? 0;
-  const isTargetReached = currentSoc >= nextTarget;
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
-      <header className="h-20 border-b border-border flex items-center justify-between px-4 sm:px-8 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
+      <header className="h-20 border-b border-border flex items-center justify-between px-4 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
             <Home className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
@@ -150,7 +149,12 @@ function DashboardContent() {
                 value={latestData?.grid?.watts ?? 0} 
                 unit="W" 
                 icon={Zap} 
-                valueExtra={<Badge variant="outline" className="text-[10px] font-black uppercase px-2 py-0 border-primary/30 text-primary">{latestData?.grid?.sens ?? "Achat"}</Badge>} 
+                valueExtra={<Badge variant="outline" className="text-[10px] font-black uppercase px-2 py-0 border-primary/30 text-primary">{latestData?.grid?.sens ?? "Achat"}</Badge>}
+                detailsLayout="bottom"
+                details={[
+                  { label: "HP", value: latestData?.zenFlex?.totalHP ?? 0, unit: "kWh", valueClassName: "text-rose-500" },
+                  { label: "HC", value: latestData?.zenFlex?.totalHC ?? 0, unit: "kWh", valueClassName: "text-emerald-500" }
+                ]}
               />
               <MetricCard 
                 title="Production Solaire" 
@@ -316,7 +320,7 @@ function DashboardContent() {
                 <Badge variant="secondary" className="px-4 py-1.5 font-black uppercase text-[10px]">{mounted ? new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ""}</Badge>
               </div>
               <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <MetricCard title="Production journalière" value={historyData?.Production ?? 0} unit="kWh" icon={Sun} detailsLayout="bottom" details={[{ label: "SolarEdge", value: historyData?.SolarEdge ?? 0, unit: "kWh" }, { label: "ApSystems", value: historyData?.Ecu ?? 0, unit: "kWh" }]} />
+                <MetricCard title="Production journalière" value={historyData?.Production ?? 0} unit="kWh" icon={Sun} detailsLayout="bottom" details={[{ label: "SolarEdge", value: historyData?.SolarEdge ?? 0, unit: "kWh" }, { label: "APsystems", value: historyData?.Ecu ?? 0, unit: "kWh" }]} />
                 <MetricCard title="Utilisation" value={historyData?.Production ?? 0} unit="kWh" icon={PieChart} detailsLayout="bottom" details={[{ label: "Auto-Conso.", value: historyData?.AutoConsommation ?? 0, unit: "kWh" }, { label: "Vente", value: historyData?.Vente ?? 0, unit: "kWh" }]} />
                 <MetricCard title="Consommation journalière" value={historyData?.Consommation ?? 0} unit="kWh" icon={Activity} detailsLayout="bottom" details={[{ label: "Auto-Production", value: historyData?.AutoConsommation ?? 0, unit: "kWh" }, { label: "Achat", value: historyData?.Achat ?? 0, unit: "kWh" }]} />
               </section>
