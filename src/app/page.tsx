@@ -138,17 +138,17 @@ function DashboardContent() {
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <MetricCard 
                 title="Réseau Electrique" 
-                value={latestData?.grid?.watts ?? 0} 
-                unit="W" 
-                icon={Zap} 
-                valueExtra={
+                titleExtra={
                   <Badge variant="outline" className={cn(
-                    "text-[10px] font-black uppercase px-2 py-0.5",
+                    "text-[10px] font-black uppercase px-2 py-0.5 ml-2",
                     latestData?.grid?.sens === "Vente" ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-rose-500/10 text-rose-500 border-rose-500/20"
                   )}>
                     {latestData?.grid?.sens ?? "Achat"}
                   </Badge>
                 }
+                value={latestData?.grid?.watts ?? 0} 
+                unit="W" 
+                icon={Zap} 
                 detailsLayout="side"
                 details={[
                   { label: "Achat", value: latestData?.energy?.total?.achat ?? 0, unit: "kWh" },
