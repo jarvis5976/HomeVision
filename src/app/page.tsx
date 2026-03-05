@@ -137,7 +137,21 @@ function DashboardContent() {
             </section>
 
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <MetricCard title="Réseau Electrique" value={latestData?.grid?.watts ?? 0} unit="W" icon={Zap} valueExtra={<Badge variant="outline" className="text-[10px] font-black uppercase px-2 py-0 border-primary/30 text-primary">{latestData?.grid?.sens ?? "Achat"}</Badge>} />
+              <MetricCard 
+                title="Réseau Electrique" 
+                titleExtra={
+                  latestData?.zenFlex?.periode && (
+                    <div className={cn(
+                      "w-2 h-2 rounded-full animate-pulse ml-2 shrink-0",
+                      latestData.zenFlex.periode === "HP" ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]" : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"
+                    )} />
+                  )
+                }
+                value={latestData?.grid?.watts ?? 0} 
+                unit="W" 
+                icon={Zap} 
+                valueExtra={<Badge variant="outline" className="text-[10px] font-black uppercase px-2 py-0 border-primary/30 text-primary">{latestData?.grid?.sens ?? "Achat"}</Badge>} 
+              />
               <MetricCard 
                 title="Production Solaire" 
                 titleExtra={latestData?.production?.percentageProduction !== undefined && (
