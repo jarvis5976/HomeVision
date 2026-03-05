@@ -138,26 +138,34 @@ function DashboardContent() {
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <MetricCard 
                 title="Réseau Electrique" 
-                titleExtra={
-                  latestData?.zenFlex?.periode && (
-                    <div className={cn(
-                      "w-2.5 h-2.5 rounded-full animate-pulse ml-2 shrink-0",
-                      latestData.zenFlex.periode === "HP" ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]" : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"
-                    )} />
-                  )
-                }
                 value={latestData?.grid?.watts ?? 0} 
                 unit="W" 
                 icon={Zap} 
+                valueExtra={
+                  <Badge variant="outline" className={cn(
+                    "text-[10px] font-black uppercase px-2 py-0.5",
+                    latestData?.grid?.sens === "Vente" ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-rose-500/10 text-rose-500 border-rose-500/20"
+                  )}>
+                    {latestData?.grid?.sens ?? "Achat"}
+                  </Badge>
+                }
                 detailsLayout="side"
                 details={[
-                  { label: "Total Achat", value: latestData?.energy?.total?.achat ?? 0, unit: "kWh" },
-                  { label: "Total Vente", value: latestData?.energy?.total?.vente ?? 0, unit: "kWh" }
+                  { label: "Achat", value: latestData?.energy?.total?.achat ?? 0, unit: "kWh" },
+                  { label: "Vente", value: latestData?.energy?.total?.vente ?? 0, unit: "kWh" }
                 ]}
                 footerDetails={[
                   { label: "", value: latestData?.zenFlex?.totalHP ?? 0, unit: "kWh", valueClassName: "text-rose-500" },
                   { label: "", value: latestData?.zenFlex?.totalHC ?? 0, unit: "kWh", valueClassName: "text-emerald-500" }
                 ]}
+                footerCenter={
+                  latestData?.zenFlex?.periode && (
+                    <div className={cn(
+                      "w-2 h-2 rounded-full animate-pulse",
+                      latestData.zenFlex.periode === "HP" ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]" : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"
+                    )} />
+                  )
+                }
               />
               <MetricCard 
                 title="Production Solaire" 

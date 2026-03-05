@@ -37,6 +37,7 @@ interface MetricCardProps {
   status?: 'online' | 'offline' | 'alert';
   details?: DetailItem[];
   footerDetails?: DetailItem[];
+  footerCenter?: React.ReactNode;
   distribution?: DistributionInfo;
   targetProgress?: TargetProgress;
   description?: string;
@@ -56,6 +57,7 @@ export function MetricCard({
   status = 'online', 
   details, 
   footerDetails,
+  footerCenter,
   distribution,
   targetProgress,
   description,
@@ -164,9 +166,14 @@ export function MetricCard({
 
         {/* Bottom Details Section */}
         {((detailsLayout === 'bottom' && details && details.length > 0) || (footerDetails && footerDetails.length > 0)) && (
-          <div className="mt-4 pt-3 border-t border-border/50 grid grid-cols-2 gap-4">
+          <div className="mt-4 pt-3 border-t border-border/50 grid grid-cols-2 gap-4 relative">
+            {footerCenter && (
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+                {footerCenter}
+              </div>
+            )}
             {(footerDetails && footerDetails.length > 0 ? footerDetails : (detailsLayout === 'bottom' ? details : [])).map((detail, idx) => (
-              <div key={idx} className="flex flex-col">
+              <div key={idx} className={cn("flex flex-col", idx === 0 ? "items-start" : "items-end")}>
                 {detail.label && (
                   <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">{detail.label}</p>
                 )}
