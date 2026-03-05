@@ -149,11 +149,10 @@ function DashboardContent() {
                 value={latestData?.grid?.watts ?? 0} 
                 unit="W" 
                 icon={Zap} 
-                valueExtra={<Badge variant="outline" className="text-[10px] font-black uppercase px-2 py-0 border-primary/30 text-primary">{latestData?.grid?.sens ?? "Achat"}</Badge>}
-                detailsLayout="bottom"
+                detailsLayout="side"
                 details={[
-                  { label: "", value: latestData?.zenFlex?.totalHP ?? 0, unit: "kWh", valueClassName: "text-rose-500" },
-                  { label: "", value: latestData?.zenFlex?.totalHC ?? 0, unit: "kWh", valueClassName: "text-emerald-500" }
+                  { label: "Total Achat", value: latestData?.energy?.total?.achat ?? 0, unit: "kWh" },
+                  { label: "Total Vente", value: latestData?.energy?.total?.vente ?? 0, unit: "kWh" }
                 ]}
               />
               <MetricCard 

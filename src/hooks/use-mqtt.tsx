@@ -96,7 +96,16 @@ export interface HomeDashboardData {
   battery?: { watts: number; soc: number; stateLabel: string; voltage: number; state: number };
   victron?: { nextBatteryChargePourc: number };
   voiture?: Record<string, CarData>;
-  energy?: { total: { all: number; maison: number; annexe: number }; detail: any };
+  energy?: { 
+    total: { 
+      all: number; 
+      maison: number; 
+      annexe: number;
+      achat?: number;
+      vente?: number;
+    }; 
+    detail: any 
+  };
   zenFlex?: { couleurJourJ: string; couleurJourJ1: string; periode?: string; totalHP?: number; totalHC?: number };
   solCast?: { today: number; tomorrow: number };
   chauffeEau?: { total: number; maison: number; annexe: number; cumulusActif?: boolean; cumulusDouche?: number };
@@ -130,7 +139,16 @@ const BASE_MOCK_DATA: HomeDashboardData = {
   production: { total: 32, detail: { solarEdge: 0, apSystems: 32 }, percentageProduction: 85 },
   battery: { watts: 2647, soc: 83, stateLabel: "En charge", voltage: 50.63, state: 1 },
   victron: { nextBatteryChargePourc: 90 },
-  energy: { total: { all: 4686, maison: 3365, annexe: 1289 }, detail: {} },
+  energy: { 
+    total: { 
+      all: 4686, 
+      maison: 3365, 
+      annexe: 1289,
+      achat: 24.52,
+      vente: 1.18
+    }, 
+    detail: {} 
+  },
   chauffeEau: { maison: 0, annexe: 1190.9, total: 1190.9, cumulusDouche: 0, cumulusActif: false },
   eau: { total: 1130.5, compteur: 1217.76, maison: 798.63, annexe: 331.88 },
   voiture: {
