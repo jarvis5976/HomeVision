@@ -88,6 +88,11 @@ function DashboardContent() {
   const currentSoc = latestData?.battery?.soc ?? 0;
   const nextTarget = latestData?.victron?.nextBatteryChargePourc ?? 0;
 
+  // Comparaison Production vs Prévision
+  const realProdDay = latestData?.energy?.total?.production ?? 0;
+  const forecastDay = latestData?.solCast?.today ?? 0;
+  const isGoalReached = realProdDay >= forecastDay;
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
       <header className="h-20 border-b border-border flex items-center justify-between px-4 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
@@ -131,12 +136,25 @@ function DashboardContent() {
                 {latestData?.zenFlex?.couleurJourJ1 && <Badge variant="outline" className="px-6 py-2.5 text-sm font-black border-2 border-rose-500 text-rose-400 bg-rose-500/10">{latestData.zenFlex.couleurJourJ1}</Badge>}
               </div>
               <div className="flex gap-3">
-                <Badge variant="outline" className="flex items-center gap-3 px-5 py-3 bg-card border-border"><CloudSun className="w-5 h-5 text-orange-400" /><div className="flex flex-col"><span className="text-[9px] font-black uppercase">Prévision jour</span><span className="font-black text-xs">{latestData?.solCast?.today ?? 0} kWh</span></div></Badge>
+                <Badge variant="outline" className="flex items-center gap-3 px-5 py-3 bg-card border-border">
+                  <CloudSun className="w-5 h-5 text-orange-400" />
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-black uppercase">Prévision jour</span>
+                    <span className="font-black text-xs">{forecastDay} kWh</span>
+                    {latestData?.energy?.total?.production !== undefined && (
+                      <span className={cn(
+                        "text-[10px] font-black mt-0.5",
+                        isGoalReached ? "text-emerald-500" : "text-rose-500"
+                      )}>
+                        ({realProdDay} kWh)
+                      </span>
+                    )}
+                  </div>
+                </Badge>
                 <Badge variant="outline" className="flex items-center gap-3 px-5 py-3 bg-card border-border border-dashed opacity-70"><CloudSun className="w-5 h-5 text-orange-300" /><div className="flex flex-col"><span className="text-[9px] font-black uppercase">Demain</span><span className="font-black text-xs">{latestData?.solCast?.tomorrow ?? 0} kWh</span></div></Badge>
               </div>
             </section>
 
-            {/* Grille unifiée de 3 colonnes (PC), 2 (iPad), 1 (Mobile) */}
             <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <MetricCard 
                 title="Réseau Electrique" 

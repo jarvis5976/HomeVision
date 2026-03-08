@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, createContext, useContext, useRef, useCallback } from 'react';
@@ -103,6 +104,7 @@ export interface HomeDashboardData {
       annexe: number;
       achat?: number;
       vente?: number;
+      production?: number;
     }; 
     detail: any 
   };
@@ -145,7 +147,8 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       maison: 3365, 
       annexe: 1289,
       achat: 24.52,
-      vente: 1.18
+      vente: 1.18,
+      production: 7.2
     }, 
     detail: {} 
   },
