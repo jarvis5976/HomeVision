@@ -136,7 +136,7 @@ function DashboardContent() {
               </div>
             </section>
 
-            {/* Ligne 1: Energie Principale */}
+            {/* Grille unifiée de 3 colonnes (PC), 2 (iPad), 1 (Mobile) */}
             <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <MetricCard 
                 title="Réseau Electrique" 
@@ -214,10 +214,7 @@ function DashboardContent() {
                   unit: "%"
                 }}
               />
-            </section>
 
-            {/* Ligne 2: Consommation Détail */}
-            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <MetricCard 
                 title="Consommation" 
                 value={latestData?.energy?.total?.all ?? 0} 
@@ -289,7 +286,7 @@ function DashboardContent() {
               />
             </section>
 
-            {/* Ligne 3: Véhicules */}
+            {/* Section Véhicules */}
             <section className="space-y-8">
               {latestData?.voiture && Object.entries(latestData.voiture).length > 0 && (
                 <div>
