@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -141,14 +140,6 @@ function DashboardContent() {
                   <div className="flex flex-col">
                     <span className="text-[9px] font-black uppercase">Prévision jour</span>
                     <span className="font-black text-xs">{forecastDay} kWh</span>
-                    {latestData?.energy?.total?.production !== undefined && (
-                      <span className={cn(
-                        "text-[10px] font-black mt-0.5",
-                        isGoalReached ? "text-emerald-500" : "text-rose-500"
-                      )}>
-                        ({realProdDay} kWh)
-                      </span>
-                    )}
                   </div>
                 </Badge>
                 <Badge variant="outline" className="flex items-center gap-3 px-5 py-3 bg-card border-border border-dashed opacity-70"><CloudSun className="w-5 h-5 text-orange-300" /><div className="flex flex-col"><span className="text-[9px] font-black uppercase">Demain</span><span className="font-black text-xs">{latestData?.solCast?.tomorrow ?? 0} kWh</span></div></Badge>
@@ -191,11 +182,23 @@ function DashboardContent() {
               />
               <MetricCard 
                 title="Production Solaire" 
-                titleExtra={latestData?.production?.percentageProduction !== undefined && (
-                  <Badge className="bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5 ml-2">
-                    {latestData.production.percentageProduction}%
-                  </Badge>
-                )}
+                titleExtra={
+                  <div className="flex items-center gap-2 ml-2">
+                    {latestData?.production?.percentageProduction !== undefined && (
+                      <Badge className="bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5">
+                        {latestData.production.percentageProduction}%
+                      </Badge>
+                    )}
+                    {latestData?.energy?.total?.production !== undefined && (
+                      <span className={cn(
+                        "text-[11px] font-black whitespace-nowrap",
+                        isGoalReached ? "text-emerald-500" : "text-rose-500"
+                      )}>
+                        ({realProdDay} kWh)
+                      </span>
+                    )}
+                  </div>
+                }
                 value={latestData?.production?.total ?? 0} 
                 unit="W" 
                 icon={Sun} 
