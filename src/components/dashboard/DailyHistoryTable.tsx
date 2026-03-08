@@ -39,7 +39,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
   const [isGrouped, setIsGrouped] = useState(false);
   const [isPercentage, setIsPercentage] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(5);
 
   const currentData = useMemo(() => {
     if (!data) return [];
@@ -93,7 +93,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
             <Rows className="w-3.5 h-3.5 text-muted-foreground" />
             <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
               <SelectTrigger className="h-8 w-28 text-[10px] font-bold">
-                <SelectValue placeholder="10 lignes" />
+                <SelectValue placeholder="5 lignes" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="5">5 lignes</SelectItem>
