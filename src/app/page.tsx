@@ -87,8 +87,6 @@ function DashboardContent() {
   // Cible batterie Victron
   const currentSoc = latestData?.battery?.soc ?? 0;
   const nextTarget = latestData?.victron?.nextBatteryChargePourc ?? 0;
-  const nextTimeCharge = latestData?.victron?.nextTimeCharge;
-  const chargeInfoText = nextTimeCharge === '-' || !nextTimeCharge ? "Pas de recharge prévue" : `Recharge prévue à ${nextTimeCharge}`;
 
   // Comparaison Production vs Prévision
   const realProdDay = latestData?.energy?.total?.production ?? 0;
@@ -229,10 +227,6 @@ function DashboardContent() {
                 } 
                 detailsLayout="side" 
                 details={[
-                  { 
-                    label: "", 
-                    value: <Badge variant="secondary" className="bg-muted/50 text-[9px] font-black uppercase py-0 px-2 border-none mb-1">{chargeInfoText}</Badge> 
-                  },
                   { label: "Puissance", value: Math.abs(latestData?.battery?.watts ?? 0), unit: "W" }, 
                   { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" }
                 ]} 
