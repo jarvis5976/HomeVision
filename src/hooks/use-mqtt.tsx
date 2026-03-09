@@ -95,7 +95,7 @@ export interface HomeDashboardData {
   grid?: { watts: number; sens: string; arrow: string };
   production?: { total: number; detail: any; percentageProduction?: number };
   battery?: { watts: number; soc: number; stateLabel: string; voltage: number; state: number };
-  victron?: { nextBatteryChargePourc: number };
+  victron?: { nextBatteryChargePourc: number; nextTimeCharge?: string };
   voiture?: Record<string, CarData>;
   energy?: { 
     total: { 
@@ -140,7 +140,7 @@ const BASE_MOCK_DATA: HomeDashboardData = {
   grid: { watts: 7301, sens: "Achat", arrow: "" },
   production: { total: 32, detail: { solarEdge: 0, apSystems: 32 }, percentageProduction: 85 },
   battery: { watts: 2647, soc: 83, stateLabel: "En charge", voltage: 50.63, state: 1 },
-  victron: { nextBatteryChargePourc: 90 },
+  victron: { nextBatteryChargePourc: 90, nextTimeCharge: "22:00" },
   energy: { 
     total: { 
       all: 4686, 

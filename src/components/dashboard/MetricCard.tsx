@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 
 interface DetailItem {
   label: string;
-  value: string | number;
+  value: React.ReactNode;
   unit?: string;
   valueClassName?: string;
 }
@@ -104,7 +105,7 @@ export function MetricCard({
                 <div key={idx} className="flex items-center gap-2 leading-none whitespace-nowrap">
                   {detail.label && <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">{detail.label} :</span>}
                   <span className={cn("text-[11px] font-black text-foreground", detail.valueClassName)}>
-                    {detail.value} <span className="text-[9px] font-normal opacity-70">{detail.unit}</span>
+                    {detail.value} {detail.unit && <span className="text-[9px] font-normal opacity-70">{detail.unit}</span>}
                   </span>
                 </div>
               ))}
@@ -178,7 +179,7 @@ export function MetricCard({
                   <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">{detail.label}</p>
                 )}
                 <p className={cn("text-sm font-black text-foreground", detail.valueClassName)}>
-                  {detail.value} <span className="text-[10px] font-normal opacity-60">{detail.unit}</span>
+                  {detail.value} {detail.unit && <span className="text-[10px] font-normal opacity-60">{detail.unit}</span>}
                 </p>
               </div>
             ))}
