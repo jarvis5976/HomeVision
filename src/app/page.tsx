@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -147,7 +146,7 @@ function DashboardContent() {
               </div>
             </section>
 
-            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <MetricCard 
                 title="Réseau Electrique" 
                 titleExtra={
@@ -229,9 +228,9 @@ function DashboardContent() {
                 details={[
                   { 
                     label: "", 
-                    value: (!latestData?.victron?.nextTimeCharge || latestData?.victron?.nextTimeCharge === '-') 
+                    value: (!latestData?.battery?.nextTimeCharge || latestData?.battery?.nextTimeCharge === '-') 
                       ? "Pas de recharge prévue" 
-                      : `Recharge prévue à ${latestData?.victron?.nextTimeCharge}`,
+                      : `Recharge prévue à ${latestData?.battery?.nextTimeCharge}`,
                     valueClassName: "text-[10px] text-muted-foreground font-bold italic"
                   },
                   { label: "Puissance", value: Math.abs(latestData?.battery?.watts ?? 0), unit: "W" }, 
@@ -371,7 +370,7 @@ function DashboardContent() {
                 <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3"><TrendingUp className="w-6 h-6 text-primary" /> Résumé Journalier</h2>
                 <Badge variant="secondary" className="px-4 py-1.5 font-black uppercase text-[10px]">{mounted ? new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ""}</Badge>
               </div>
-              <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <MetricCard title="Production journalière" value={historyData?.Production ?? 0} unit="kWh" icon={Sun} detailsLayout="bottom" details={[{ label: "SolarEdge", value: historyData?.SolarEdge ?? 0, unit: "kWh" }, { label: "APsystems", value: historyData?.Ecu ?? 0, unit: "kWh" }]} />
                 <MetricCard title="Utilisation" value={historyData?.Production ?? 0} unit="kWh" icon={PieChart} detailsLayout="bottom" details={[{ label: "Auto-Conso.", value: historyData?.AutoConsommation ?? 0, unit: "kWh" }, { label: "Vente", value: historyData?.Vente ?? 0, unit: "kWh" }]} />
                 <MetricCard title="Consommation journalière" value={historyData?.Consommation ?? 0} unit="kWh" icon={Activity} detailsLayout="bottom" details={[{ label: "Auto-Production", value: historyData?.AutoConsommation ?? 0, unit: "kWh" }, { label: "Achat", value: historyData?.Achat ?? 0, unit: "kWh" }]} />
