@@ -92,6 +92,9 @@ function DashboardContent() {
   const forecastDay = latestData?.solCast?.today ?? 0;
   const isGoalReached = realProdDay >= forecastDay;
 
+  // État de décharge batterie
+  const isBatteryDischarging = latestData?.battery?.stateLabel?.toLowerCase().includes('décharge') || latestData?.battery?.stateLabel?.toLowerCase().includes('discharging');
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
       <header className="h-20 border-b border-border flex items-center justify-between px-4 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
@@ -146,7 +149,7 @@ function DashboardContent() {
               </div>
             </section>
 
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <MetricCard 
                 title="Réseau Electrique" 
                 titleExtra={
@@ -220,9 +223,16 @@ function DashboardContent() {
                 unit="%" 
                 icon={BatteryIcon} 
                 titleExtra={
-                  <Badge className="bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5 ml-2">
-                    {latestData?.battery?.stateLabel}
-                  </Badge>
+                  <div className="flex items-center gap-2 ml-2">
+                    <Badge className="bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5">
+                      {latestData?.battery?.stateLabel}
+                    </Badge>
+                    {isBatteryDischarging && latestData?.battery?.batteryTimeLeft && (
+                      <Badge variant="secondary" className="text-[9px] font-black uppercase px-2 py-0.5 bg-muted/50 border-none">
+                        {latestData.battery.batteryTimeLeft}
+                      </Badge>
+                    )}
+                  </div>
                 } 
                 detailsLayout="side" 
                 details={[
@@ -312,7 +322,7 @@ function DashboardContent() {
                   rightValue: eauAnnexePct
                 }}
               />
-            </section>
+            </div>
 
             {/* Section Véhicules */}
             <section className="space-y-8">
