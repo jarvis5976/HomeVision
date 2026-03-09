@@ -92,9 +92,6 @@ function DashboardContent() {
   const forecastDay = latestData?.solCast?.today ?? 0;
   const isGoalReached = realProdDay >= forecastDay;
 
-  // État de décharge batterie
-  const isBatteryDischarging = latestData?.battery?.stateLabel?.toLowerCase().includes('décharge') || latestData?.battery?.stateLabel?.toLowerCase().includes('discharging');
-
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
       <header className="h-20 border-b border-border flex items-center justify-between px-4 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
@@ -227,7 +224,7 @@ function DashboardContent() {
                     <Badge className="bg-emerald-600 text-white border-none text-[9px] font-black uppercase px-2 py-0.5">
                       {latestData?.battery?.stateLabel}
                     </Badge>
-                    {isBatteryDischarging && latestData?.battery?.batteryTimeLeft && (
+                    {latestData?.battery?.batteryTimeLeft && (
                       <Badge variant="secondary" className="text-[9px] font-black uppercase px-2 py-0.5 bg-muted/50 border-none">
                         {latestData.battery.batteryTimeLeft}
                       </Badge>
