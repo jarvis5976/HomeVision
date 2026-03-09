@@ -227,6 +227,13 @@ function DashboardContent() {
                 } 
                 detailsLayout="side" 
                 details={[
+                  { 
+                    label: "", 
+                    value: (!latestData?.victron?.nextTimeCharge || latestData?.victron?.nextTimeCharge === '-') 
+                      ? "Pas de recharge prévue" 
+                      : `Recharge prévue à ${latestData?.victron?.nextTimeCharge}`,
+                    valueClassName: "text-[10px] text-muted-foreground font-bold italic"
+                  },
                   { label: "Puissance", value: Math.abs(latestData?.battery?.watts ?? 0), unit: "W" }, 
                   { label: "Tension", value: latestData?.battery?.voltage ?? 0, unit: "V" }
                 ]} 
