@@ -115,7 +115,16 @@ export interface HomeDashboardData {
     }; 
     detail: any 
   };
-  zenFlex?: { couleurJourJ: string; couleurJourJ1: string; periode?: string; totalHP?: number; totalHC?: number };
+  zenFlex?: { 
+    couleurJourJ?: string; 
+    couleurJourJ1?: string; 
+    couleurJourJLight?: string; 
+    couleurJourJ1Light?: string; 
+    countSobriete?: number;
+    periode?: string; 
+    totalHP?: number; 
+    totalHC?: number 
+  };
   solCast?: { today: number; tomorrow: number };
   chauffeEau?: { total: number; maison: number; annexe: number; cumulusActif?: boolean; cumulusDouche?: number };
   eau?: { total: number; compteur?: number; maison?: number; annexe?: number };
@@ -196,7 +205,16 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       "localisation": "home"
     }
   },
-  zenFlex: { couleurJourJ: "jour Eco", couleurJourJ1: "jour Sobriété", periode: "HP", totalHP: 12.5, totalHC: 8.2 },
+  zenFlex: { 
+    couleurJourJ: "jour Eco", 
+    couleurJourJ1: "jour Sobriété", 
+    couleurJourJLight: "Eco",
+    couleurJourJ1Light: "Sobriété",
+    countSobriete: 12,
+    periode: "HP", 
+    totalHP: 12.5, 
+    totalHC: 8.2 
+  },
   solCast: { today: 8.75, tomorrow: 8.03 }
 };
 

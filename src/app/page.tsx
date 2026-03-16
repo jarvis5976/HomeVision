@@ -130,17 +130,55 @@ function DashboardContent() {
         {view === 'dashboard' ? (
           <>
             <section className="flex flex-col sm:flex-row items-center justify-between gap-6 p-6 bg-secondary/10 rounded-3xl border border-border/50">
-              <div className="flex gap-4">
-                {latestData?.zenFlex?.couleurJourJ && <Badge className="px-6 py-2.5 text-sm font-black bg-emerald-600 text-white border-none">{latestData.zenFlex.couleurJourJ}</Badge>}
-                {latestData?.zenFlex?.couleurJourJ1 && <Badge variant="outline" className="px-6 py-2.5 text-sm font-black border-2 border-rose-500 text-rose-400 bg-rose-500/10">{latestData.zenFlex.couleurJourJ1}</Badge>}
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex gap-4">
+                  {latestData?.zenFlex?.couleurJourJLight && (
+                    <Badge 
+                      className={cn(
+                        "px-6 py-2.5 text-sm font-black text-white border-none",
+                        latestData.zenFlex.couleurJourJLight === "Sobriété" ? "bg-rose-600" : "bg-emerald-600"
+                      )}
+                    >
+                      Auj : {latestData.zenFlex.couleurJourJLight}
+                    </Badge>
+                  )}
+                  {latestData?.zenFlex?.couleurJourJ1Light && (
+                    <Badge 
+                      variant="outline" 
+                      className={cn(
+                        "px-6 py-2.5 text-sm font-black border-2 bg-card/50",
+                        latestData.zenFlex.couleurJourJ1Light === "Sobriété" 
+                          ? "border-rose-500 text-rose-500" 
+                          : "border-emerald-500 text-emerald-500"
+                      )}
+                    >
+                      Dem : {latestData.zenFlex.couleurJourJ1Light}
+                    </Badge>
+                  )}
+                </div>
+                {latestData?.zenFlex?.countSobriete !== undefined && (
+                  <Badge variant="secondary" className="px-4 py-2 text-xs font-black uppercase bg-muted/50 text-muted-foreground border-none">
+                    Jours Sobriété : {latestData.zenFlex.countSobriete}
+                  </Badge>
+                )}
               </div>
               <div className="flex gap-3">
-                <Badge variant="outline" className="flex items-center gap-3 px-5 py-3 bg-card border-border">
-                  <CloudSun className="w-5 h-5 text-orange-400" />
-                  <div className="flex flex-col">
-                    <span className="text-[9px] font-black uppercase">Prévision jour</span>
-                    <span className="font-black text-xs">{forecastDay} kWh</span>
+                <Badge variant="outline" className="flex flex-col items-center gap-0.5 px-5 py-3 bg-card border-border">
+                  <div className="flex items-center gap-2">
+                    <CloudSun className="w-5 h-5 text-orange-400" />
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-black uppercase">Prévision jour</span>
+                      <span className="font-black text-xs">{forecastDay} kWh</span>
+                    </div>
                   </div>
+                  {latestData?.energy?.total?.production !== undefined && (
+                    <span className={cn(
+                      "text-[10px] font-black mt-1",
+                      isGoalReached ? "text-emerald-500" : "text-rose-500"
+                    )}>
+                      ({realProdDay} kWh)
+                    </span>
+                  )}
                 </Badge>
                 <Badge variant="outline" className="flex items-center gap-3 px-5 py-3 bg-card border-border border-dashed opacity-70"><CloudSun className="w-5 h-5 text-orange-300" /><div className="flex flex-col"><span className="text-[9px] font-black uppercase">Demain</span><span className="font-black text-xs">{latestData?.solCast?.tomorrow ?? 0} kWh</span></div></Badge>
               </div>
@@ -172,7 +210,7 @@ function DashboardContent() {
                 footerCenter={
                   latestData?.zenFlex?.periode && (
                     <span className={cn(
-                      "text-[11px] font-black uppercase tracking-widest",
+                      "text-xs font-black uppercase tracking-widest",
                       latestData.zenFlex.periode === "HP" ? "text-rose-500" : "text-emerald-500"
                     )}>
                       {latestData.zenFlex.periode}
