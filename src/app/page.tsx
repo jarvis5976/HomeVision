@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -135,7 +136,7 @@ function DashboardContent() {
                   {latestData?.zenFlex?.couleurJourJLight && (
                     <Badge 
                       className={cn(
-                        "px-6 py-2.5 text-sm font-black text-white border-none",
+                        "px-6 py-2.5 text-sm font-black text-white border-none shadow-sm",
                         latestData.zenFlex.couleurJourJLight === "Sobriété" ? "bg-rose-600" : "bg-emerald-600"
                       )}
                     >
@@ -144,12 +145,9 @@ function DashboardContent() {
                   )}
                   {latestData?.zenFlex?.couleurJourJ1Light && (
                     <Badge 
-                      variant="outline" 
                       className={cn(
-                        "px-6 py-2.5 text-sm font-black border-2 bg-card/50",
-                        latestData.zenFlex.couleurJourJ1Light === "Sobriété" 
-                          ? "border-rose-500 text-rose-500" 
-                          : "border-emerald-500 text-emerald-500"
+                        "px-6 py-2.5 text-sm font-black text-white border-none shadow-sm",
+                        latestData.zenFlex.couleurJourJ1Light === "Sobriété" ? "bg-rose-600" : "bg-emerald-600"
                       )}
                     >
                       Dem : {latestData.zenFlex.couleurJourJ1Light}
