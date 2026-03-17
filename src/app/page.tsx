@@ -130,6 +130,7 @@ function DashboardContent() {
       <main className="flex-1 p-4 sm:p-8 max-w-7xl mx-auto w-full space-y-8 animate-in fade-in slide-up duration-500">
         {view === 'dashboard' ? (
           <>
+            {/* ZenFlex Section */}
             <section className="flex flex-col sm:flex-row items-center justify-between gap-6 p-6 bg-secondary/10 rounded-3xl border border-border/50">
               <div className="flex flex-wrap items-center gap-4">
                 <div className="flex gap-4">
@@ -169,20 +170,20 @@ function DashboardContent() {
                       <span className="font-black text-xs">{forecastDay} kWh</span>
                     </div>
                   </div>
-                  {latestData?.energy?.total?.production !== undefined && (
-                    <span className={cn(
-                      "text-[10px] font-black mt-1",
-                      isGoalReached ? "text-emerald-500" : "text-rose-500"
-                    )}>
-                      ({realProdDay} kWh)
-                    </span>
-                  )}
                 </Badge>
-                <Badge variant="outline" className="flex items-center gap-3 px-5 py-3 bg-card border-border border-dashed opacity-70"><CloudSun className="w-5 h-5 text-orange-300" /><div className="flex flex-col"><span className="text-[9px] font-black uppercase">Demain</span><span className="font-black text-xs">{latestData?.solCast?.tomorrow ?? 0} kWh</span></div></Badge>
+                <Badge variant="outline" className="flex items-center gap-3 px-5 py-3 bg-card border-border border-dashed opacity-70">
+                  <CloudSun className="w-5 h-5 text-orange-300" />
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-black uppercase">Demain</span>
+                    <span className="font-black text-xs">{latestData?.solCast?.tomorrow ?? 0} kWh</span>
+                  </div>
+                </Badge>
               </div>
             </section>
 
+            {/* KPI Cards Grid - All rows follow the same 3/2/1 structure */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Row 1 */}
               <MetricCard 
                 title="Réseau Electrique" 
                 titleExtra={
@@ -286,8 +287,9 @@ function DashboardContent() {
                 }}
               />
 
+              {/* Row 2 */}
               <MetricCard 
-                title="Consommation" 
+                title="Consommation Totale" 
                 value={latestData?.energy?.total?.all ?? 0} 
                 unit="W" 
                 icon={Activity} 
@@ -357,7 +359,7 @@ function DashboardContent() {
               />
             </div>
 
-            {/* Section Véhicules */}
+            {/* Vehicles Carousel */}
             <section className="space-y-8">
               {latestData?.voiture && Object.entries(latestData.voiture).length > 0 && (
                 <div>
@@ -383,9 +385,16 @@ function DashboardContent() {
                                   </div>
                                 )}
                               </div>
-                              <CardHeader className="pb-2"><CardTitle className="text-base font-black flex items-center gap-2"><Car className="w-4 h-4 text-primary" />{car.carModel || car.display_name}</CardTitle></CardHeader>
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-base font-black flex items-center gap-2">
+                                  <Car className="w-4 h-4 text-primary" />
+                                  {car.carModel || car.display_name}
+                                </CardTitle>
+                              </CardHeader>
                               <CardContent className="p-6 pt-2">
-                                <p className={cn("text-4xl font-black tracking-tighter mb-2", isCharging ? "text-emerald-500" : "")}>{car.batteryLevel ?? car.battery_level ?? 0}%</p>
+                                <p className={cn("text-4xl font-black tracking-tighter mb-2", isCharging ? "text-emerald-500" : "")}>
+                                  {car.batteryLevel ?? car.battery_level ?? 0}%
+                                </p>
                                 <div className="space-y-1 mb-4">
                                   <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Autonomie: {Math.round(car.range ?? car.est_battery_range_km ?? 0)} km</p>
                                   <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Kilomètre: {mounted ? Math.round(car.odometer ?? 0).toLocaleString() : 0} km</p>
@@ -413,7 +422,7 @@ function DashboardContent() {
                 <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3"><TrendingUp className="w-6 h-6 text-primary" /> Résumé Journalier</h2>
                 <Badge variant="secondary" className="px-4 py-1.5 font-black uppercase text-[10px]">{mounted ? new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ""}</Badge>
               </div>
-              <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <MetricCard title="Production journalière" value={historyData?.Production ?? 0} unit="kWh" icon={Sun} detailsLayout="bottom" details={[{ label: "SolarEdge", value: historyData?.SolarEdge ?? 0, unit: "kWh" }, { label: "APsystems", value: historyData?.Ecu ?? 0, unit: "kWh" }]} />
                 <MetricCard title="Utilisation" value={historyData?.Production ?? 0} unit="kWh" icon={PieChart} detailsLayout="bottom" details={[{ label: "Auto-Conso.", value: historyData?.AutoConsommation ?? 0, unit: "kWh" }, { label: "Vente", value: historyData?.Vente ?? 0, unit: "kWh" }]} />
                 <MetricCard title="Consommation journalière" value={historyData?.Consommation ?? 0} unit="kWh" icon={Activity} detailsLayout="bottom" details={[{ label: "Auto-Production", value: historyData?.AutoConsommation ?? 0, unit: "kWh" }, { label: "Achat", value: historyData?.Achat ?? 0, unit: "kWh" }]} />
