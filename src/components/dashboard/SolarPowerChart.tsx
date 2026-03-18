@@ -29,7 +29,6 @@ const COLORS = [
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
-    // Nettoyage du label pour n'afficher que l'heure dans le tooltip aussi
     const cleanLabel = label.split(' ').pop();
     return (
       <div className="bg-card border border-border p-3 rounded-xl shadow-xl text-[11px] font-black space-y-2 text-black dark:text-white">
@@ -51,6 +50,21 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
+// Composant pour l'icône solaire au point maximum
+const PeakDot = (props: any) => {
+  const { cx, cy, index, maxIndex, color } = props;
+
+  if (index === maxIndex) {
+    return (
+      <g transform={`translate(${cx - 8}, ${cy - 8})`}>
+        <SunMedium size={16} stroke={color} fill={color} fillOpacity={0.2} strokeWidth={2.5} />
+      </g>
+    );
+  }
+
+  return null;
+};
+
 export function SolarPowerChart({ data }: SolarPowerChartProps) {
   const chartData = useMemo(() => {
     if (!data || data.length < 2) return [];
@@ -61,7 +75,6 @@ export function SolarPowerChart({ data }: SolarPowerChartProps) {
     return labels.map((label, i) => {
       const point: any = { 
         label,
-        // On garde une version courte pour l'axe X (HH:mm)
         displayLabel: label.split(' ').pop() 
       };
       series.forEach(s => {
@@ -75,6 +88,28 @@ export function SolarPowerChart({ data }: SolarPowerChartProps) {
     if (!data || data.length < 2) return [];
     return data.slice(1).map((s: any) => s.name);
   }, [data]);
+
+  // Calcul des index des pics pour chaque série
+  const peakIndices = useMemo(() => {
+    if (chartData.length === 0 || seriesNames.length === 0) return {};
+    const peaks: Record<string, number> = {};
+    
+    seriesNames.forEach(name => {
+      let maxVal = -1;
+      let maxIdx = -1;
+      chartData.forEach((point, idx) => {
+        if (point[name] > maxVal) {
+          maxVal = point[name];
+          maxIdx = idx;
+        }
+      });
+      // On n'affiche l'icône que s'il y a une production réelle
+      if (maxVal > 0) {
+        peaks[name] = maxIdx;
+      }
+    });
+    return peaks;
+  }, [chartData, seriesNames]);
 
   if (!data || chartData.length === 0) return null;
 
@@ -119,7 +154,7 @@ export function SolarPowerChart({ data }: SolarPowerChartProps) {
                   dataKey={name} 
                   stroke={COLORS[i % COLORS.length]} 
                   strokeWidth={2.5}
-                  dot={false}
+                  dot={<PeakDot maxIndex={peakIndices[name]} color={COLORS[i % COLORS.length]} />}
                   activeDot={{ r: 5, strokeWidth: 0 }}
                   animationDuration={1000}
                 />
