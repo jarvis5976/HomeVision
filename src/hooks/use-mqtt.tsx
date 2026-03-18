@@ -331,7 +331,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (qRes.ok) {
         const q = await qRes.json();
-        // Utilisation du mapping spécifique fourni par l'utilisateur
+        // Utilisation du mapping spécifique basé sur les index du tableau 'total'
         if (q.data?.total) {
           const t = q.data.total;
           setTotalHistoryData({
