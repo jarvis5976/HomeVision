@@ -64,22 +64,27 @@ function DashboardContent() {
     return h > 0 ? `${h}h ${m}min` : `${m}min`;
   };
 
-  // Calcul distribution consommation
+  const getPercent = (value: number, total: number) => {
+    if (!total || total === 0) return 0;
+    return Math.round((value / total) * 100);
+  };
+
+  // Calcul distribution consommation temps réel
   const totalCons = latestData?.energy?.total?.all || 1;
   const maisonPct = Math.round(((latestData?.energy?.total?.maison || 0) / totalCons) * 100);
   const annexePct = 100 - maisonPct;
 
-  // Calcul distribution production
+  // Calcul distribution production temps réel
   const totalProd = latestData?.production?.total || 1;
   const solarEdgePct = Math.round(((latestData?.production?.detail?.solarEdge || 0) / totalProd) * 100);
   const apSystemsPct = 100 - solarEdgePct;
 
-  // Calcul distribution chauffe-eau
+  // Calcul distribution chauffe-eau temps réel
   const chauffeEauTotal = latestData?.chauffeEau?.total || 1;
   const chauffeEauMaisonPct = Math.round(((latestData?.chauffeEau?.maison || 0) / chauffeEauTotal) * 100);
   const chauffeEauAnnexePct = 100 - chauffeEauMaisonPct;
 
-  // Calcul distribution eau
+  // Calcul distribution eau temps réel
   const eauTotal = latestData?.eau?.total || 1;
   const eauMaisonPct = Math.round(((latestData?.eau?.maison || 0) / eauTotal) * 100);
   const eauAnnexePct = 100 - eauMaisonPct;
@@ -92,6 +97,11 @@ function DashboardContent() {
   const realProdDay = latestData?.energy?.total?.production ?? 0;
   const forecastDay = latestData?.solCast?.today ?? 0;
   const isGoalReached = realProdDay >= forecastDay;
+
+  // Totaux cumulés pour les cartes globales
+  const totalProdGlobal = totalHistoryData?.production ?? 1;
+  const totalUsageGlobal = (totalHistoryData?.vente ?? 0) + (totalHistoryData?.autoConsommation ?? 0);
+  const totalConsoGlobal = (totalHistoryData?.achat ?? 0) + (totalHistoryData?.autoConsommation ?? 0);
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
@@ -420,9 +430,63 @@ function DashboardContent() {
                 <Badge variant="secondary" className="px-4 py-1.5 font-black uppercase text-[10px]">{mounted ? new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ""}</Badge>
               </div>
               <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <MetricCard title="Production journalière" value={historyData?.Production ?? 0} unit="kWh" icon={Sun} detailsLayout="bottom" details={[{ label: "SolarEdge", value: historyData?.SolarEdge ?? 0, unit: "kWh" }, { label: "APsystems", value: historyData?.Ecu ?? 0, unit: "kWh" }]} />
-                <MetricCard title="Utilisation" value={historyData?.Production ?? 0} unit="kWh" icon={PieChart} detailsLayout="bottom" details={[{ label: "Auto-Conso.", value: historyData?.AutoConsommation ?? 0, unit: "kWh" }, { label: "Vente", value: historyData?.Vente ?? 0, unit: "kWh" }]} />
-                <MetricCard title="Consommation journalière" value={historyData?.Consommation ?? 0} unit="kWh" icon={Activity} detailsLayout="bottom" details={[{ label: "Auto-Conso.", value: historyData?.AutoConsommation ?? 0, unit: "kWh" }, { label: "Achat", value: historyData?.Achat ?? 0, unit: "kWh" }]} />
+                <MetricCard 
+                  title="Production journalière" 
+                  value={historyData?.Production ?? 0} 
+                  unit="kWh" 
+                  icon={Sun} 
+                  detailsLayout="bottom" 
+                  details={[
+                    { 
+                      label: "SolarEdge", 
+                      value: <><span className="mr-1">{historyData?.SolarEdge ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(historyData?.SolarEdge ?? 0, historyData?.Production ?? 0)}%)</span></>, 
+                      unit: "kWh" 
+                    }, 
+                    { 
+                      label: "APsystems", 
+                      value: <><span className="mr-1">{historyData?.Ecu ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(historyData?.Ecu ?? 0, historyData?.Production ?? 0)}%)</span></>, 
+                      unit: "kWh" 
+                    }
+                  ]} 
+                />
+                <MetricCard 
+                  title="Utilisation" 
+                  value={historyData?.Production ?? 0} 
+                  unit="kWh" 
+                  icon={PieChart} 
+                  detailsLayout="bottom" 
+                  details={[
+                    { 
+                      label: "Auto-Conso.", 
+                      value: <><span className="mr-1">{historyData?.AutoConsommation ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(historyData?.AutoConsommation ?? 0, historyData?.Production ?? 0)}%)</span></>, 
+                      unit: "kWh" 
+                    }, 
+                    { 
+                      label: "Vente", 
+                      value: <><span className="mr-1">{historyData?.Vente ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(historyData?.Vente ?? 0, historyData?.Production ?? 0)}%)</span></>, 
+                      unit: "kWh" 
+                    }
+                  ]} 
+                />
+                <MetricCard 
+                  title="Consommation journalière" 
+                  value={historyData?.Consommation ?? 0} 
+                  unit="kWh" 
+                  icon={Activity} 
+                  detailsLayout="bottom" 
+                  details={[
+                    { 
+                      label: "Auto-Conso.", 
+                      value: <><span className="mr-1">{historyData?.AutoConsommation ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(historyData?.AutoConsommation ?? 0, historyData?.Consommation ?? 0)}%)</span></>, 
+                      unit: "kWh" 
+                    }, 
+                    { 
+                      label: "Achat", 
+                      value: <><span className="mr-1">{historyData?.Achat ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(historyData?.Achat ?? 0, historyData?.Consommation ?? 0)}%)</span></>, 
+                      unit: "kWh" 
+                    }
+                  ]} 
+                />
               </section>
             </div>
 
@@ -439,30 +503,54 @@ function DashboardContent() {
                   icon={Sun} 
                   detailsLayout="bottom" 
                   details={[
-                    { label: "SolarEdge", value: (totalHistoryData?.production ?? 0) - (totalHistoryData?.apSystems ?? 0), unit: "kWh" }, 
-                    { label: "APsystems", value: totalHistoryData?.apSystems ?? 0, unit: "kWh" }
+                    { 
+                      label: "SolarEdge", 
+                      value: <><span className="mr-1">{(totalHistoryData?.production ?? 0) - (totalHistoryData?.apSystems ?? 0)}</span><span className="text-[9px] text-muted-foreground">({getPercent((totalHistoryData?.production ?? 0) - (totalHistoryData?.apSystems ?? 0), totalProdGlobal)}%)</span></>, 
+                      unit: "kWh" 
+                    }, 
+                    { 
+                      label: "APsystems", 
+                      value: <><span className="mr-1">{totalHistoryData?.apSystems ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(totalHistoryData?.apSystems ?? 0, totalProdGlobal)}%)</span></>, 
+                      unit: "kWh" 
+                    }
                   ]} 
                 />
                 <MetricCard 
                   title="Utilisation totale" 
-                  value={(totalHistoryData?.vente ?? 0) + (totalHistoryData?.autoConsommation ?? 0)} 
+                  value={totalUsageGlobal} 
                   unit="kWh" 
                   icon={PieChart} 
                   detailsLayout="bottom" 
                   details={[
-                    { label: "Auto-Conso.", value: totalHistoryData?.autoConsommation ?? 0, unit: "kWh" },
-                    { label: "Vente", value: totalHistoryData?.vente ?? 0, unit: "kWh" }
+                    { 
+                      label: "Auto-Conso.", 
+                      value: <><span className="mr-1">{totalHistoryData?.autoConsommation ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(totalHistoryData?.autoConsommation ?? 0, totalUsageGlobal)}%)</span></>, 
+                      unit: "kWh" 
+                    },
+                    { 
+                      label: "Vente", 
+                      value: <><span className="mr-1">{totalHistoryData?.vente ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(totalHistoryData?.vente ?? 0, totalUsageGlobal)}%)</span></>, 
+                      unit: "kWh" 
+                    }
                   ]} 
                 />
                 <MetricCard 
                   title="Consommation totale" 
-                  value={(totalHistoryData?.achat ?? 0) + (totalHistoryData?.autoConsommation ?? 0)} 
+                  value={totalConsoGlobal} 
                   unit="kWh" 
                   icon={Activity} 
                   detailsLayout="bottom" 
                   details={[
-                    { label: "Auto-Conso.", value: totalHistoryData?.autoConsommation ?? 0, unit: "kWh" },
-                    { label: "Achat", value: totalHistoryData?.achat ?? 0, unit: "kWh" }
+                    { 
+                      label: "Auto-Conso.", 
+                      value: <><span className="mr-1">{totalHistoryData?.autoConsommation ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(totalHistoryData?.autoConsommation ?? 0, totalConsoGlobal)}%)</span></>, 
+                      unit: "kWh" 
+                    },
+                    { 
+                      label: "Achat", 
+                      value: <><span className="mr-1">{totalHistoryData?.achat ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(totalHistoryData?.achat ?? 0, totalConsoGlobal)}%)</span></>, 
+                      unit: "kWh" 
+                    }
                   ]} 
                 />
               </section>
