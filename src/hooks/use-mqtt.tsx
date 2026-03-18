@@ -203,19 +203,9 @@ const BASE_MOCK_DATA: HomeDashboardData = {
       "charger_time_charging_minutes": 45,
       "carModel": "Volvo XC40",
       "localisation": "home"
-    },
-    "zoe": {
-      "batteryLevel": 76,
-      "odometer": 51687,
-      "range": 242,
-      "charge": false,
-      "carModel": "Renault Zoé",
-      "localisation": "home"
     }
   },
   zenFlex: { 
-    couleurJourJ: "jour Eco", 
-    couleurJourJ1: "jour Sobriété", 
     couleurJourJLight: "Eco",
     couleurJourJ1Light: "Sobriété",
     countSobriete: 12,
@@ -255,10 +245,10 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isSimulated, setIsSimulated] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [latestData, setLatestData] = useState<HomeDashboardData | null>(BASE_MOCK_DATA);
-  const [historyData, setHistoryData] = useState<HistoryData | null>(isSimulated ? MOCK_DAILY_HISTORY : null);
-  const [totalHistoryData, setTotalHistoryData] = useState<TotalHistoryData | null>(isSimulated ? MOCK_TOTAL_HISTORY : null);
+  const [historyData, setHistoryData] = useState<HistoryData | null>(null);
+  const [totalHistoryData, setTotalHistoryData] = useState<TotalHistoryData | null>(null);
   const [solarChartData, setSolarChartData] = useState<SolarChartData | null>(null);
-  const [solarPowerChartData, setSolarPowerChartData] = useState<SolarPowerChartData | null>(isSimulated ? MOCK_POWER_CHART_DATA : null);
+  const [solarPowerChartData, setSolarPowerChartData] = useState<SolarPowerChartData | null>(null);
   const [solCastChartData, setSolCastChartData] = useState<SolCastChartData | null>(null);
   const [annualData, setAnnualData] = useState<AnnualData | null>(null);
   const [dailyHistoryData, setDailyHistoryData] = useState<DailyHistoryData | null>(null);
@@ -331,7 +321,6 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (qRes.ok) {
         const q = await qRes.json();
-        // Utilisation du mapping spécifique basé sur les index du tableau 'total'
         if (q.data?.total) {
           const t = q.data.total;
           setTotalHistoryData({
@@ -340,7 +329,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
             vente: parseFloat(t[3]?.data?.[0] || 0),
             consommation: parseFloat(t[4]?.data?.[0] || 0),
             autoConsommation: parseFloat(t[5]?.data?.[0] || 0),
-            apSystems: parseFloat(t[6]?.data?.[0] || 0)
+            apSystems: parseFloat(t[6]?.data?.[0] || t[6] || 0) // Mapping APsystems: Index 6
           });
         }
       }
