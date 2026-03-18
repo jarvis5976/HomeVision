@@ -94,9 +94,15 @@ function DashboardContent() {
   const forecastDay = latestData?.solCast?.today ?? 0;
   const isGoalReached = realProdDay >= forecastDay;
 
-  const totalProdGlobal = totalHistoryData?.production ?? 1;
-  const totalUsageGlobal = (totalHistoryData?.vente ?? 0) + (totalHistoryData?.autoConsommation ?? 0);
-  const totalConsoGlobal = (totalHistoryData?.achat ?? 0) + (totalHistoryData?.autoConsommation ?? 0);
+  // Calculs pour les cartes globales basés sur TotalHistoryData
+  const totalProdGlobal = totalHistoryData?.production ?? 0;
+  const totalAchatGlobal = totalHistoryData?.achat ?? 0;
+  const totalVenteGlobal = totalHistoryData?.vente ?? 0;
+  const totalAutoConsoGlobal = totalHistoryData?.autoConsommation ?? 0;
+  const totalApSystemsGlobal = totalHistoryData?.apSystems ?? 0;
+  
+  const totalUsageGlobal = totalVenteGlobal + totalAutoConsoGlobal;
+  const totalConsoGlobal = totalAchatGlobal + totalAutoConsoGlobal;
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
@@ -490,58 +496,58 @@ function DashboardContent() {
               <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <MetricCard 
                   title="Production totale" 
-                  value={totalHistoryData?.production ?? 0} 
+                  value={totalProdGlobal} 
                   unit="kWh" 
                   icon={Sun} 
                   detailsLayout="bottom" 
                   details={[
                     { 
                       label: "SolarEdge", 
-                      value: (totalHistoryData?.production ?? 0) - (totalHistoryData?.apSystems ?? 0), 
-                      unit: `kWh (${getPercent((totalHistoryData?.production ?? 0) - (totalHistoryData?.apSystems ?? 0), totalProdGlobal)}%)`
+                      value: (totalProdGlobal - totalApSystemsGlobal).toFixed(2), 
+                      unit: `kWh (${getPercent(totalProdGlobal - totalApSystemsGlobal, totalProdGlobal)}%)`
                     }, 
                     { 
                       label: "APsystems", 
-                      value: totalHistoryData?.apSystems ?? 0, 
-                      unit: `kWh (${getPercent(totalHistoryData?.apSystems ?? 0, totalProdGlobal)}%)`
+                      value: totalApSystemsGlobal.toFixed(2), 
+                      unit: `kWh (${getPercent(totalApSystemsGlobal, totalProdGlobal)}%)`
                     }
                   ]} 
                 />
                 <MetricCard 
                   title="Utilisation totale" 
-                  value={totalUsageGlobal} 
+                  value={totalUsageGlobal.toFixed(2)} 
                   unit="kWh" 
                   icon={PieChart} 
                   detailsLayout="bottom" 
                   details={[
                     { 
                       label: "Auto-Conso.", 
-                      value: totalHistoryData?.autoConsommation ?? 0, 
-                      unit: `kWh (${getPercent(totalHistoryData?.autoConsommation ?? 0, totalUsageGlobal)}%)`
+                      value: totalAutoConsoGlobal.toFixed(2), 
+                      unit: `kWh (${getPercent(totalAutoConsoGlobal, totalUsageGlobal)}%)`
                     },
                     { 
                       label: "Vente", 
-                      value: totalHistoryData?.vente ?? 0, 
-                      unit: `kWh (${getPercent(totalHistoryData?.vente ?? 0, totalUsageGlobal)}%)`
+                      value: totalVenteGlobal.toFixed(2), 
+                      unit: `kWh (${getPercent(totalVenteGlobal, totalUsageGlobal)}%)`
                     }
                   ]} 
                 />
                 <MetricCard 
                   title="Consommation totale" 
-                  value={totalConsoGlobal} 
+                  value={totalConsoGlobal.toFixed(2)} 
                   unit="kWh" 
                   icon={Activity} 
                   detailsLayout="bottom" 
                   details={[
                     { 
                       label: "Auto-Conso.", 
-                      value: totalHistoryData?.autoConsommation ?? 0, 
-                      unit: `kWh (${getPercent(totalHistoryData?.autoConsommation ?? 0, totalConsoGlobal)}%)`
+                      value: totalAutoConsoGlobal.toFixed(2), 
+                      unit: `kWh (${getPercent(totalAutoConsoGlobal, totalConsoGlobal)}%)`
                     },
                     { 
                       label: "Achat", 
-                      value: totalHistoryData?.achat ?? 0, 
-                      unit: `kWh (${getPercent(totalHistoryData?.achat ?? 0, totalConsoGlobal)}%)`
+                      value: totalAchatGlobal.toFixed(2), 
+                      unit: `kWh (${getPercent(totalAchatGlobal, totalConsoGlobal)}%)`
                     }
                   ]} 
                 />

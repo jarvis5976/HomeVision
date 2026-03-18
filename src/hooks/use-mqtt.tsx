@@ -312,28 +312,49 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     try {
       const proxy = (u: string) => `/api/proxy?url=${encodeURIComponent(u)}`;
+      
       const hRes = await fetch(proxy('http://192.168.0.3/Dashboard/assets/Solaire/getProductDays.php'));
-      const qRes = await fetch(proxy('http://192.168.0.3/Dashboard/assets/Solaire/getProduct_query.php'));
-      
       if (hRes.ok) {
-        setHistoryData(await hRes.json());
+        const hData = await hRes.json();
+        setHistoryData(hData);
       }
-      
+
+      const qRes = await fetch(proxy('http://192.168.0.3/Dashboard/assets/Solaire/getProduct_query.php'));
       if (qRes.ok) {
         const q = await qRes.json();
         if (q.data?.total) {
           const t = q.data.total;
+          
+          // Mapping précis selon vos instructions
+          const production = parseFloat(t[1]?.data?.[0] || 0);
+          const achat = parseFloat(t[2]?.data?.[0] || 0);
+          const vente = parseFloat(t[3]?.data?.[0] || 0);
+          const consommation = parseFloat(t[4]?.data?.[0] || 0);
+          const autoConsommation = parseFloat(t[5]?.data?.[0] || 0);
+          
+          // APsystems est t[6], peut être un objet dataset ou une valeur directe
+          let apSystemsValue = 0;
+          if (t[6]) {
+            if (t[6].data && t[6].data[0] !== undefined) {
+              apSystemsValue = parseFloat(t[6].data[0]);
+            } else if (typeof t[6] === 'number') {
+              apSystemsValue = t[6];
+            } else if (typeof t[6] === 'string') {
+              apSystemsValue = parseFloat(t[6]);
+            }
+          }
+
           setTotalHistoryData({
-            production: parseFloat(t[1]?.data?.[0] || 0),
-            achat: parseFloat(t[2]?.data?.[0] || 0),
-            vente: parseFloat(t[3]?.data?.[0] || 0),
-            consommation: parseFloat(t[4]?.data?.[0] || 0),
-            autoConsommation: parseFloat(t[5]?.data?.[0] || 0),
-            apSystems: parseFloat(t[6]?.data?.[0] || t[6] || 0) // Mapping APsystems: Index 6
+            production,
+            achat,
+            vente,
+            consommation,
+            autoConsommation,
+            apSystems: apSystemsValue
           });
         }
       }
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error('Error fetching history stats:', e); }
   }, [isSimulated]);
 
   const fetchSolCastChart = useCallback(async () => { if (!isSimulated) { const res = await fetch(`/api/proxy?url=${encodeURIComponent('http://192.168.0.3/Dashboard/assets/Solaire/getSolCast.php')}`); if (res.ok) setSolCastChartData(await res.json()); } }, [isSimulated]);
