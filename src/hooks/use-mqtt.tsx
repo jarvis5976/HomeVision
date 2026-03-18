@@ -226,6 +226,12 @@ const BASE_MOCK_DATA: HomeDashboardData = {
   solCast: { today: 8.75, tomorrow: 8.03 }
 };
 
+const MOCK_POWER_CHART_DATA: SolarPowerChartData = [
+  { "Label": ["18/03 00:00","00:10","00:20","00:30","00:40","00:50","01:00","01:10","01:20","01:30","01:40","01:50","02:00","02:10","02:20","02:30","02:40","02:50","03:00","03:10","03:20","03:30","03:40","03:50","04:00","04:10","04:20","04:30","04:40","04:50","05:00","05:10","05:20","05:30","05:40","05:50","06:00","06:10","06:20","06:30","06:40","06:50","07:00","07:10","07:20","07:30","07:40","07:50","08:00","08:10","08:20","08:30"] },
+  { "name": "SolarEdge", "data": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,37,49,61,69,76,82,93] },
+  { "name": "APsystems", "data": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,60,79,86,93,81,91,106,142] }
+];
+
 export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSimulated, setIsSimulated] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -233,7 +239,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [historyData, setHistoryData] = useState<HistoryData | null>(null);
   const [totalHistoryData, setTotalHistoryData] = useState<TotalHistoryData | null>(null);
   const [solarChartData, setSolarChartData] = useState<SolarChartData | null>(null);
-  const [solarPowerChartData, setSolarPowerChartData] = useState<SolarPowerChartData | null>(null);
+  const [solarPowerChartData, setSolarPowerChartData] = useState<SolarPowerChartData | null>(isSimulated ? MOCK_POWER_CHART_DATA : null);
   const [solCastChartData, setSolCastChartData] = useState<SolCastChartData | null>(null);
   const [annualData, setAnnualData] = useState<AnnualData | null>(null);
   const [dailyHistoryData, setDailyHistoryData] = useState<DailyHistoryData | null>(null);
@@ -274,7 +280,10 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isSimulated]);
 
   const fetchSolarPowerChart = useCallback(async (date: string) => {
-    if (isSimulated) return;
+    if (isSimulated) {
+      setSolarPowerChartData(MOCK_POWER_CHART_DATA);
+      return;
+    }
     try {
       const url = `http://192.168.0.3/Dashboard/assets/Solaire/getProductDays_Quart.php`;
       const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`, {
