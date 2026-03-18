@@ -232,12 +232,31 @@ const MOCK_POWER_CHART_DATA: SolarPowerChartData = [
   { "name": "APsystems", "data": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,60,79,86,93,81,91,106,142] }
 ];
 
+const MOCK_TOTAL_HISTORY: TotalHistoryData = {
+  production: 4520.4,
+  achat: 2150.8,
+  vente: 980.2,
+  consommation: 5690.6,
+  autoConsommation: 3540.2,
+  apSystems: 1120.5
+};
+
+const MOCK_DAILY_HISTORY: HistoryData = {
+  Production: 7.2,
+  SolarEdge: 4.8,
+  Ecu: 2.4,
+  Achat: 24.5,
+  Vente: 1.2,
+  Consommation: 30.5,
+  AutoConsommation: 6.0
+};
+
 export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSimulated, setIsSimulated] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [latestData, setLatestData] = useState<HomeDashboardData | null>(BASE_MOCK_DATA);
-  const [historyData, setHistoryData] = useState<HistoryData | null>(null);
-  const [totalHistoryData, setTotalHistoryData] = useState<TotalHistoryData | null>(null);
+  const [historyData, setHistoryData] = useState<HistoryData | null>(isSimulated ? MOCK_DAILY_HISTORY : null);
+  const [totalHistoryData, setTotalHistoryData] = useState<TotalHistoryData | null>(isSimulated ? MOCK_TOTAL_HISTORY : null);
   const [solarChartData, setSolarChartData] = useState<SolarChartData | null>(null);
   const [solarPowerChartData, setSolarPowerChartData] = useState<SolarPowerChartData | null>(isSimulated ? MOCK_POWER_CHART_DATA : null);
   const [solCastChartData, setSolCastChartData] = useState<SolCastChartData | null>(null);
@@ -296,22 +315,32 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isSimulated]);
 
   const fetchHistoryStats = useCallback(async () => {
-    if (isSimulated) return;
+    if (isSimulated) {
+      setHistoryData(MOCK_DAILY_HISTORY);
+      setTotalHistoryData(MOCK_TOTAL_HISTORY);
+      return;
+    }
     try {
       const proxy = (u: string) => `/api/proxy?url=${encodeURIComponent(u)}`;
       const hRes = await fetch(proxy('http://192.168.0.3/Dashboard/assets/Solaire/getProductDays.php'));
       const qRes = await fetch(proxy('http://192.168.0.3/Dashboard/assets/Solaire/getProduct_query.php'));
-      if (hRes.ok) setHistoryData(await hRes.json());
+      
+      if (hRes.ok) {
+        setHistoryData(await hRes.json());
+      }
+      
       if (qRes.ok) {
         const q = await qRes.json();
+        // Utilisation du mapping spécifique fourni par l'utilisateur
         if (q.data?.total) {
+          const t = q.data.total;
           setTotalHistoryData({
-            production: parseFloat(q.data.total[1]?.data?.[0] || 0),
-            achat: parseFloat(q.data.total[2]?.data?.[0] || 0),
-            vente: parseFloat(q.data.total[3]?.data?.[0] || 0),
-            consommation: parseFloat(q.data.total[4]?.data?.[0] || 0),
-            autoConsommation: parseFloat(q.data.total[5]?.data?.[0] || 0),
-            apSystems: parseFloat(q.data.total[6]?.data?.[0] || 0)
+            production: parseFloat(t[1]?.data?.[0] || 0),
+            achat: parseFloat(t[2]?.data?.[0] || 0),
+            vente: parseFloat(t[3]?.data?.[0] || 0),
+            consommation: parseFloat(t[4]?.data?.[0] || 0),
+            autoConsommation: parseFloat(t[5]?.data?.[0] || 0),
+            apSystems: parseFloat(t[6]?.data?.[0] || 0)
           });
         }
       }
@@ -326,6 +355,8 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (pollInterval.current) clearInterval(pollInterval.current);
     if (!isPaused) {
       if (isSimulated) {
+        setHistoryData(MOCK_DAILY_HISTORY);
+        setTotalHistoryData(MOCK_TOTAL_HISTORY);
         pollInterval.current = setInterval(() => {
           setLatestData(prev => {
             if (!prev) return BASE_MOCK_DATA;
