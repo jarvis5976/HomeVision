@@ -191,7 +191,7 @@ function DashboardContent() {
               </div>
             </section>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <MetricCard 
                 title="Réseau Electrique" 
                 titleExtra={
@@ -429,7 +429,7 @@ function DashboardContent() {
                 <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3"><TrendingUp className="w-6 h-6 text-primary" /> Résumé Journalier</h2>
                 <Badge variant="secondary" className="px-4 py-1.5 font-black uppercase text-[10px]">{mounted ? new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ""}</Badge>
               </div>
-              <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <MetricCard 
                   title="Production journalière" 
                   value={historyData?.Production ?? 0} 
@@ -439,13 +439,13 @@ function DashboardContent() {
                   details={[
                     { 
                       label: "SolarEdge", 
-                      value: <><span className="mr-1">{historyData?.SolarEdge ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(historyData?.SolarEdge ?? 0, historyData?.Production ?? 0)}%)</span></>, 
-                      unit: "kWh" 
+                      value: historyData?.SolarEdge ?? 0, 
+                      unit: `kWh (${getPercent(historyData?.SolarEdge ?? 0, historyData?.Production ?? 0)}%)`
                     }, 
                     { 
                       label: "APsystems", 
-                      value: <><span className="mr-1">{historyData?.Ecu ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(historyData?.Ecu ?? 0, historyData?.Production ?? 0)}%)</span></>, 
-                      unit: "kWh" 
+                      value: historyData?.Ecu ?? 0, 
+                      unit: `kWh (${getPercent(historyData?.Ecu ?? 0, historyData?.Production ?? 0)}%)`
                     }
                   ]} 
                 />
@@ -458,13 +458,13 @@ function DashboardContent() {
                   details={[
                     { 
                       label: "Auto-Conso.", 
-                      value: <><span className="mr-1">{historyData?.AutoConsommation ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(historyData?.AutoConsommation ?? 0, historyData?.Production ?? 0)}%)</span></>, 
-                      unit: "kWh" 
+                      value: historyData?.AutoConsommation ?? 0, 
+                      unit: `kWh (${getPercent(historyData?.AutoConsommation ?? 0, historyData?.Production ?? 0)}%)`
                     }, 
                     { 
                       label: "Vente", 
-                      value: <><span className="mr-1">{historyData?.Vente ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(historyData?.Vente ?? 0, historyData?.Production ?? 0)}%)</span></>, 
-                      unit: "kWh" 
+                      value: historyData?.Vente ?? 0, 
+                      unit: `kWh (${getPercent(historyData?.Vente ?? 0, historyData?.Production ?? 0)}%)`
                     }
                   ]} 
                 />
@@ -477,13 +477,13 @@ function DashboardContent() {
                   details={[
                     { 
                       label: "Auto-Conso.", 
-                      value: <><span className="mr-1">{historyData?.AutoConsommation ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(historyData?.AutoConsommation ?? 0, historyData?.Consommation ?? 0)}%)</span></>, 
-                      unit: "kWh" 
+                      value: historyData?.AutoConsommation ?? 0, 
+                      unit: `kWh (${getPercent(historyData?.AutoConsommation ?? 0, historyData?.Consommation ?? 0)}%)`
                     }, 
                     { 
                       label: "Achat", 
-                      value: <><span className="mr-1">{historyData?.Achat ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(historyData?.Achat ?? 0, historyData?.Consommation ?? 0)}%)</span></>, 
-                      unit: "kWh" 
+                      value: historyData?.Achat ?? 0, 
+                      unit: `kWh (${getPercent(historyData?.Achat ?? 0, historyData?.Consommation ?? 0)}%)`
                     }
                   ]} 
                 />
@@ -495,7 +495,7 @@ function DashboardContent() {
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3"><Globe className="w-6 h-6 text-primary" /> Résumé Global</h2>
               </div>
-              <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <MetricCard 
                   title="Production totale" 
                   value={totalHistoryData?.production ?? 0} 
@@ -505,13 +505,13 @@ function DashboardContent() {
                   details={[
                     { 
                       label: "SolarEdge", 
-                      value: <><span className="mr-1">{(totalHistoryData?.production ?? 0) - (totalHistoryData?.apSystems ?? 0)}</span><span className="text-[9px] text-muted-foreground">({getPercent((totalHistoryData?.production ?? 0) - (totalHistoryData?.apSystems ?? 0), totalProdGlobal)}%)</span></>, 
-                      unit: "kWh" 
+                      value: (totalHistoryData?.production ?? 0) - (totalHistoryData?.apSystems ?? 0), 
+                      unit: `kWh (${getPercent((totalHistoryData?.production ?? 0) - (totalHistoryData?.apSystems ?? 0), totalProdGlobal)}%)`
                     }, 
                     { 
                       label: "APsystems", 
-                      value: <><span className="mr-1">{totalHistoryData?.apSystems ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(totalHistoryData?.apSystems ?? 0, totalProdGlobal)}%)</span></>, 
-                      unit: "kWh" 
+                      value: totalHistoryData?.apSystems ?? 0, 
+                      unit: `kWh (${getPercent(totalHistoryData?.apSystems ?? 0, totalProdGlobal)}%)`
                     }
                   ]} 
                 />
@@ -524,13 +524,13 @@ function DashboardContent() {
                   details={[
                     { 
                       label: "Auto-Conso.", 
-                      value: <><span className="mr-1">{totalHistoryData?.autoConsommation ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(totalHistoryData?.autoConsommation ?? 0, totalUsageGlobal)}%)</span></>, 
-                      unit: "kWh" 
+                      value: totalHistoryData?.autoConsommation ?? 0, 
+                      unit: `kWh (${getPercent(totalHistoryData?.autoConsommation ?? 0, totalUsageGlobal)}%)`
                     },
                     { 
                       label: "Vente", 
-                      value: <><span className="mr-1">{totalHistoryData?.vente ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(totalHistoryData?.vente ?? 0, totalUsageGlobal)}%)</span></>, 
-                      unit: "kWh" 
+                      value: totalHistoryData?.vente ?? 0, 
+                      unit: `kWh (${getPercent(totalHistoryData?.vente ?? 0, totalUsageGlobal)}%)`
                     }
                   ]} 
                 />
@@ -543,13 +543,13 @@ function DashboardContent() {
                   details={[
                     { 
                       label: "Auto-Conso.", 
-                      value: <><span className="mr-1">{totalHistoryData?.autoConsommation ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(totalHistoryData?.autoConsommation ?? 0, totalConsoGlobal)}%)</span></>, 
-                      unit: "kWh" 
+                      value: totalHistoryData?.autoConsommation ?? 0, 
+                      unit: `kWh (${getPercent(totalHistoryData?.autoConsommation ?? 0, totalConsoGlobal)}%)`
                     },
                     { 
                       label: "Achat", 
-                      value: <><span className="mr-1">{totalHistoryData?.achat ?? 0}</span><span className="text-[9px] text-muted-foreground">({getPercent(totalHistoryData?.achat ?? 0, totalConsoGlobal)}%)</span></>, 
-                      unit: "kWh" 
+                      value: totalHistoryData?.achat ?? 0, 
+                      unit: `kWh (${getPercent(totalHistoryData?.achat ?? 0, totalConsoGlobal)}%)`
                     }
                   ]} 
                 />
