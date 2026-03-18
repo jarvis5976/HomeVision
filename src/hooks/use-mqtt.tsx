@@ -134,6 +134,15 @@ export interface HomeDashboardData {
   solCast?: { today: number; tomorrow: number };
   chauffeEau?: { total: number; maison: number; annexe: number; cumulusActif?: boolean; cumulusDouche?: number };
   eau?: { total: number; compteur?: number; maison?: number; annexe?: number };
+  totalStart?: {
+    productionTotal: number;
+    achatTotal: number;
+    venteTotal: number;
+    consoTotal: number;
+    autoConsoTotal: number;
+    productionApsTotal: number;
+    productionSolaredgeTotal: number;
+  };
 }
 
 interface MQTTContextType {
@@ -213,7 +222,16 @@ const BASE_MOCK_DATA: HomeDashboardData = {
     totalHP: 12.5, 
     totalHC: 8.2 
   },
-  solCast: { today: 8.75, tomorrow: 8.03 }
+  solCast: { today: 8.75, tomorrow: 8.03 },
+  totalStart: {
+    productionTotal: 22552.7,
+    achatTotal: 94204.51,
+    venteTotal: 2814.01,
+    consoTotal: 113943.2,
+    autoConsoTotal: 113943.2,
+    productionApsTotal: 9381.39,
+    productionSolaredgeTotal: 13171.31
+  }
 };
 
 const MOCK_POWER_CHART_DATA: SolarPowerChartData = [
@@ -223,12 +241,12 @@ const MOCK_POWER_CHART_DATA: SolarPowerChartData = [
 ];
 
 const MOCK_TOTAL_HISTORY: TotalHistoryData = {
-  production: 4520.4,
-  achat: 2150.8,
-  vente: 980.2,
-  consommation: 5690.6,
-  autoConsommation: 3540.2,
-  apSystems: 1120.5
+  production: 22552.7,
+  achat: 94204.51,
+  vente: 2814.01,
+  consommation: 113943.2,
+  autoConsommation: 113943.2,
+  apSystems: 9381.39
 };
 
 const MOCK_DAILY_HISTORY: HistoryData = {
@@ -265,8 +283,21 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const proxyUrl = `/api/proxy?url=${encodeURIComponent(targetUrl)}`;
       const res = await fetch(proxyUrl, { signal: controller.signal });
       if (!res.ok) throw new Error(`Proxy error!`);
-      const data = await res.json();
+      const data: HomeDashboardData = await res.json();
       setLatestData(data);
+      
+      // Update historical totals from totalStart if present
+      if (data.totalStart) {
+        setTotalHistoryData({
+          production: data.totalStart.productionTotal,
+          achat: data.totalStart.achatTotal,
+          vente: data.totalStart.venteTotal,
+          consommation: data.totalStart.consoTotal,
+          autoConsommation: data.totalStart.autoConsoTotal,
+          apSystems: data.totalStart.productionApsTotal
+        });
+      }
+      
       setError(null);
     } catch (e: any) {
       if (e.name !== 'AbortError') setError(e.message);
@@ -312,48 +343,12 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     try {
       const proxy = (u: string) => `/api/proxy?url=${encodeURIComponent(u)}`;
-      
       const hRes = await fetch(proxy('http://192.168.0.3/Dashboard/assets/Solaire/getProductDays.php'));
       if (hRes.ok) {
         const hData = await hRes.json();
         setHistoryData(hData);
       }
-
-      const qRes = await fetch(proxy('http://192.168.0.3/Dashboard/assets/Solaire/getProduct_query.php'));
-      if (qRes.ok) {
-        const q = await qRes.json();
-        if (q.data?.total) {
-          const t = q.data.total;
-          
-          // Mapping précis selon vos instructions
-          const production = parseFloat(t[1]?.data?.[0] || 0);
-          const achat = parseFloat(t[2]?.data?.[0] || 0);
-          const vente = parseFloat(t[3]?.data?.[0] || 0);
-          const consommation = parseFloat(t[4]?.data?.[0] || 0);
-          const autoConsommation = parseFloat(t[5]?.data?.[0] || 0);
-          
-          // APsystems est t[6], peut être un objet dataset ou une valeur directe
-          let apSystemsValue = 0;
-          if (t[6]) {
-            if (t[6].data && t[6].data[0] !== undefined) {
-              apSystemsValue = parseFloat(t[6].data[0]);
-            } else if (typeof t[6] === 'number') {
-              apSystemsValue = t[6];
-            } else if (typeof t[6] === 'string') {
-              apSystemsValue = parseFloat(t[6]);
-            }
-          }
-
-          setTotalHistoryData({
-            production,
-            achat,
-            vente,
-            consommation,
-            autoConsommation,
-            apSystems: apSystemsValue
-          });
-        }
-      }
+      // Totals are now fetched via fetchRealData from instant_from_mqtt.php
     } catch (e) { console.error('Error fetching history stats:', e); }
   }, [isSimulated]);
 
