@@ -9,7 +9,7 @@ import { SolarForecastChart } from "@/components/dashboard/SolarForecastChart";
 import { AnnualSummaryTable } from "@/components/dashboard/AnnualSummaryTable";
 import { DailyHistoryTable } from "@/components/dashboard/DailyHistoryTable";
 import { 
-  Zap, Battery as BatteryIcon, Car, Droplets, Sun, Home, History, Flame, ArrowLeft, TrendingUp, PieChart, Activity, Clock, MapPin, CloudSun, Moon, SunMedium
+  Zap, Battery as BatteryIcon, Car, Droplets, Sun, Home, History, Flame, ArrowLeft, TrendingUp, PieChart, Activity, Clock, MapPin, CloudSun, Moon, SunMedium, Globe
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -24,7 +24,7 @@ type ViewType = 'dashboard' | 'history';
 
 function DashboardContent() {
   const { 
-    latestData, historyData, solarChartData, solCastChartData, annualData, dailyHistoryData, isSimulated, setIsSimulated, setIsPaused, fetchHistoryStats, fetchSolarChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory
+    latestData, historyData, totalHistoryData, solarChartData, solCastChartData, annualData, dailyHistoryData, isSimulated, setIsSimulated, setIsPaused, fetchHistoryStats, fetchSolarChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory
   } = useMQTT();
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [mounted, setMounted] = useState(false);
@@ -181,9 +181,7 @@ function DashboardContent() {
               </div>
             </section>
 
-            {/* KPI Cards Grid - All rows follow the same 3/2/1 structure */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Row 1 */}
               <MetricCard 
                 title="Réseau Electrique" 
                 titleExtra={
@@ -287,7 +285,6 @@ function DashboardContent() {
                 }}
               />
 
-              {/* Row 2 */}
               <MetricCard 
                 title="Consommation Totale" 
                 value={latestData?.energy?.total?.all ?? 0} 
@@ -359,7 +356,6 @@ function DashboardContent() {
               />
             </div>
 
-            {/* Vehicles Carousel */}
             <section className="space-y-8">
               {latestData?.voiture && Object.entries(latestData.voiture).length > 0 && (
                 <div>
@@ -417,6 +413,7 @@ function DashboardContent() {
           </>
         ) : (
           <div className="space-y-12 animate-in fade-in slide-in-from-left duration-500">
+            {/* Résumé Journalier */}
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3"><TrendingUp className="w-6 h-6 text-primary" /> Résumé Journalier</h2>
@@ -425,9 +422,52 @@ function DashboardContent() {
               <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <MetricCard title="Production journalière" value={historyData?.Production ?? 0} unit="kWh" icon={Sun} detailsLayout="bottom" details={[{ label: "SolarEdge", value: historyData?.SolarEdge ?? 0, unit: "kWh" }, { label: "APsystems", value: historyData?.Ecu ?? 0, unit: "kWh" }]} />
                 <MetricCard title="Utilisation" value={historyData?.Production ?? 0} unit="kWh" icon={PieChart} detailsLayout="bottom" details={[{ label: "Auto-Conso.", value: historyData?.AutoConsommation ?? 0, unit: "kWh" }, { label: "Vente", value: historyData?.Vente ?? 0, unit: "kWh" }]} />
-                <MetricCard title="Consommation journalière" value={historyData?.Consommation ?? 0} unit="kWh" icon={Activity} detailsLayout="bottom" details={[{ label: "Auto-Production", value: historyData?.AutoConsommation ?? 0, unit: "kWh" }, { label: "Achat", value: historyData?.Achat ?? 0, unit: "kWh" }]} />
+                <MetricCard title="Consommation journalière" value={historyData?.Consommation ?? 0} unit="kWh" icon={Activity} detailsLayout="bottom" details={[{ label: "Auto-Conso.", value: historyData?.AutoConsommation ?? 0, unit: "kWh" }, { label: "Achat", value: historyData?.Achat ?? 0, unit: "kWh" }]} />
               </section>
             </div>
+
+            {/* Résumé Global (Totaux Historiques) */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3"><Globe className="w-6 h-6 text-primary" /> Résumé Global</h2>
+              </div>
+              <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <MetricCard 
+                  title="Production totale" 
+                  value={totalHistoryData?.production ?? 0} 
+                  unit="kWh" 
+                  icon={Sun} 
+                  detailsLayout="bottom" 
+                  details={[
+                    { label: "SolarEdge", value: (totalHistoryData?.production ?? 0) - (totalHistoryData?.apSystems ?? 0), unit: "kWh" }, 
+                    { label: "APsystems", value: totalHistoryData?.apSystems ?? 0, unit: "kWh" }
+                  ]} 
+                />
+                <MetricCard 
+                  title="Utilisation totale" 
+                  value={(totalHistoryData?.vente ?? 0) + (totalHistoryData?.autoConsommation ?? 0)} 
+                  unit="kWh" 
+                  icon={PieChart} 
+                  detailsLayout="bottom" 
+                  details={[
+                    { label: "Auto-Conso.", value: totalHistoryData?.autoConsommation ?? 0, unit: "kWh" },
+                    { label: "Vente", value: totalHistoryData?.vente ?? 0, unit: "kWh" }
+                  ]} 
+                />
+                <MetricCard 
+                  title="Consommation totale" 
+                  value={(totalHistoryData?.achat ?? 0) + (totalHistoryData?.autoConsommation ?? 0)} 
+                  unit="kWh" 
+                  icon={Activity} 
+                  detailsLayout="bottom" 
+                  details={[
+                    { label: "Auto-Conso.", value: totalHistoryData?.autoConsommation ?? 0, unit: "kWh" },
+                    { label: "Achat", value: totalHistoryData?.achat ?? 0, unit: "kWh" }
+                  ]} 
+                />
+              </section>
+            </div>
+
             <SolarHistoryChart data={solarChartData} date={selectedDate} onDateChange={setSelectedDate} onRefresh={refreshHistory} />
             <SolarForecastChart data={solCastChartData} />
             <DailyHistoryTable data={dailyHistoryData} />

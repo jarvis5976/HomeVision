@@ -275,13 +275,14 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (qRes.ok) {
         const q = await qRes.json();
         if (q.data?.total) {
+          // Mapping conforme aux spécifications utilisateur
           setTotalHistoryData({
-            production: parseFloat(q.data.total[1]?.data || 0),
-            achat: parseFloat(q.data.total[2]?.data || 0),
-            vente: parseFloat(q.data.total[3]?.data || 0),
-            consommation: parseFloat(q.data.total[4]?.data || 0),
-            autoConsommation: parseFloat(q.data.total[5]?.data || 0),
-            apSystems: parseFloat(q.data.total[6]?.data || 0)
+            production: parseFloat(q.data.total[1]?.data?.[0] || 0),
+            achat: parseFloat(q.data.total[2]?.data?.[0] || 0),
+            vente: parseFloat(q.data.total[3]?.data?.[0] || 0),
+            consommation: parseFloat(q.data.total[4]?.data?.[0] || 0),
+            autoConsommation: parseFloat(q.data.total[5]?.data?.[0] || 0),
+            apSystems: parseFloat(q.data.total[6]?.data?.[0] || 0)
           });
         }
       }
