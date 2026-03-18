@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import { MQTTProvider, useMQTT } from "@/hooks/use-mqtt";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { SolarHistoryChart } from "@/components/dashboard/SolarHistoryChart";
+import { SolarPowerChart } from "@/components/dashboard/SolarPowerChart";
 import { SolarForecastChart } from "@/components/dashboard/SolarForecastChart";
 import { AnnualSummaryTable } from "@/components/dashboard/AnnualSummaryTable";
 import { DailyHistoryTable } from "@/components/dashboard/DailyHistoryTable";
@@ -24,7 +25,7 @@ type ViewType = 'dashboard' | 'history';
 
 function DashboardContent() {
   const { 
-    latestData, historyData, totalHistoryData, solarChartData, solCastChartData, annualData, dailyHistoryData, isSimulated, setIsSimulated, setIsPaused, fetchHistoryStats, fetchSolarChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory
+    latestData, historyData, totalHistoryData, solarChartData, solarPowerChartData, solCastChartData, annualData, dailyHistoryData, isSimulated, setIsSimulated, setIsPaused, fetchHistoryStats, fetchSolarChart, fetchSolarPowerChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory
   } = useMQTT();
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [mounted, setMounted] = useState(false);
@@ -43,10 +44,11 @@ function DashboardContent() {
   const refreshHistory = useCallback(() => {
     fetchHistoryStats();
     fetchSolarChart(selectedDate);
+    fetchSolarPowerChart(selectedDate);
     fetchSolCastChart();
     fetchAnnualData();
     fetchDailyHistory();
-  }, [fetchHistoryStats, fetchSolarChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory, selectedDate]);
+  }, [fetchHistoryStats, fetchSolarChart, fetchSolarPowerChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory, selectedDate]);
 
   useEffect(() => { if (view === 'history') refreshHistory(); }, [view, refreshHistory]);
 
@@ -69,36 +71,29 @@ function DashboardContent() {
     return Math.round((value / total) * 100);
   };
 
-  // Calcul distribution consommation temps réel
   const totalCons = latestData?.energy?.total?.all || 1;
   const maisonPct = Math.round(((latestData?.energy?.total?.maison || 0) / totalCons) * 100);
   const annexePct = 100 - maisonPct;
 
-  // Calcul distribution production temps réel
   const totalProd = latestData?.production?.total || 1;
   const solarEdgePct = Math.round(((latestData?.production?.detail?.solarEdge || 0) / totalProd) * 100);
   const apSystemsPct = 100 - solarEdgePct;
 
-  // Calcul distribution chauffe-eau temps réel
   const chauffeEauTotal = latestData?.chauffeEau?.total || 1;
   const chauffeEauMaisonPct = Math.round(((latestData?.chauffeEau?.maison || 0) / chauffeEauTotal) * 100);
   const chauffeEauAnnexePct = 100 - chauffeEauMaisonPct;
 
-  // Calcul distribution eau temps réel
   const eauTotal = latestData?.eau?.total || 1;
   const eauMaisonPct = Math.round(((latestData?.eau?.maison || 0) / eauTotal) * 100);
   const eauAnnexePct = 100 - eauMaisonPct;
 
-  // Cible batterie Victron
   const currentSoc = latestData?.battery?.soc ?? 0;
   const nextTarget = latestData?.victron?.nextBatteryChargePourc ?? 0;
 
-  // Comparaison Production vs Prévision
   const realProdDay = latestData?.energy?.total?.production ?? 0;
   const forecastDay = latestData?.solCast?.today ?? 0;
   const isGoalReached = realProdDay >= forecastDay;
 
-  // Totaux cumulés pour les cartes globales
   const totalProdGlobal = totalHistoryData?.production ?? 1;
   const totalUsageGlobal = (totalHistoryData?.vente ?? 0) + (totalHistoryData?.autoConsommation ?? 0);
   const totalConsoGlobal = (totalHistoryData?.achat ?? 0) + (totalHistoryData?.autoConsommation ?? 0);
@@ -140,7 +135,6 @@ function DashboardContent() {
       <main className="flex-1 p-4 sm:p-8 max-w-7xl mx-auto w-full space-y-8 animate-in fade-in slide-up duration-500">
         {view === 'dashboard' ? (
           <>
-            {/* ZenFlex Section */}
             <section className="flex flex-col sm:flex-row items-center justify-between gap-6 p-6 bg-secondary/10 rounded-3xl border border-border/50">
               <div className="flex flex-wrap items-center gap-4">
                 <div className="flex gap-4">
@@ -423,7 +417,6 @@ function DashboardContent() {
           </>
         ) : (
           <div className="space-y-12 animate-in fade-in slide-in-from-left duration-500">
-            {/* Résumé Journalier */}
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3"><TrendingUp className="w-6 h-6 text-primary" /> Résumé Journalier</h2>
@@ -490,7 +483,6 @@ function DashboardContent() {
               </section>
             </div>
 
-            {/* Résumé Global (Totaux Historiques) */}
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3"><Globe className="w-6 h-6 text-primary" /> Résumé Global</h2>
@@ -556,6 +548,7 @@ function DashboardContent() {
               </section>
             </div>
 
+            <SolarPowerChart data={solarPowerChartData} />
             <SolarHistoryChart data={solarChartData} date={selectedDate} onDateChange={setSelectedDate} onRefresh={refreshHistory} />
             <SolarForecastChart data={solCastChartData} />
             <DailyHistoryTable data={dailyHistoryData} />

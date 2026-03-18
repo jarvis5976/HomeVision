@@ -57,6 +57,11 @@ export interface SolarChartData {
   };
 }
 
+export type SolarPowerChartData = [
+  { Label: string[] },
+  ...Array<{ name: string; data: number[] }>
+];
+
 export type SolCastChartData = [
   { Label: string[] },
   { Energy: number[] },
@@ -140,12 +145,14 @@ interface MQTTContextType {
   historyData: HistoryData | null;
   totalHistoryData: TotalHistoryData | null;
   solarChartData: SolarChartData | null;
+  solarPowerChartData: SolarPowerChartData | null;
   solCastChartData: SolCastChartData | null;
   annualData: AnnualData | null;
   dailyHistoryData: DailyHistoryData | null;
   error: string | null;
   fetchHistoryStats: () => Promise<void>;
   fetchSolarChart: (date: string) => Promise<void>;
+  fetchSolarPowerChart: (date: string) => Promise<void>;
   fetchSolCastChart: () => Promise<void>;
   fetchAnnualData: () => Promise<void>;
   fetchDailyHistory: () => Promise<void>;
@@ -226,6 +233,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [historyData, setHistoryData] = useState<HistoryData | null>(null);
   const [totalHistoryData, setTotalHistoryData] = useState<TotalHistoryData | null>(null);
   const [solarChartData, setSolarChartData] = useState<SolarChartData | null>(null);
+  const [solarPowerChartData, setSolarPowerChartData] = useState<SolarPowerChartData | null>(null);
   const [solCastChartData, setSolCastChartData] = useState<SolCastChartData | null>(null);
   const [annualData, setAnnualData] = useState<AnnualData | null>(null);
   const [dailyHistoryData, setDailyHistoryData] = useState<DailyHistoryData | null>(null);
@@ -265,6 +273,19 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (e) { console.error(e); }
   }, [isSimulated]);
 
+  const fetchSolarPowerChart = useCallback(async (date: string) => {
+    if (isSimulated) return;
+    try {
+      const url = `http://192.168.0.3/Dashboard/assets/Solaire/getProductDays_Quart.php`;
+      const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date })
+      });
+      if (res.ok) setSolarPowerChartData(await res.json());
+    } catch (e) { console.error(e); }
+  }, [isSimulated]);
+
   const fetchHistoryStats = useCallback(async () => {
     if (isSimulated) return;
     try {
@@ -275,7 +296,6 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (qRes.ok) {
         const q = await qRes.json();
         if (q.data?.total) {
-          // Mapping conforme aux spécifications utilisateur
           setTotalHistoryData({
             production: parseFloat(q.data.total[1]?.data?.[0] || 0),
             achat: parseFloat(q.data.total[2]?.data?.[0] || 0),
@@ -314,8 +334,8 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <MQTTContext.Provider value={{ 
       isSimulated, setIsSimulated, isPaused, setIsPaused, latestData, 
-      historyData, totalHistoryData, solarChartData, solCastChartData, annualData, dailyHistoryData, error,
-      fetchHistoryStats, fetchSolarChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory
+      historyData, totalHistoryData, solarChartData, solarPowerChartData, solCastChartData, annualData, dailyHistoryData, error,
+      fetchHistoryStats, fetchSolarChart, fetchSolarPowerChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory
     }}>
       {children}
     </MQTTContext.Provider>
