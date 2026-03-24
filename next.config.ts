@@ -32,9 +32,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     reactCompiler: false,
-    serverActions: {
-      bodySizeLimit: '2mb',
-    },
+    esmExternals: true,
   },
 };
 
