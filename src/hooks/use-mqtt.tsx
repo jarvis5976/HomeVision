@@ -19,6 +19,12 @@ export interface CarData {
     address?: string;
     [key: string]: any;
   } | string;
+  charge_limit_soc?: number;
+  estimateChargeTime?: {
+    summary?: {
+      total_time_minutes?: number;
+    };
+  };
   [key: string]: any;
 }
 
