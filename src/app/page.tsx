@@ -24,8 +24,8 @@ import { Progress } from "@/components/ui/progress";
 type ViewType = 'dashboard' | 'history';
 
 function DashboardContent() {
-  const { 
-    latestData, historyData, totalHistoryData, solarChartData, solarPowerChartData, solCastChartData, annualData, dailyHistoryData, isSimulated, setIsSimulated, setIsPaused, fetchHistoryStats, fetchSolarChart, fetchSolarPowerChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory
+  const {
+    latestData, historyData, totalHistoryData, solarChartData, solarPowerChartData, solCastChartData, annualData, dailyHistoryData, isSimulated, setIsSimulated, setIsPaused, borneConsumptionEnabled, setBorneConsumptionEnabled, fetchHistoryStats, fetchSolarChart, fetchSolarPowerChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory
   } = useMQTT();
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [mounted, setMounted] = useState(false);
@@ -569,7 +569,11 @@ function DashboardContent() {
             <SolarHistoryChart data={solarChartData} date={selectedDate} onDateChange={setSelectedDate} onRefresh={refreshHistory} />
             <SolarForecastChart data={solCastChartData} />
             <DailyHistoryTable data={dailyHistoryData} />
-            <AnnualSummaryTable data={annualData} />
+            <AnnualSummaryTable
+              data={annualData}
+              onBorneToggleChange={setBorneConsumptionEnabled}
+              borneConsumptionEnabled={borneConsumptionEnabled}
+            />
           </div>
         )}
       </main>

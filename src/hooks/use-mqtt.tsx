@@ -79,6 +79,7 @@ export interface AnnualData {
   achat: AnnualMetricItem[];
   vente: AnnualMetricItem[];
   autoConsommation: AnnualMetricItem[];
+  borne?: AnnualMetricItem[];
 }
 
 export interface AnnualMetricItem {
@@ -156,6 +157,8 @@ interface MQTTContextType {
   setIsSimulated: (val: boolean) => void;
   isPaused: boolean;
   setIsPaused: (val: boolean) => void;
+  borneConsumptionEnabled: boolean;
+  setBorneConsumptionEnabled: (val: boolean) => void;
   latestData: HomeDashboardData | null;
   historyData: HistoryData | null;
   totalHistoryData: TotalHistoryData | null;
@@ -268,6 +271,7 @@ const MOCK_DAILY_HISTORY: HistoryData = {
 export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSimulated, setIsSimulated] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [borneConsumptionEnabled, setBorneConsumptionEnabled] = useState(false);
   const [latestData, setLatestData] = useState<HomeDashboardData | null>(BASE_MOCK_DATA);
   const [historyData, setHistoryData] = useState<HistoryData | null>(null);
   const [totalHistoryData, setTotalHistoryData] = useState<TotalHistoryData | null>(null);
@@ -359,7 +363,17 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isSimulated]);
 
   const fetchSolCastChart = useCallback(async () => { if (!isSimulated) { const res = await fetch(`/api/proxy?url=${encodeURIComponent('http://192.168.0.3/Dashboard/assets/Solaire/getSolCast.php')}`); if (res.ok) setSolCastChartData(await res.json()); } }, [isSimulated]);
-  const fetchAnnualData = useCallback(async () => { if (!isSimulated) { const res = await fetch(`/api/proxy?url=${encodeURIComponent('http://192.168.0.3/Dashboard/assets/Solaire/getStatByMonths.php')}`); if (res.ok) setAnnualData(await res.json()); } }, [isSimulated]);
+  const fetchAnnualData = useCallback(async () => {
+    if (!isSimulated) {
+      const url = 'http://192.168.0.3/Dashboard/assets/Solaire/getStatByMonths.php';
+      const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ includeBorneConsumption: borneConsumptionEnabled })
+      });
+      if (res.ok) setAnnualData(await res.json());
+    }
+  }, [isSimulated, borneConsumptionEnabled]);
   const fetchDailyHistory = useCallback(async () => { if (!isSimulated) { const res = await fetch(`/api/proxy?url=${encodeURIComponent('http://192.168.0.3/Dashboard/assets/Solaire/listeProductDays2.php')}`); if (res.ok) setDailyHistoryData(await res.json()); } }, [isSimulated]);
 
   useEffect(() => {
@@ -383,8 +397,8 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isSimulated, isPaused, fetchRealData]);
 
   return (
-    <MQTTContext.Provider value={{ 
-      isSimulated, setIsSimulated, isPaused, setIsPaused, latestData, 
+    <MQTTContext.Provider value={{
+      isSimulated, setIsSimulated, isPaused, setIsPaused, borneConsumptionEnabled, setBorneConsumptionEnabled, latestData,
       historyData, totalHistoryData, solarChartData, solarPowerChartData, solCastChartData, annualData, dailyHistoryData, error,
       fetchHistoryStats, fetchSolarChart, fetchSolarPowerChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory
     }}>
