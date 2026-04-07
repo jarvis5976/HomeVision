@@ -5,8 +5,6 @@ import { useMemo, useState, useEffect } from "react";
 import { AnnualData, AnnualMetricItem } from "@/hooks/use-mqtt";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -20,8 +18,6 @@ import { cn } from "@/lib/utils";
 
 interface AnnualSummaryTableProps {
   data: AnnualData | null;
-  onBorneToggleChange?: (enabled: boolean) => void;
-  borneConsumptionEnabled?: boolean;
 }
 
 type MetricType = 'production' | 'achat' | 'vente' | 'autoConsommation' | 'borne';
@@ -31,7 +27,7 @@ const MONTH_NAMES = [
   "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
 ];
 
-export function AnnualSummaryTable({ data, onBorneToggleChange, borneConsumptionEnabled = false }: AnnualSummaryTableProps) {
+export function AnnualSummaryTable({ data }: AnnualSummaryTableProps) {
   const [activeMetric, setActiveMetric] = useState<MetricType>('production');
   const [currentDateInfo, setCurrentDateInfo] = useState<{ month: string; year: string } | null>(null);
 
@@ -79,23 +75,12 @@ export function AnnualSummaryTable({ data, onBorneToggleChange, borneConsumption
 
   return (
     <Card className="border-border bg-card shadow-lg">
-      <CardHeader className="flex flex-col gap-4 pb-6">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <CardTitle className="text-lg font-bold flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-primary" />
-            Résumé Annuel
-          </CardTitle>
-          <div className="flex items-center gap-3 bg-secondary/10 px-3 py-2 rounded-lg border border-border/50">
-            <Label htmlFor="borne-toggle" className="text-[10px] font-bold uppercase cursor-pointer whitespace-nowrap">Conso. Borne</Label>
-            <Switch
-              id="borne-toggle"
-              checked={borneConsumptionEnabled}
-              onCheckedChange={onBorneToggleChange}
-              className="scale-75 sm:scale-100"
-            />
-          </div>
-        </div>
-        <Tabs value={activeMetric} onValueChange={(val) => setActiveMetric(val as MetricType)} className="w-full">
+      <CardHeader className="flex flex-col md:flex-row items-center justify-between gap-4 pb-6">
+        <CardTitle className="text-lg font-bold flex items-center gap-2">
+          <BarChart3 className="w-5 h-5 text-primary" />
+          Résumé Annuel
+        </CardTitle>
+        <Tabs value={activeMetric} onValueChange={(val) => setActiveMetric(val as MetricType)} className="w-full md:w-auto">
           <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full h-auto p-1 bg-secondary/20">
             <TabsTrigger value="production" className="text-[10px] uppercase font-bold px-4 py-2">Production</TabsTrigger>
             <TabsTrigger value="achat" className="text-[10px] uppercase font-bold px-4 py-2">Achat</TabsTrigger>
