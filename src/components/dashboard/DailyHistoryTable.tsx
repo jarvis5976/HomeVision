@@ -20,7 +20,9 @@ import {
   Zap, 
   ChevronLeft, 
   ChevronRight,
-  Rows
+  Rows,
+  CalendarDays,
+  FilterX
 } from "lucide-react";
 import {
   Select,
@@ -35,18 +37,38 @@ interface DailyHistoryTableProps {
   data: DailyHistoryData | null;
 }
 
+const MONTHS = [
+  "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+  "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+];
+
 export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
   const [isGrouped, setIsGrouped] = useState(false);
   const [isPercentage, setIsPercentage] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
+  const [filterYear, setFilterYear] = useState<string>("all");
+  const [filterMonth, setFilterMonth] = useState<string>("all");
+
+  const uniqueYears = useMemo(() => {
+    if (!data) return [];
+    const years = new Set<number>();
+    data.unGroup.byKwh.forEach(item => years.add(item.Année));
+    return Array.from(years).sort((a, b) => b - a);
+  }, [data]);
 
   const currentData = useMemo(() => {
     if (!data) return [];
-    return isGrouped 
+    let baseData = isGrouped 
       ? (isPercentage ? data.group.byPourc : data.group.byKwh)
       : (isPercentage ? data.unGroup.byPourc : data.unGroup.byKwh);
-  }, [data, isGrouped, isPercentage]);
+
+    return baseData.filter(item => {
+      const yearMatch = filterYear === "all" || item.Année.toString() === filterYear;
+      const monthMatch = filterMonth === "all" || item.Date.toLowerCase().includes(filterMonth.toLowerCase());
+      return yearMatch && monthMatch;
+    });
+  }, [data, isGrouped, isPercentage, filterYear, filterMonth]);
 
   const totalPages = Math.ceil(currentData.length / pageSize);
   
@@ -78,51 +100,96 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
     setCurrentPage(1);
   };
 
-  // Classe CSS pour harmoniser la largeur des colonnes de données
+  const resetFilters = () => {
+    setFilterYear("all");
+    setFilterMonth("all");
+    setCurrentPage(1);
+  };
+
   const dataColClass = "w-[110px] min-w-[110px] text-center px-2";
 
   return (
     <Card className="border-border bg-card shadow-lg">
-      <CardHeader className="flex flex-col lg:flex-row items-center justify-between gap-4 pb-6">
-        <div className="flex items-center gap-4">
-          <CardTitle className="text-lg font-bold flex items-center gap-2">
-            <ListChecks className="w-5 h-5 text-primary" />
-            Historique par jour
-          </CardTitle>
-          <div className="flex items-center gap-2 ml-4">
-            <Rows className="w-3.5 h-3.5 text-muted-foreground" />
-            <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
-              <SelectTrigger className="h-8 w-28 text-[10px] font-bold">
-                <SelectValue placeholder="5 lignes" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="5">5 lignes</SelectItem>
-                <SelectItem value="10">10 lignes</SelectItem>
-              </SelectContent>
-            </Select>
+      <CardHeader className="flex flex-col space-y-4 pb-6">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <CardTitle className="text-lg font-bold flex items-center gap-2">
+              <ListChecks className="w-5 h-5 text-primary" />
+              Historique par jour
+            </CardTitle>
+            <div className="flex items-center gap-2 ml-4">
+              <Rows className="w-3.5 h-3.5 text-muted-foreground" />
+              <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+                <SelectTrigger className="h-8 w-28 text-[10px] font-bold">
+                  <SelectValue placeholder="5 lignes" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 lignes</SelectItem>
+                  <SelectItem value="10">10 lignes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <div className="flex gap-2 bg-secondary/20 p-1 rounded-xl">
+            <Button 
+              variant={isGrouped ? "secondary" : "ghost"} 
+              size="sm" 
+              onClick={() => { setIsGrouped(!isGrouped); setCurrentPage(1); }}
+              className="h-8 gap-2 text-[10px] font-black uppercase"
+            >
+              {isGrouped ? <Layers className="w-3.5 h-3.5" /> : <ListChecks className="w-3.5 h-3.5" />}
+              {isGrouped ? "Regroupé" : "Détaillé"}
+            </Button>
+            <div className="w-px h-4 bg-border my-auto" />
+            <Button 
+              variant={isPercentage ? "secondary" : "ghost"} 
+              size="sm" 
+              onClick={() => { setIsPercentage(!isPercentage); setCurrentPage(1); }}
+              className="h-8 gap-2 text-[10px] font-black uppercase"
+            >
+              {isPercentage ? <Percent className="w-3.5 h-3.5" /> : <Zap className="w-3.5 h-3.5" />}
+              {isPercentage ? "%" : "kWh"}
+            </Button>
           </div>
         </div>
-        
-        <div className="flex gap-2 bg-secondary/20 p-1 rounded-xl">
-          <Button 
-            variant={isGrouped ? "secondary" : "ghost"} 
-            size="sm" 
-            onClick={() => { setIsGrouped(!isGrouped); setCurrentPage(1); }}
-            className="h-8 gap-2 text-[10px] font-black uppercase"
-          >
-            {isGrouped ? <Layers className="w-3.5 h-3.5" /> : <ListChecks className="w-3.5 h-3.5" />}
-            {isGrouped ? "Regroupé" : "Détaillé"}
-          </Button>
-          <div className="w-px h-4 bg-border my-auto" />
-          <Button 
-            variant={isPercentage ? "secondary" : "ghost"} 
-            size="sm" 
-            onClick={() => { setIsPercentage(!isPercentage); setCurrentPage(1); }}
-            className="h-8 gap-2 text-[10px] font-black uppercase"
-          >
-            {isPercentage ? <Percent className="w-3.5 h-3.5" /> : <Zap className="w-3.5 h-3.5" />}
-            {isPercentage ? "%" : "kWh"}
-          </Button>
+
+        <div className="flex flex-wrap items-center gap-3 p-3 bg-secondary/10 rounded-2xl border border-border/50">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="w-4 h-4 text-primary" />
+            <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Période :</span>
+          </div>
+          
+          <Select value={filterYear} onValueChange={(val) => { setFilterYear(val); setCurrentPage(1); }}>
+            <SelectTrigger className="h-8 w-28 text-[10px] font-bold">
+              <SelectValue placeholder="Année" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes</SelectItem>
+              {uniqueYears.map(year => (
+                <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={filterMonth} onValueChange={(val) => { setFilterMonth(val); setCurrentPage(1); }}>
+            <SelectTrigger className="h-8 w-32 text-[10px] font-bold">
+              <SelectValue placeholder="Mois" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les mois</SelectItem>
+              {MONTHS.map(month => (
+                <SelectItem key={month} value={month}>{month}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {(filterYear !== "all" || filterMonth !== "all") && (
+            <Button variant="ghost" size="sm" onClick={resetFilters} className="h-8 gap-2 text-[9px] font-black uppercase text-rose-500 hover:text-rose-600 hover:bg-rose-500/10">
+              <FilterX className="w-3 h-3" />
+              Réinitialiser
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent>
@@ -152,7 +219,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedData.map((row, idx) => (
+              {paginatedData.length > 0 ? paginatedData.map((row, idx) => (
                 <TableRow key={idx} className="border-border/50">
                   <TableCell className="text-[10px] font-bold">{row.Année}</TableCell>
                   <TableCell className="text-[10px] font-bold whitespace-nowrap">{row.Date}</TableCell>
@@ -202,7 +269,13 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
                   <TableCell className={dataColClass}>{renderValue(row.AchatMaison)}</TableCell>
                   <TableCell className={dataColClass}>{renderValue(row.AchatAnnexe)}</TableCell>
                 </TableRow>
-              ))}
+              )) : (
+                <TableRow>
+                  <TableCell colSpan={19} className="h-32 text-center text-muted-foreground italic font-medium">
+                    Aucune donnée disponible pour cette période.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>
