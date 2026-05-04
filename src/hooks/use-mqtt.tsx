@@ -39,6 +39,7 @@ export interface TotalHistoryData {
   consommation: number;
   autoConsommation: number;
   apSystems: number;
+  productionSolaredgeTotal?: number;
 }
 
 export interface SolarChartData {
@@ -293,8 +294,9 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
           achat: data.totalStart.achatTotal,
           vente: data.totalStart.venteTotal,
           consommation: data.totalStart.consoTotal,
-          autoConsommation: data.totalStart.autoConsoTotal,
-          apSystems: data.totalStart.productionApsTotal
+          autoConsommation: data.totalStart.autoConsommationTotal || data.totalStart.autoConsoTotal,
+          apSystems: data.totalStart.productionApsTotal,
+          productionSolaredgeTotal: data.totalStart.productionSolaredgeTotal
         });
       }
       
@@ -348,7 +350,6 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const hData = await hRes.json();
         setHistoryData(hData);
       }
-      // Totals are now fetched via fetchRealData from instant_from_mqtt.php
     } catch (e) { console.error('Error fetching history stats:', e); }
   }, [isSimulated]);
 

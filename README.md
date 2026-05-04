@@ -2,40 +2,41 @@
 
 Tableau de bord intelligent pour le suivi de l'énergie (Solaire, Batterie Victron, Tesla) et des capteurs domestiques.
 
-## 🚨 Fix "Access Denied" on GitHub Actions
+## 🚨 Résoudre l'erreur Git "Authentication failed"
 
-Si vous voyez l'erreur `requested access to the resource is denied` dans vos GitHub Actions, c'est que vous n'avez pas encore ajouté vos identifiants Docker Hub à votre dépôt GitHub. **C'est une étape obligatoire pour que GitHub puisse publier l'image sur votre compte Docker Hub.**
+Si vous voyez l'erreur `Invalid username or token. Password authentication is not supported`, c'est que vous essayez d'utiliser votre mot de passe GitHub au lieu d'un jeton d'accès (token).
+
+### 1. Générer un Token sur GitHub
+1. Allez dans **Settings** (de votre compte, pas du dépôt) > **Developer settings** > **Personal access tokens** > **Tokens (classic)**.
+2. Cliquez sur **Generate new token**.
+3. Donnez un nom (ex: "HomeVision CLI"), cochez la case **repo**, et générez le token.
+4. **Copiez le token immédiatement** (vous ne pourrez plus le voir).
+
+### 2. Mettre à jour vos identifiants en local
+Utilisez cette commande pour mettre à jour l'URL de votre dépôt avec votre nom d'utilisateur et votre nouveau token :
+```bash
+git remote set-url origin https://VOTRE_USERNAME:VOTRE_TOKEN@github.com/jarvis5976/HomeVision.git
+```
+Ensuite, réessayez votre `git push`.
+
+## 🚨 Configuration GitHub Actions (Déploiement Docker)
+
+Si l'erreur survient lors du déploiement automatique sur Docker Hub :
 
 1. Allez sur votre dépôt GitHub : `https://github.com/jarvis5976/HomeVision`
-2. Cliquez sur l'onglet **Settings** (en haut à droite).
-3. Dans le menu de gauche, allez dans **Secrets and variables** > **Actions**.
-4. Cliquez sur le bouton vert **New repository secret**.
-5. Ajoutez les deux secrets suivants :
+2. Allez dans **Settings** > **Secrets and variables** > **Actions**.
+3. Ajoutez les deux secrets suivants :
    - **Name:** `DOCKERHUB_USERNAME`  / **Value:** `jarvis5976`
-   - **Name:** `DOCKERHUB_TOKEN`     / **Value:** (Votre jeton d'accès Docker Hub, généré dans Account Settings > Security sur Docker Hub)
-
-Une fois ces secrets ajoutés, relancez l'action ou faites un nouveau "push" pour que le déploiement réussisse.
+   - **Name:** `DOCKERHUB_TOKEN`     / **Value:** (Votre jeton d'accès Docker Hub)
 
 ## Fonctionnalités
 
-- **Energy Center** : Monitoring en temps réel (Grille, Solaire, Batterie).
-- **Détails de consommation** : Répartition Maison vs Annexe (Chauffage, Cumulus).
-- **Widget Tesla** : État de la batterie, autonomie, température et charge (Modèle Y).
-- **Mode Simulation/Réel** : Basculez entre des données simulées et votre endpoint local via le bouton dans la barre latérale.
+- **Energy Center** : Monitoring en temps réel via `instant_from_mqtt.php`.
+- **Historique Global** : Utilisation de `totalStart` pour les compteurs cumulés.
+- **Analyse Solaire** : Graphique de puissance par quart d'heure avec détection automatique des pics de production (icône soleil).
+- **Tableau de bord filtrable** : Historique journalier avec filtres par année et par mois.
 
-## Déploiement Docker (Local)
+## Déploiement Local
 
-1. **Construire l'image** :
-   ```bash
-   docker build -t jarvis5976/home-vision:latest .
-   ```
-2. **Lancer le conteneur** :
-   ```bash
-   docker run -p 3000:3000 jarvis5976/home-vision:latest
-   ```
-
-## Note sur les données réelles (HTTPS vs HTTP)
-L'application tente de contacter `http://192.168.0.3`. Si vous hébergez cette application en HTTPS (Vercel, GitHub Pages, etc.), le navigateur bloquera la requête par défaut ("Mixed Content"). 
-
-**Solution :**
-Autorisez le "contenu non sécurisé" dans les paramètres de votre navigateur pour l'URL de votre tableau de bord HomeVision.
+1. **Construire** : `docker build -t jarvis5976/home-vision:latest .`
+2. **Lancer** : `docker run -p 3000:3000 jarvis5976/home-vision:latest`
