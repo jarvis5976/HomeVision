@@ -24,7 +24,7 @@ import { Progress } from "@/components/ui/progress";
 type ViewType = 'dashboard' | 'history';
 
 function DashboardContent() {
-  const { 
+  const {
     latestData, historyData, totalHistoryData, solarChartData, solarPowerChartData, solCastChartData, annualData, dailyHistoryData, isSimulated, setIsSimulated, setIsPaused, fetchHistoryStats, fetchSolarChart, fetchSolarPowerChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory
   } = useMQTT();
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
@@ -388,6 +388,17 @@ function DashboardContent() {
                                   <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-2 py-1 flex items-center gap-1.5 shadow-sm">
                                     <Clock className="h-3 w-3 text-emerald-500" />
                                     <span className="text-[9px] text-emerald-500 font-black uppercase tracking-widest">{formatTime(car.charger_time_charging_minutes)}</span>
+                                  </div>
+                                )}
+                                {!isCharging && car.charge_limit_soc && (
+                                  <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg px-2 py-1 flex items-center gap-1.5 shadow-sm">
+                                    <span className="text-[9px] text-blue-500 font-black uppercase tracking-widest">Limite: {car.charge_limit_soc}%</span>
+                                  </div>
+                                )}
+                                {!isCharging && car.estimateChargeTime?.summary?.total_time_minutes && (
+                                  <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg px-2 py-1 flex items-center gap-1.5 shadow-sm">
+                                    <Clock className="h-3 w-3 text-blue-500" />
+                                    <span className="text-[9px] text-blue-500 font-black uppercase tracking-widest">{formatTime(car.estimateChargeTime.summary.total_time_minutes)}</span>
                                   </div>
                                 )}
                               </div>

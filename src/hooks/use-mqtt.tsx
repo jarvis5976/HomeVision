@@ -18,6 +18,12 @@ export interface CarData {
     address?: string;
     [key: string]: any;
   } | string;
+  charge_limit_soc?: number;
+  estimateChargeTime?: {
+    summary?: {
+      total_time_minutes?: number;
+    };
+  };
   [key: string]: any;
 }
 
@@ -73,6 +79,7 @@ export interface AnnualData {
   achat: AnnualMetricItem[];
   vente: AnnualMetricItem[];
   autoConsommation: AnnualMetricItem[];
+  borne?: AnnualMetricItem[];
 }
 
 export interface AnnualMetricItem {
@@ -377,8 +384,8 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isSimulated, isPaused, fetchRealData]);
 
   return (
-    <MQTTContext.Provider value={{ 
-      isSimulated, setIsSimulated, isPaused, setIsPaused, latestData, 
+    <MQTTContext.Provider value={{
+      isSimulated, setIsSimulated, isPaused, setIsPaused, latestData,
       historyData, totalHistoryData, solarChartData, solarPowerChartData, solCastChartData, annualData, dailyHistoryData, error,
       fetchHistoryStats, fetchSolarChart, fetchSolarPowerChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory
     }}>

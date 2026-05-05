@@ -20,7 +20,7 @@ interface AnnualSummaryTableProps {
   data: AnnualData | null;
 }
 
-type MetricType = 'production' | 'achat' | 'vente' | 'autoConsommation';
+type MetricType = 'production' | 'achat' | 'vente' | 'autoConsommation' | 'borne';
 
 const MONTH_NAMES = [
   "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
@@ -81,11 +81,12 @@ export function AnnualSummaryTable({ data }: AnnualSummaryTableProps) {
           Résumé Annuel
         </CardTitle>
         <Tabs value={activeMetric} onValueChange={(val) => setActiveMetric(val as MetricType)} className="w-full md:w-auto">
-          <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full h-auto p-1 bg-secondary/20">
+          <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full h-auto p-1 bg-secondary/20">
             <TabsTrigger value="production" className="text-[10px] uppercase font-bold px-4 py-2">Production</TabsTrigger>
             <TabsTrigger value="achat" className="text-[10px] uppercase font-bold px-4 py-2">Achat</TabsTrigger>
             <TabsTrigger value="vente" className="text-[10px] uppercase font-bold px-4 py-2">Vente</TabsTrigger>
             <TabsTrigger value="autoConsommation" className="text-[10px] uppercase font-bold px-4 py-2">Auto-Conso.</TabsTrigger>
+            <TabsTrigger value="borne" className="text-[10px] uppercase font-bold px-4 py-2">Borne</TabsTrigger>
           </TabsList>
         </Tabs>
       </CardHeader>
