@@ -38,7 +38,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format, startOfDay } from "date-fns";
+import { format, startOfDay, parse, isWithinInterval } from "date-fns";
 import { fr } from "date-fns/locale";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
@@ -73,7 +73,6 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
             return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
           }
         } else {
-          // Format "18 Mars"
           const parts = dateStr.trim().split(' ');
           if (parts.length >= 2) {
             const day = parseInt(parts[0]);
@@ -85,7 +84,6 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
           }
         }
       } else {
-        // Format "Mars"
         const monthStr = dateStr.toLowerCase();
         const month = MONTH_MAP[monthStr];
         if (month !== undefined) {
@@ -106,22 +104,22 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
 
     if (!dateRange?.from) return baseData;
 
+    const from = startOfDay(dateRange.from);
+    const to = dateRange.to ? startOfDay(dateRange.to) : from;
+
     return baseData.filter(item => {
       const itemDate = getItemDate(item, isGrouped);
-      if (!itemDate) return true;
+      if (!itemDate) return false;
       
-      const start = startOfDay(dateRange.from!);
-      const end = dateRange.to ? startOfDay(dateRange.to) : start;
       const targetDate = startOfDay(itemDate);
 
       if (isGrouped) {
-        // En mode regroupé, on affiche le mois si au moins un jour du mois est dans la plage
         const monthStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
         const nextMonthStart = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 1);
-        return (monthStart <= end && nextMonthStart > start);
+        return (monthStart <= to && nextMonthStart > from);
       }
 
-      return targetDate >= start && targetDate <= end;
+      return targetDate >= from && targetDate <= to;
     });
   }, [data, isGrouped, isPercentage, dateRange]);
 
@@ -231,7 +229,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
                   id="date"
                   variant={"outline"}
                   className={cn(
-                    "w-[260px] justify-start text-left font-bold text-[10px] uppercase h-8 bg-background border-primary/20",
+                    "w-[280px] justify-start text-left font-bold text-[10px] uppercase h-8 bg-background border-primary/20",
                     !dateRange && "text-muted-foreground"
                   )}
                 >
@@ -254,7 +252,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
                 <Calendar
                   initialFocus
                   mode="range"
-                  defaultMonth={dateRange?.from}
+                  defaultMonth={dateRange?.from || new Date()}
                   selected={dateRange}
                   onSelect={(range) => {
                     setDateRange(range);
@@ -270,7 +268,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
           {dateRange && (
             <Button variant="ghost" size="sm" onClick={resetFilters} className="h-8 gap-2 text-[9px] font-black uppercase text-rose-500 hover:text-rose-600 hover:bg-rose-500/10">
               <FilterX className="w-3 h-3" />
-              Toutes les dates
+              Effacer le filtre
             </Button>
           )}
         </div>
@@ -292,13 +290,6 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
                 <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Auto Conso.</TableHead>
                 <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Vente</TableHead>
                 <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Borne</TableHead>
-                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Maison Cons.</TableHead>
-                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Annexe Cons.</TableHead>
-                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Bat. Charge</TableHead>
-                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Bat. Discharge</TableHead>
-                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Bat. Total</TableHead>
-                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Achat Maison</TableHead>
-                <TableHead className={cn("text-[9px] font-black uppercase whitespace-nowrap", dataColClass)}>Achat Annexe</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -322,40 +313,18 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
                       )}>
                         {renderValue(row.Production_Total)}
                       </span>
-                      <span className="text-[8px] text-muted-foreground">{renderRawValue(row.Prevision)}</span>
                     </div>
                   </TableCell>
-                  <TableCell className={dataColClass}>
-                    <div className="flex flex-col items-center">
-                      <span className="text-[10px] font-black">{renderValue(row.Achat)}</span>
-                      <div className="text-[8px] flex gap-1">
-                        <span className="text-emerald-500">{renderRawValue(row.HC)}</span>
-                        <span className="opacity-30">/</span>
-                        <span className="text-rose-500">{renderRawValue(row.HP)}</span>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className={dataColClass}>
-                    <div className="flex flex-col items-center">
-                      <span className="text-[10px] font-black">{renderValue(row.Consommation)}</span>
-                      <span className="text-[8px] text-emerald-500 font-bold">{renderRawValue(row.Consommation - (row.Borne || 0))}</span>
-                    </div>
-                  </TableCell>
+                  <TableCell className={dataColClass}>{renderValue(row.Achat)}</TableCell>
+                  <TableCell className={dataColClass}>{renderValue(row.Consommation)}</TableCell>
                   <TableCell className={dataColClass}>{renderValue(row.Autoconsommation)}</TableCell>
                   <TableCell className={dataColClass}>{renderValue(row.Vente)}</TableCell>
                   <TableCell className={dataColClass}>{renderValue(row.Borne)}</TableCell>
-                  <TableCell className={dataColClass}>{renderValue(row.ConsommationMaison)}</TableCell>
-                  <TableCell className={dataColClass}>{renderValue(row.ConsommationAnnexe)}</TableCell>
-                  <TableCell className={dataColClass}>{renderValue(row.BatteryCharge)}</TableCell>
-                  <TableCell className={dataColClass}>{renderValue(row.BatteryDischarge)}</TableCell>
-                  <TableCell className={dataColClass}>{renderValue(row.BatteryTotal)}</TableCell>
-                  <TableCell className={dataColClass}>{renderValue(row.AchatMaison)}</TableCell>
-                  <TableCell className={dataColClass}>{renderValue(row.AchatAnnexe)}</TableCell>
                 </TableRow>
               )) : (
                 <TableRow>
-                  <TableCell colSpan={19} className="h-32 text-center text-muted-foreground italic font-medium">
-                    Aucune donnée disponible pour cette période.
+                  <TableCell colSpan={12} className="h-32 text-center text-muted-foreground italic font-medium">
+                    Sélectionnez une période pour afficher les données.
                   </TableCell>
                 </TableRow>
               )}
@@ -363,34 +332,24 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
             <TableFooter>
               <TableRow className="bg-primary/5 hover:bg-primary/5 border-t-2 border-primary/20">
                 <TableCell colSpan={isGrouped ? 6 : 7} className="text-[10px] font-black uppercase text-primary tracking-widest py-4">
-                  Total sur la période
+                  Total période
                 </TableCell>
                 <TableCell className={dataColClass}>
-                  <div className="flex flex-col items-center">
-                    <span className="text-[10px] font-black text-primary">{renderValue(totals.prod)}</span>
-                  </div>
+                  <span className="text-[10px] font-black text-primary">{renderValue(totals.prod)}</span>
                 </TableCell>
                 <TableCell className={dataColClass}>
-                  <div className="flex flex-col items-center">
-                    <span className="text-[10px] font-black text-primary">{renderValue(totals.achat)}</span>
-                  </div>
+                  <span className="text-[10px] font-black text-primary">{renderValue(totals.achat)}</span>
                 </TableCell>
                 <TableCell className={dataColClass}>
-                  <div className="flex flex-col items-center">
-                    <span className="text-[10px] font-black text-primary">{renderValue(totals.conso)}</span>
-                  </div>
+                  <span className="text-[10px] font-black text-primary">{renderValue(totals.conso)}</span>
                 </TableCell>
                 <TableCell className={dataColClass}>
-                  <div className="flex flex-col items-center">
-                    <span className="text-[10px] font-black text-primary">{renderValue(totals.auto)}</span>
-                  </div>
+                  <span className="text-[10px] font-black text-primary">{renderValue(totals.auto)}</span>
                 </TableCell>
                 <TableCell className={dataColClass}>
-                  <div className="flex flex-col items-center">
-                    <span className="text-[10px] font-black text-primary">{renderValue(totals.vente)}</span>
-                  </div>
+                  <span className="text-[10px] font-black text-primary">{renderValue(totals.vente)}</span>
                 </TableCell>
-                <TableCell colSpan={8} />
+                <TableCell />
               </TableRow>
             </TableFooter>
           </Table>
@@ -399,7 +358,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
       {totalPages > 1 && (
         <CardFooter className="flex items-center justify-between border-t border-border/50 py-4">
           <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-            Page {currentPage} sur {totalPages} ({currentData.length} lignes au total)
+            Page {currentPage} sur {totalPages}
           </div>
           <div className="flex gap-2">
             <Button

@@ -43,18 +43,17 @@ function Calendar({
         [UI.DayButton]: cn(
           buttonVariants({ variant: "ghost" }),
           "h-9 w-9 p-0 font-bold transition-all duration-200 border-none",
-          // Style par défaut quand non sélectionné
           "hover:bg-accent hover:text-accent-foreground",
-          // Style quand sélectionné (générique)
-          "data-[selected]:text-white",
+          // État sélectionné (générique)
+          "aria-selected:text-white",
           // Début de plage : Bleu foncé
-          "data-[range-start]:bg-blue-800 data-[range-start]:rounded-l-md data-[range-start]:text-white data-[range-start]:opacity-100",
+          "data-[range-start]:bg-blue-900 data-[range-start]:text-white data-[range-start]:opacity-100 data-[range-start]:rounded-l-md",
           // Fin de plage : Bleu foncé
-          "data-[range-end]:bg-blue-800 data-[range-end]:rounded-r-md data-[range-end]:text-white data-[range-end]:opacity-100",
+          "data-[range-end]:bg-blue-900 data-[range-end]:text-white data-[range-end]:opacity-100 data-[range-end]:rounded-r-md",
           // Milieu de plage : Bleu clair
-          "data-[range-middle]:bg-blue-400/40 data-[range-middle]:text-white data-[range-middle]:rounded-none",
-          // Cas d'une sélection unique (pas une plage encore)
-          "aria-selected:bg-blue-800 aria-selected:text-white"
+          "data-[range-middle]:bg-blue-400 data-[range-middle]:text-white data-[range-middle]:rounded-none",
+          // Sélection unique
+          "data-[selected]:not([data-[range-middle]]):bg-blue-900 data-[selected]:text-white"
         ),
         [UI.Today]: "text-blue-600 font-black underline underline-offset-4",
         [UI.DayOutside]: "text-muted-foreground opacity-20 aria-selected:opacity-30",
