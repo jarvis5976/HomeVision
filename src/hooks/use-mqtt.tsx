@@ -96,6 +96,7 @@ export interface DailyHistoryItem {
   Consommation: number;
   Autoconsommation: number;
   SunHours: number;
+  Prevision?: number;
   [key: string]: any;
 }
 
@@ -281,10 +282,10 @@ const MOCK_ANNUAL_DATA: AnnualData = {
 const MOCK_DAILY_HISTORY_DATA: DailyHistoryData = {
   unGroup: {
     byKwh: [
-      { Année: 2024, Date: "2024-03-18", Production_Total: 6.5, Vente: 0.5, Achat: 30.5, Consommation: 36.5, Autoconsommation: 6.0, SunHours: 4.2 },
-      { Année: 2025, Date: "2025-03-18", Production_Total: 7.2, Vente: 1.2, Achat: 24.5, Consommation: 30.5, Autoconsommation: 6.0, SunHours: 4.5 },
-      { Année: 2025, Date: "2025-03-19", Production_Total: 12.5, Vente: 3.2, Achat: 18.5, Consommation: 27.8, Autoconsommation: 9.3, SunHours: 6.2 },
-      { Année: 2025, Date: "2025-03-20", Production_Total: 5.8, Vente: 0.8, Achat: 28.2, Consommation: 33.2, Autoconsommation: 5.0, SunHours: 3.5 }
+      { Année: 2024, Date: "2024-03-18", Production_Total: 6.5, Prevision: 7.0, Vente: 0.5, Achat: 30.5, Consommation: 36.5, Autoconsommation: 6.0, SunHours: 4.2 },
+      { Année: 2025, Date: "2025-03-18", Production_Total: 7.2, Prevision: 6.8, Vente: 1.2, Achat: 24.5, Consommation: 30.5, Autoconsommation: 6.0, SunHours: 4.5 },
+      { Année: 2025, Date: "2025-03-19", Production_Total: 12.5, Prevision: 10.0, Vente: 3.2, Achat: 18.5, Consommation: 27.8, Autoconsommation: 9.3, SunHours: 6.2 },
+      { Année: 2025, Date: "2025-03-20", Production_Total: 5.8, Prevision: 8.5, Vente: 0.8, Achat: 28.2, Consommation: 33.2, Autoconsommation: 5.0, SunHours: 3.5 }
     ],
     byPourc: [
       { Année: 2025, Date: "2025-03-18", Production_Total: 100, Vente: 16.6, Achat: 80.3, Consommation: 100, Autoconsommation: 19.7, SunHours: 4.5 },

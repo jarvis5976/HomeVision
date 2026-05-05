@@ -72,7 +72,6 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
         return null;
       }
 
-      // Format ISO attendu: AAAA-MM-JJ
       const parsed = parseISO(item.Date);
       return isValid(parsed) ? parsed : null;
     } catch (e) {
@@ -294,6 +293,11 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
                       )}>
                         {renderValue(row.Production_Total)}
                       </span>
+                      {row.Prevision !== undefined && !isPercentage && (
+                        <span className="text-[8px] text-muted-foreground font-bold italic">
+                          Est: {row.Prevision.toFixed(2)} kWh
+                        </span>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className={dataColClass}>{renderValue(row.Achat)}</TableCell>
@@ -312,10 +316,6 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
             </TableBody>
             <TableFooter>
               <TableRow className="bg-primary/5 hover:bg-primary/5 border-t-2 border-primary/20">
-                {/* 
-                  Ungrouped: Année(1), Date(2), Couleur(3), SunHours(4), SE(5), APS(6) = 6 cols before Total Prod
-                  Grouped: Année(1), Date(2), SunHours(3), SE(4), APS(5) = 5 cols before Total Prod
-                */}
                 <TableCell colSpan={isGrouped ? 5 : 6} className="text-[10px] font-black uppercase text-primary tracking-widest py-4">
                   Total période
                 </TableCell>
