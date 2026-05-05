@@ -247,6 +247,47 @@ const MOCK_POWER_CHART_DATA: SolarPowerChartData = [
   { "name": "APsystems", "data": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,60,79,86,93,81,91,106,142] }
 ];
 
+const MOCK_SOLAR_HISTORY: SolarChartData = {
+  multi: {
+    Label: ["00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"],
+    Achat: [1.2, 0.8, 0.5, 0.4, 0.4, 0.6, 1.1, 1.5, 2.0, 0.2, 0, 0, 0, 0, 0, 0.1, 0.5, 1.2, 2.5, 3.0, 2.8, 2.0, 1.8, 1.5],
+    Vente: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 1.2, 2.5, 3.0, 2.8, 1.5, 0.2, 0, 0, 0, 0, 0, 0, 0],
+    AutoConsommation: [0, 0, 0, 0, 0, 0, 0, 0.1, 0.5, 1.2, 2.5, 3.0, 2.8, 1.5, 1.2, 0.8, 0.4, 0.2, 0, 0, 0, 0, 0, 0],
+    Production: [0, 0, 0, 0, 0, 0, 0, 0.2, 1.0, 2.5, 4.0, 5.5, 6.0, 5.8, 4.5, 3.0, 1.5, 0.5, 0, 0, 0, 0, 0, 0],
+    BatterieCharge: [0, 0, 0, 0, 0, 0, 0, 0, 0, -0.5, -1.0, -1.5, -2.0, -2.0, -1.5, -1.0, -0.5, 0, 0, 0, 0, 0, 0, 0],
+    BatterieDecharge: [0.5, 0.3, 0.2, 0.1, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 1.0, 1.2, 1.1, 0.8, 0.6, 0.4],
+    Estimation: [0, 0, 0, 0, 0, 0, 0, 0.1, 0.8, 2.0, 3.5, 5.0, 5.5, 5.0, 4.0, 2.5, 1.2, 0.3, 0, 0, 0, 0, 0, 0],
+    BatterieSoc: [80, 75, 70, 68, 65, 63, 62, 62, 62, 65, 72, 80, 90, 98, 100, 100, 98, 92, 85, 78, 70, 65, 60, 55],
+    TotalHC: 8.2,
+    TotalHP: 12.5
+  }
+};
+
+const MOCK_SOLCAST_DATA: SolCastChartData = [
+  { Label: ["06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00"] },
+  { Energy: [0.1, 0.8, 1.5, 2.2, 1.8, 1.2, 0.5, 0] },
+  { Energy: [0.05, 0.6, 1.3, 2.0, 1.6, 1.0, 0.4, 0] }
+];
+
+const MOCK_ANNUAL_DATA: AnnualData = {
+  production: [{ mois: "Janvier", "2024": 150.2, "2025": 165.5 }, { mois: "TOTAL", "2024": 150.2, "2025": 165.5 }],
+  achat: [{ mois: "Janvier", "2024": 800.5, "2025": 780.2 }, { mois: "TOTAL", "2024": 800.5, "2025": 780.2 }],
+  vente: [{ mois: "Janvier", "2024": 20.5, "2025": 25.1 }, { mois: "TOTAL", "2024": 20.5, "2025": 25.1 }],
+  autoConsommation: [{ mois: "Janvier", "2024": 130.2, "2025": 140.4 }, { mois: "TOTAL", "2024": 130.2, "2025": 140.4 }],
+  borne: [{ mois: "Janvier", "2024": 50.2, "2025": 45.8 }, { mois: "TOTAL", "2024": 50.2, "2025": 45.8 }]
+};
+
+const MOCK_DAILY_HISTORY_DATA: DailyHistoryData = {
+  unGroup: {
+    byKwh: [{ Année: 2025, Date: "18/03/2025", Production_Total: 7.2, Vente: 1.2, Achat: 24.5, Consommation: 30.5, Autoconsommation: 6.0, SunHours: 4.5 }],
+    byPourc: [{ Année: 2025, Date: "18/03/2025", Production_Total: 100, Vente: 16.6, Achat: 80.3, Consommation: 100, Autoconsommation: 19.7, SunHours: 4.5 }]
+  },
+  group: {
+    byKwh: [{ Année: 2025, Date: "Mars", Production_Total: 250.5, Vente: 45.2, Achat: 850.1, Consommation: 1055.3, Autoconsommation: 205.3, SunHours: 120 }],
+    byPourc: [{ Année: 2025, Date: "Mars", Production_Total: 100, Vente: 18, Achat: 80.5, Consommation: 100, Autoconsommation: 19.5, SunHours: 120 }]
+  }
+};
+
 const MOCK_TOTAL_HISTORY: TotalHistoryData = {
   production: 22552.7,
   achat: 94204.51,
@@ -293,7 +334,6 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const data: HomeDashboardData = await res.json();
       setLatestData(data);
       
-      // Update historical totals from totalStart if present
       if (data.totalStart) {
         setTotalHistoryData({
           production: data.totalStart.productionTotal,
@@ -315,7 +355,10 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isSimulated, isPaused]);
 
   const fetchSolarChart = useCallback(async (date: string) => {
-    if (isSimulated) return;
+    if (isSimulated) {
+      setSolarChartData(MOCK_SOLAR_HISTORY);
+      return;
+    }
     try {
       const url = `http://192.168.0.3/Dashboard/assets/Solaire/getSolaire.php`;
       const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`, {
@@ -359,9 +402,32 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (e) { console.error('Error fetching history stats:', e); }
   }, [isSimulated]);
 
-  const fetchSolCastChart = useCallback(async () => { if (!isSimulated) { const res = await fetch(`/api/proxy?url=${encodeURIComponent('http://192.168.0.3/Dashboard/assets/Solaire/getSolCast.php')}`); if (res.ok) setSolCastChartData(await res.json()); } }, [isSimulated]);
-  const fetchAnnualData = useCallback(async () => { if (!isSimulated) { const res = await fetch(`/api/proxy?url=${encodeURIComponent('http://192.168.0.3/Dashboard/assets/Solaire/getStatByMonths.php')}`); if (res.ok) setAnnualData(await res.json()); } }, [isSimulated]);
-  const fetchDailyHistory = useCallback(async () => { if (!isSimulated) { const res = await fetch(`/api/proxy?url=${encodeURIComponent('http://192.168.0.3/Dashboard/assets/Solaire/listeProductDays2.php')}`); if (res.ok) setDailyHistoryData(await res.json()); } }, [isSimulated]);
+  const fetchSolCastChart = useCallback(async () => { 
+    if (isSimulated) {
+      setSolCastChartData(MOCK_SOLCAST_DATA);
+      return;
+    }
+    const res = await fetch(`/api/proxy?url=${encodeURIComponent('http://192.168.0.3/Dashboard/assets/Solaire/getSolCast.php')}`); 
+    if (res.ok) setSolCastChartData(await res.json()); 
+  }, [isSimulated]);
+
+  const fetchAnnualData = useCallback(async () => { 
+    if (isSimulated) {
+      setAnnualData(MOCK_ANNUAL_DATA);
+      return;
+    }
+    const res = await fetch(`/api/proxy?url=${encodeURIComponent('http://192.168.0.3/Dashboard/assets/Solaire/getStatByMonths.php')}`); 
+    if (res.ok) setAnnualData(await res.json()); 
+  }, [isSimulated]);
+
+  const fetchDailyHistory = useCallback(async () => { 
+    if (isSimulated) {
+      setDailyHistoryData(MOCK_DAILY_HISTORY_DATA);
+      return;
+    }
+    const res = await fetch(`/api/proxy?url=${encodeURIComponent('http://192.168.0.3/Dashboard/assets/Solaire/listeProductDays2.php')}`); 
+    if (res.ok) setDailyHistoryData(await res.json()); 
+  }, [isSimulated]);
 
   useEffect(() => {
     if (pollInterval.current) clearInterval(pollInterval.current);
