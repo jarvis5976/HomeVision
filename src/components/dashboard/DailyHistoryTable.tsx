@@ -38,7 +38,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format, isWithinInterval, startOfDay, parse, isValid } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
@@ -62,8 +62,11 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
   const getItemDate = (item: any, grouped: boolean): Date | null => {
     try {
       const year = item.Année || new Date().getFullYear();
+      const dateStr = item.Date;
+      
+      if (!dateStr) return null;
+
       if (!grouped) {
-        const dateStr = item.Date;
         if (dateStr.includes('/')) {
           const parts = dateStr.split('/');
           if (parts.length === 3) {
@@ -72,16 +75,18 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
         } else {
           // Format "18 Mars"
           const parts = dateStr.trim().split(' ');
-          const day = parseInt(parts[0]);
-          const monthStr = (parts[1] || "").toLowerCase();
-          const month = MONTH_MAP[monthStr];
-          if (month !== undefined && !isNaN(day)) {
-            return new Date(year, month, day);
+          if (parts.length >= 2) {
+            const day = parseInt(parts[0]);
+            const monthStr = parts[1].toLowerCase();
+            const month = MONTH_MAP[monthStr];
+            if (month !== undefined && !isNaN(day)) {
+              return new Date(year, month, day);
+            }
           }
         }
       } else {
         // Format "Mars"
-        const monthStr = (item.Date || "").toLowerCase();
+        const monthStr = dateStr.toLowerCase();
         const month = MONTH_MAP[monthStr];
         if (month !== undefined) {
           return new Date(year, month, 1);
@@ -107,8 +112,15 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
       
       const start = startOfDay(dateRange.from!);
       const end = dateRange.to ? startOfDay(dateRange.to) : start;
-
       const targetDate = startOfDay(itemDate);
+
+      if (isGrouped) {
+        // En mode regroupé, on affiche le mois si au moins un jour du mois est dans la plage
+        const monthStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
+        const nextMonthStart = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 1);
+        return (monthStart <= end && nextMonthStart > start);
+      }
+
       return targetDate >= start && targetDate <= end;
     });
   }, [data, isGrouped, isPercentage, dateRange]);
@@ -167,7 +179,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
           <div className="flex items-center gap-4">
             <h3 className="text-lg font-bold flex items-center gap-2">
               <ListChecks className="w-5 h-5 text-primary" />
-              Historique par jour
+              Historique journalier
             </h3>
             <div className="flex items-center gap-2 ml-4">
               <Rows className="w-3.5 h-3.5 text-muted-foreground" />
@@ -219,7 +231,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
                   id="date"
                   variant={"outline"}
                   className={cn(
-                    "w-[260px] justify-start text-left font-bold text-[10px] uppercase h-8 bg-background",
+                    "w-[260px] justify-start text-left font-bold text-[10px] uppercase h-8 bg-background border-primary/20",
                     !dateRange && "text-muted-foreground"
                   )}
                 >
