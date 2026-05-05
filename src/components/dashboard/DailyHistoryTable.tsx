@@ -234,7 +234,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
             </TableBody>
             <TableFooter>
               <TableRow className="bg-primary/5 hover:bg-primary/5 border-t-2 border-primary/20">
-                <TableCell colSpan={isGrouped ? 4 : 5} className="text-[10px] font-black uppercase text-primary tracking-widest py-4">Total période</TableCell>
+                <TableCell colSpan={isGrouped ? 3 : 4} className="text-[10px] font-black uppercase text-primary tracking-widest py-4">Total période</TableCell>
                 <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.se)}</span></TableCell>
                 <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.aps)}</span></TableCell>
                 <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.prod)}</span></TableCell>

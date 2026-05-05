@@ -51,7 +51,7 @@ function Calendar({
           // Milieu de plage : Bleu clair
           "data-[range-middle]:bg-blue-400 data-[range-middle]:text-white data-[range-middle]:rounded-none",
           // Sélection unique
-          "data-[selected]:not([data-[range-middle]]):bg-blue-900 data-[selected]:text-white"
+          "data-[selected]:not([data-range-middle]):bg-blue-900 data-[selected]:text-white"
         ),
         [UI.Today]: "text-blue-600 font-black underline underline-offset-4",
         [UI.DayOutside]: "text-muted-foreground opacity-20 aria-selected:opacity-30",
