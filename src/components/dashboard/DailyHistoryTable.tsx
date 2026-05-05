@@ -3,7 +3,7 @@
 
 import { useState, useMemo } from "react";
 import { DailyHistoryData } from "@/hooks/use-mqtt";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -22,7 +22,8 @@ import {
   ChevronRight,
   Rows,
   CalendarDays,
-  FilterX
+  FilterX,
+  Calendar as CalendarIcon
 } from "lucide-react";
 import {
   Select,
@@ -31,31 +32,54 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format, isWithinInterval, startOfDay, parse } from "date-fns";
+import { fr } from "date-fns/locale";
+import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
 
 interface DailyHistoryTableProps {
   data: DailyHistoryData | null;
 }
 
-const MONTHS = [
-  "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-  "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
-];
+const MONTH_MAP: Record<string, number> = {
+  "janvier": 0, "février": 1, "mars": 2, "avril": 3, "mai": 4, "juin": 5,
+  "juillet": 6, "août": 7, "septembre": 8, "octobre": 9, "novembre": 10, "décembre": 11
+};
 
 export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
   const [isGrouped, setIsGrouped] = useState(false);
   const [isPercentage, setIsPercentage] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
-  const [filterYear, setFilterYear] = useState<string>("all");
-  const [filterMonth, setFilterMonth] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
-  const uniqueYears = useMemo(() => {
-    if (!data) return [];
-    const years = new Set<number>();
-    data.unGroup.byKwh.forEach(item => years.add(item.Année));
-    return Array.from(years).sort((a, b) => b - a);
-  }, [data]);
+  // Helper pour parser la date des items
+  const getItemDate = (item: any, grouped: boolean): Date => {
+    if (!grouped) {
+      // Format attendu: "DD Mois" ou "DD/MM" - on utilise l'année de l'item
+      // On essaie de parser "DD/MM/YYYY" ou "DD Mois YYYY"
+      const dateStr = item.Date;
+      if (dateStr.includes('/')) {
+        return parse(dateStr, 'dd/MM/yyyy', new Date());
+      } else {
+        // Cas "18 Mars" -> on construit "18 Mars 2024"
+        const parts = dateStr.split(' ');
+        const day = parseInt(parts[0]);
+        const month = MONTH_MAP[parts[1]?.toLowerCase()] || 0;
+        return new Date(item.Année, month, day);
+      }
+    } else {
+      // Format regroupé: "Mois YYYY" ou "Mois"
+      const month = MONTH_MAP[item.Date.toLowerCase()] || 0;
+      return new Date(item.Année, month, 1);
+    }
+  };
 
   const currentData = useMemo(() => {
     if (!data) return [];
@@ -63,12 +87,20 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
       ? (isPercentage ? data.group.byPourc : data.group.byKwh)
       : (isPercentage ? data.unGroup.byPourc : data.unGroup.byKwh);
 
+    if (!dateRange?.from) return baseData;
+
     return baseData.filter(item => {
-      const yearMatch = filterYear === "all" || item.Année.toString() === filterYear;
-      const monthMatch = filterMonth === "all" || item.Date.toLowerCase().includes(filterMonth.toLowerCase());
-      return yearMatch && monthMatch;
+      try {
+        const itemDate = startOfDay(getItemDate(item, isGrouped));
+        const start = startOfDay(dateRange.from!);
+        const end = dateRange.to ? startOfDay(dateRange.to) : start;
+
+        return isWithinInterval(itemDate, { start, end });
+      } catch (e) {
+        return true; // En cas d'erreur de parsing on garde la ligne
+      }
     });
-  }, [data, isGrouped, isPercentage, filterYear, filterMonth]);
+  }, [data, isGrouped, isPercentage, dateRange]);
 
   const totalPages = Math.ceil(currentData.length / pageSize);
   
@@ -101,8 +133,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
   };
 
   const resetFilters = () => {
-    setFilterYear("all");
-    setFilterMonth("all");
+    setDateRange(undefined);
     setCurrentPage(1);
   };
 
@@ -113,10 +144,10 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
       <CardHeader className="flex flex-col space-y-4 pb-6">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <CardTitle className="text-lg font-bold flex items-center gap-2">
+            <h3 className="text-lg font-bold flex items-center gap-2">
               <ListChecks className="w-5 h-5 text-primary" />
               Historique par jour
-            </CardTitle>
+            </h3>
             <div className="flex items-center gap-2 ml-4">
               <Rows className="w-3.5 h-3.5 text-muted-foreground" />
               <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
@@ -157,37 +188,56 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
         <div className="flex flex-wrap items-center gap-3 p-3 bg-secondary/10 rounded-2xl border border-border/50">
           <div className="flex items-center gap-2">
             <CalendarDays className="w-4 h-4 text-primary" />
-            <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Période :</span>
+            <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Période d'analyse :</span>
           </div>
           
-          <Select value={filterYear} onValueChange={(val) => { setFilterYear(val); setCurrentPage(1); }}>
-            <SelectTrigger className="h-8 w-28 text-[10px] font-bold">
-              <SelectValue placeholder="Année" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Toutes</SelectItem>
-              {uniqueYears.map(year => (
-                <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="grid gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id="date"
+                  variant={"outline"}
+                  className={cn(
+                    "w-[260px] justify-start text-left font-bold text-[10px] uppercase h-8",
+                    !dateRange && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-3.5 w-3.5" />
+                  {dateRange?.from ? (
+                    dateRange.to ? (
+                      <>
+                        {format(dateRange.from, "dd LLL y", { locale: fr })} -{" "}
+                        {format(dateRange.to, "dd LLL y", { locale: fr })}
+                      </>
+                    ) : (
+                      format(dateRange.from, "dd LLL y", { locale: fr })
+                    )
+                  ) : (
+                    <span>Choisir une période</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  initialFocus
+                  mode="range"
+                  defaultMonth={dateRange?.from}
+                  selected={dateRange}
+                  onSelect={(range) => {
+                    setDateRange(range);
+                    setCurrentPage(1);
+                  }}
+                  numberOfMonths={2}
+                  locale={fr}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
 
-          <Select value={filterMonth} onValueChange={(val) => { setFilterMonth(val); setCurrentPage(1); }}>
-            <SelectTrigger className="h-8 w-32 text-[10px] font-bold">
-              <SelectValue placeholder="Mois" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous les mois</SelectItem>
-              {MONTHS.map(month => (
-                <SelectItem key={month} value={month}>{month}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {(filterYear !== "all" || filterMonth !== "all") && (
+          {dateRange && (
             <Button variant="ghost" size="sm" onClick={resetFilters} className="h-8 gap-2 text-[9px] font-black uppercase text-rose-500 hover:text-rose-600 hover:bg-rose-500/10">
               <FilterX className="w-3 h-3" />
-              Réinitialiser
+              Toutes les dates
             </Button>
           )}
         </div>
