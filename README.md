@@ -17,7 +17,7 @@ Utilisez cette commande pour mettre à jour l'URL de votre dépôt avec votre no
 ```bash
 git remote set-url origin https://VOTRE_USERNAME:VOTRE_TOKEN@github.com/jarvis5976/HomeVision.git
 ```
-Ensuite, réessayez votre `git push`.
+Remplacez `VOTRE_USERNAME` par votre nom d'utilisateur GitHub et `VOTRE_TOKEN` par le jeton généré. Ensuite, réessayez votre `git push`.
 
 ## 🚨 Configuration GitHub Actions (Déploiement Docker)
 
@@ -32,7 +32,7 @@ Si l'erreur survient lors du déploiement automatique sur Docker Hub :
 ## Fonctionnalités
 
 - **Energy Center** : Monitoring en temps réel via `instant_from_mqtt.php`.
-- **Historique Global** : Utilisation de `totalStart` pour les compteurs cumulés.
+- **Historique Global** : Utilisation de `totalStart` pour les compteurs cumulés synchronisés en temps réel.
 - **Analyse Solaire** : Graphique de puissance par quart d'heure avec détection automatique des pics de production (icône soleil).
 - **Tableau de bord filtrable** : Historique journalier avec filtres par année et par mois.
 

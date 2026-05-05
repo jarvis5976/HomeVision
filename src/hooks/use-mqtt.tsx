@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, createContext, useContext, useRef, useCallback } from 'react';
@@ -294,7 +293,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
           achat: data.totalStart.achatTotal,
           vente: data.totalStart.venteTotal,
           consommation: data.totalStart.consoTotal,
-          autoConsommation: data.totalStart.autoConsommationTotal || data.totalStart.autoConsoTotal,
+          autoConsommation: data.totalStart.autoConsoTotal,
           apSystems: data.totalStart.productionApsTotal,
           productionSolaredgeTotal: data.totalStart.productionSolaredgeTotal
         });
