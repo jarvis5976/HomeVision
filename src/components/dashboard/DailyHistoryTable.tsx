@@ -38,7 +38,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format, startOfDay, parse, isWithinInterval } from "date-fns";
+import { format, startOfDay, parseISO, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
@@ -61,44 +61,28 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
 
   const getItemDate = (item: any, grouped: boolean): Date | null => {
     try {
-      const year = item.Année || new Date().getFullYear();
-      const dateStr = item.Date;
-      
-      if (!dateStr) return null;
+      if (!item.Date) return null;
 
-      if (!grouped) {
-        if (dateStr.includes('/')) {
-          const parts = dateStr.split('/');
-          if (parts.length === 3) {
-            return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
-          }
-        } else {
-          const parts = dateStr.trim().split(' ');
-          if (parts.length >= 2) {
-            const day = parseInt(parts[0]);
-            const monthStr = parts[1].toLowerCase();
-            const month = MONTH_MAP[monthStr];
-            if (month !== undefined && !isNaN(day)) {
-              return new Date(year, month, day);
-            }
-          }
-        }
-      } else {
-        const monthStr = dateStr.toLowerCase();
+      if (grouped) {
+        const monthStr = item.Date.toLowerCase();
         const month = MONTH_MAP[monthStr];
         if (month !== undefined) {
-          return new Date(year, month, 1);
+          return new Date(item.Année || new Date().getFullYear(), month, 1);
         }
+        return null;
       }
+
+      // Format attendu: AAAA-MM-JJ
+      const parsed = parseISO(item.Date);
+      return isValid(parsed) ? parsed : null;
     } catch (e) {
       return null;
     }
-    return null;
   };
 
   const currentData = useMemo(() => {
     if (!data) return [];
-    let baseData = isGrouped 
+    const baseData = isGrouped 
       ? (isPercentage ? data.group.byPourc : data.group.byKwh)
       : (isPercentage ? data.unGroup.byPourc : data.unGroup.byKwh);
 
@@ -114,6 +98,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
       const targetDate = startOfDay(itemDate);
 
       if (isGrouped) {
+        // En mode regroupé, on vérifie si le mois du point de données chevauche la plage sélectionnée
         const monthStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
         const nextMonthStart = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 1);
         return (monthStart <= to && nextMonthStart > from);
@@ -147,11 +132,6 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
   const renderValue = (val: number | undefined) => {
     if (val === undefined) return `0.00 ${unit}`;
     return `${val.toFixed(2)} ${unit}`;
-  };
-
-  const renderRawValue = (val: number | undefined) => {
-    if (val === undefined) return "0.00";
-    return val.toFixed(2);
   };
 
   const handlePageChange = (page: number) => {
@@ -296,7 +276,9 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
               {paginatedData.length > 0 ? paginatedData.map((row, idx) => (
                 <TableRow key={idx} className="border-border/50">
                   <TableCell className="text-[10px] font-bold">{row.Année}</TableCell>
-                  <TableCell className="text-[10px] font-bold whitespace-nowrap">{row.Date}</TableCell>
+                  <TableCell className="text-[10px] font-bold whitespace-nowrap">
+                    {isGrouped ? row.Date : format(parseISO(row.Date), "dd/MM/yyyy")}
+                  </TableCell>
                   {!isGrouped && (
                     <TableCell className="text-[10px] font-bold">
                       {row.Couleur || "n/c"}
@@ -324,7 +306,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
               )) : (
                 <TableRow>
                   <TableCell colSpan={12} className="h-32 text-center text-muted-foreground italic font-medium">
-                    Sélectionnez une période pour afficher les données.
+                    Aucune donnée pour cette période.
                   </TableCell>
                 </TableRow>
               )}
