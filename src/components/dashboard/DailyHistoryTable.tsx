@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -39,7 +38,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format, isWithinInterval, startOfDay, parse } from "date-fns";
+import { format, isWithinInterval, startOfDay, parse, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
@@ -60,21 +59,35 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
   const [pageSize, setPageSize] = useState(5);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
-  const getItemDate = (item: any, grouped: boolean): Date => {
-    if (!grouped) {
-      const dateStr = item.Date;
-      if (dateStr.includes('/')) {
-        return parse(dateStr, 'dd/MM/yyyy', new Date());
+  const getItemDate = (item: any, grouped: boolean): Date | null => {
+    try {
+      if (!grouped) {
+        const dateStr = item.Date;
+        if (dateStr.includes('/')) {
+          const parsed = parse(dateStr, 'dd/MM/yyyy', new Date());
+          return isValid(parsed) ? parsed : null;
+        } else {
+          // Format "18 Mars"
+          const parts = dateStr.split(' ');
+          const day = parseInt(parts[0]);
+          const monthStr = (parts[1] || "").toLowerCase();
+          const month = MONTH_MAP[monthStr];
+          if (month !== undefined && !isNaN(day)) {
+            return new Date(item.Année || new Date().getFullYear(), month, day);
+          }
+        }
       } else {
-        const parts = dateStr.split(' ');
-        const day = parseInt(parts[0]);
-        const month = MONTH_MAP[parts[1]?.toLowerCase()] || 0;
-        return new Date(item.Année, month, day);
+        // Format "Mars"
+        const monthStr = (item.Date || "").toLowerCase();
+        const month = MONTH_MAP[monthStr];
+        if (month !== undefined) {
+          return new Date(item.Année || new Date().getFullYear(), month, 1);
+        }
       }
-    } else {
-      const month = MONTH_MAP[item.Date.toLowerCase()] || 0;
-      return new Date(item.Année, month, 1);
+    } catch (e) {
+      return null;
     }
+    return null;
   };
 
   const currentData = useMemo(() => {
@@ -86,15 +99,13 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
     if (!dateRange?.from) return baseData;
 
     return baseData.filter(item => {
-      try {
-        const itemDate = startOfDay(getItemDate(item, isGrouped));
-        const start = startOfDay(dateRange.from!);
-        const end = dateRange.to ? startOfDay(dateRange.to) : start;
+      const itemDate = getItemDate(item, isGrouped);
+      if (!itemDate) return true;
+      
+      const start = startOfDay(dateRange.from!);
+      const end = dateRange.to ? startOfDay(dateRange.to) : start;
 
-        return isWithinInterval(itemDate, { start, end });
-      } catch (e) {
-        return true;
-      }
+      return isWithinInterval(startOfDay(itemDate), { start, end });
     });
   }, [data, isGrouped, isPercentage, dateRange]);
 
@@ -204,7 +215,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
                   id="date"
                   variant={"outline"}
                   className={cn(
-                    "w-[260px] justify-start text-left font-bold text-[10px] uppercase h-8",
+                    "w-[260px] justify-start text-left font-bold text-[10px] uppercase h-8 bg-background",
                     !dateRange && "text-muted-foreground"
                   )}
                 >

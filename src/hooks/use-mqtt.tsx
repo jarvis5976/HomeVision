@@ -279,8 +279,15 @@ const MOCK_ANNUAL_DATA: AnnualData = {
 
 const MOCK_DAILY_HISTORY_DATA: DailyHistoryData = {
   unGroup: {
-    byKwh: [{ Année: 2025, Date: "18/03/2025", Production_Total: 7.2, Vente: 1.2, Achat: 24.5, Consommation: 30.5, Autoconsommation: 6.0, SunHours: 4.5 }],
-    byPourc: [{ Année: 2025, Date: "18/03/2025", Production_Total: 100, Vente: 16.6, Achat: 80.3, Consommation: 100, Autoconsommation: 19.7, SunHours: 4.5 }]
+    byKwh: [
+      { Année: 2025, Date: "18/03/2025", Production_Total: 7.2, Vente: 1.2, Achat: 24.5, Consommation: 30.5, Autoconsommation: 6.0, SunHours: 4.5 },
+      { Année: 2025, Date: "19/03/2025", Production_Total: 12.5, Vente: 3.2, Achat: 18.5, Consommation: 27.8, Autoconsommation: 9.3, SunHours: 6.2 },
+      { Année: 2025, Date: "20/03/2025", Production_Total: 5.8, Vente: 0.8, Achat: 28.2, Consommation: 33.2, Autoconsommation: 5.0, SunHours: 3.5 }
+    ],
+    byPourc: [
+      { Année: 2025, Date: "18/03/2025", Production_Total: 100, Vente: 16.6, Achat: 80.3, Consommation: 100, Autoconsommation: 19.7, SunHours: 4.5 },
+      { Année: 2025, Date: "19/03/2025", Production_Total: 100, Vente: 25.6, Achat: 66.5, Consommation: 100, Autoconsommation: 33.5, SunHours: 6.2 }
+    ]
   },
   group: {
     byKwh: [{ Année: 2025, Date: "Mars", Production_Total: 250.5, Vente: 45.2, Achat: 850.1, Consommation: 1055.3, Autoconsommation: 205.3, SunHours: 120 }],
@@ -435,6 +442,7 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (isSimulated) {
         setHistoryData(MOCK_DAILY_HISTORY);
         setTotalHistoryData(MOCK_TOTAL_HISTORY);
+        setDailyHistoryData(MOCK_DAILY_HISTORY_DATA);
         pollInterval.current = setInterval(() => {
           setLatestData(prev => {
             if (!prev) return BASE_MOCK_DATA;
