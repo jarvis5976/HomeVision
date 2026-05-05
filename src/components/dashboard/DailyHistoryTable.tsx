@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { DailyHistoryData } from "@/hooks/use-mqtt";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import {
@@ -32,16 +32,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+import { DayPicker, DateRange } from "react-day-picker";
+import { fr } from "react-day-picker/locale";
 import { format, startOfDay, parseISO, isValid } from "date-fns";
-import { fr } from "date-fns/locale";
-import { DateRange } from "react-day-picker";
+import { fr as frDateFns } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+
+// Import du style par défaut de react-day-picker
+import "react-day-picker/dist/style.css";
 
 interface DailyHistoryTableProps {
   data: DailyHistoryData | null;
@@ -58,6 +56,19 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [open, setOpen] = useState(false);
+  const calendarRef = useRef<HTMLDivElement>(null);
+
+  // Fermer si clic extérieur (logique personnalisée fournie)
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const getItemDate = (item: any, grouped: boolean): Date | null => {
     try {
@@ -171,25 +182,71 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
             </Button>
           </div>
         </div>
+        
+        {/* Sélecteur de date personnalisé */}
         <div className="flex flex-wrap items-center gap-3 p-3 bg-secondary/10 rounded-2xl border border-border/50">
           <div className="flex items-center gap-2">
             <CalendarDays className="w-4 h-4 text-primary" />
             <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Période d'analyse :</span>
           </div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className={cn("w-[280px] justify-start text-left font-bold text-[10px] uppercase h-8 bg-background border-primary/20", !dateRange && "text-muted-foreground")}>
-                <CalendarIcon className="mr-2 h-3.5 w-3.5" />
-                {dateRange?.from ? (dateRange.to ? <>{format(dateRange.from, "dd LLL y", { locale: fr })} - {format(dateRange.to, "dd LLL y", { locale: fr })}</> : format(dateRange.from, "dd LLL y", { locale: fr })) : <span>Choisir une période</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar initialFocus mode="range" defaultMonth={dateRange?.from || new Date()} selected={dateRange} onSelect={(range) => { setDateRange(range); setCurrentPage(1); }} numberOfMonths={2} locale={fr} />
-            </PopoverContent>
-          </Popover>
-          {dateRange && <Button variant="ghost" size="sm" onClick={resetFilters} className="h-8 gap-2 text-[9px] font-black uppercase text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"><FilterX className="w-3 h-3" />Effacer le filtre</Button>}
+          
+          <div className="relative" ref={calendarRef}>
+            <input
+              type="text"
+              readOnly
+              onClick={() => setOpen(!open)}
+              value={
+                dateRange?.from 
+                  ? (dateRange.to 
+                    ? `${format(dateRange.from, "dd LLL y", { locale: frDateFns })} - ${format(dateRange.to, "dd LLL y", { locale: frDateFns })}`
+                    : format(dateRange.from, "dd LLL y", { locale: frDateFns }))
+                  : ""
+              }
+              placeholder="Choisir une période"
+              className="w-[280px] bg-background border border-primary/20 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
+            />
+
+            {open && (
+              <div className="absolute z-50 mt-2 bg-white dark:bg-card border rounded-xl shadow-2xl p-2 left-0 top-full">
+                <DayPicker
+                  mode="range"
+                  selected={dateRange}
+                  onSelect={(range) => {
+                    setDateRange(range);
+                    // On ne ferme pas automatiquement en mode range pour laisser choisir la fin
+                  }}
+                  locale={fr}
+                  weekStartsOn={1}
+                  // Anatomie v9 avec styles personnalisés
+                  classNames={{
+                    today: `text-blue-600 font-bold underline`,
+                    selected: `text-white`,
+                    range_start: `bg-blue-900 text-white rounded-l-md !opacity-100`,
+                    range_end: `bg-blue-900 text-white rounded-r-md !opacity-100`,
+                    range_middle: `bg-blue-400 text-white !rounded-none !opacity-100`,
+                    day: `h-9 w-9 text-center text-sm p-0 relative focus-within:z-20 font-medium hover:bg-accent rounded-md transition-colors`,
+                    month_caption: `flex justify-center pt-1 relative items-center h-9 mb-4 text-sm font-bold uppercase tracking-widest`,
+                    weekday: `text-muted-foreground w-9 font-black text-[10px] text-center uppercase`,
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          {dateRange && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={resetFilters} 
+              className="h-8 gap-2 text-[9px] font-black uppercase text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"
+            >
+              <FilterX className="w-3 h-3" />
+              Effacer le filtre
+            </Button>
+          )}
         </div>
       </CardHeader>
+
       <CardContent>
         <div className="overflow-x-auto">
           <Table>
@@ -221,7 +278,9 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
                   <TableCell className={dataColClass}>
                     <div className="flex flex-col items-center">
                       <span className={cn("text-[10px] font-black", row.Production_Total >= (row.Prevision || 0) ? "text-emerald-500" : "text-rose-500")}>{renderValue(row.Production_Total)}</span>
-                      {row.Prevision !== undefined && !isPercentage && <span className="text-[8px] text-muted-foreground font-bold italic">Est: {row.Prevision.toFixed(2)} kWh</span>}
+                      {row.Prevision !== undefined && !isPercentage && (
+                        <span className="text-[8px] text-muted-foreground font-bold italic">Est: {row.Prevision.toFixed(2)} kWh</span>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className={dataColClass}>{renderValue(row.Achat)}</TableCell>
@@ -230,11 +289,19 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
                   <TableCell className={dataColClass}>{renderValue(row.Vente)}</TableCell>
                   <TableCell className={dataColClass}>{renderValue(row.Borne)}</TableCell>
                 </TableRow>
-              )) : <TableRow><TableCell colSpan={12} className="h-32 text-center text-muted-foreground italic font-medium">Aucune donnée pour cette période.</TableCell></TableRow>}
+              )) : (
+                <TableRow>
+                  <TableCell colSpan={12} className="h-32 text-center text-muted-foreground italic font-medium">
+                    Aucune donnée pour cette période.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
             <TableFooter>
               <TableRow className="bg-primary/5 hover:bg-primary/5 border-t-2 border-primary/20">
+                {/* colSpan corrigé : 3 si groupé, 4 si détaillé */}
                 <TableCell colSpan={isGrouped ? 3 : 4} className="text-[10px] font-black uppercase text-primary tracking-widest py-4">Total période</TableCell>
+                <TableCell /> {/* Pour la colonne Heure Soleil si groupé ? Non, alignons sur les colonnes de chiffres */}
                 <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.se)}</span></TableCell>
                 <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.aps)}</span></TableCell>
                 <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.prod)}</span></TableCell>
@@ -248,6 +315,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
           </Table>
         </div>
       </CardContent>
+
       {totalPages > 1 && (
         <CardFooter className="flex items-center justify-between border-t border-border/50 py-4">
           <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Page {currentPage} sur {totalPages}</div>
