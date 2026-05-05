@@ -11,6 +11,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableFooter,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { 
@@ -59,23 +60,18 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
   const [pageSize, setPageSize] = useState(5);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
-  // Helper pour parser la date des items
   const getItemDate = (item: any, grouped: boolean): Date => {
     if (!grouped) {
-      // Format attendu: "DD Mois" ou "DD/MM" - on utilise l'année de l'item
-      // On essaie de parser "DD/MM/YYYY" ou "DD Mois YYYY"
       const dateStr = item.Date;
       if (dateStr.includes('/')) {
         return parse(dateStr, 'dd/MM/yyyy', new Date());
       } else {
-        // Cas "18 Mars" -> on construit "18 Mars 2024"
         const parts = dateStr.split(' ');
         const day = parseInt(parts[0]);
         const month = MONTH_MAP[parts[1]?.toLowerCase()] || 0;
         return new Date(item.Année, month, day);
       }
     } else {
-      // Format regroupé: "Mois YYYY" ou "Mois"
       const month = MONTH_MAP[item.Date.toLowerCase()] || 0;
       return new Date(item.Année, month, 1);
     }
@@ -97,10 +93,20 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
 
         return isWithinInterval(itemDate, { start, end });
       } catch (e) {
-        return true; // En cas d'erreur de parsing on garde la ligne
+        return true;
       }
     });
   }, [data, isGrouped, isPercentage, dateRange]);
+
+  const totals = useMemo(() => {
+    return currentData.reduce((acc, curr) => ({
+      prod: acc.prod + (curr.Production_Total || 0),
+      achat: acc.achat + (curr.Achat || 0),
+      conso: acc.conso + (curr.Consommation || 0),
+      auto: acc.auto + (curr.Autoconsommation || 0),
+      vente: acc.vente + (curr.Vente || 0),
+    }), { prod: 0, achat: 0, conso: 0, auto: 0, vente: 0 });
+  }, [currentData]);
 
   const totalPages = Math.ceil(currentData.length / pageSize);
   
@@ -327,6 +333,39 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
                 </TableRow>
               )}
             </TableBody>
+            <TableFooter>
+              <TableRow className="bg-primary/5 hover:bg-primary/5 border-t-2 border-primary/20">
+                <TableCell colSpan={isGrouped ? 6 : 7} className="text-[10px] font-black uppercase text-primary tracking-widest py-4">
+                  Total sur la période
+                </TableCell>
+                <TableCell className={dataColClass}>
+                  <div className="flex flex-col items-center">
+                    <span className="text-[10px] font-black text-primary">{renderValue(totals.prod)}</span>
+                  </div>
+                </TableCell>
+                <TableCell className={dataColClass}>
+                  <div className="flex flex-col items-center">
+                    <span className="text-[10px] font-black text-primary">{renderValue(totals.achat)}</span>
+                  </div>
+                </TableCell>
+                <TableCell className={dataColClass}>
+                  <div className="flex flex-col items-center">
+                    <span className="text-[10px] font-black text-primary">{renderValue(totals.conso)}</span>
+                  </div>
+                </TableCell>
+                <TableCell className={dataColClass}>
+                  <div className="flex flex-col items-center">
+                    <span className="text-[10px] font-black text-primary">{renderValue(totals.auto)}</span>
+                  </div>
+                </TableCell>
+                <TableCell className={dataColClass}>
+                  <div className="flex flex-col items-center">
+                    <span className="text-[10px] font-black text-primary">{renderValue(totals.vente)}</span>
+                  </div>
+                </TableCell>
+                <TableCell colSpan={8} />
+              </TableRow>
+            </TableFooter>
           </Table>
         </div>
       </CardContent>
