@@ -43,12 +43,12 @@ function Calendar({
           "h-9 w-9 p-0 font-bold transition-all duration-200 border-none",
           "hover:bg-accent hover:text-accent-foreground",
           "data-[selected]:text-white",
-          // Début et Fin : Bleu foncé (Blue 900)
-          "data-[range-start]:bg-blue-900 data-[range-start]:text-white data-[range-start]:opacity-100 data-[range-start]:rounded-l-md",
-          "data-[range-end]:bg-blue-900 data-[range-end]:text-white data-[range-end]:opacity-100 data-[range-end]:rounded-r-md",
-          // Milieu de plage : Bleu clair (Blue 400)
-          "data-[range-middle]:bg-blue-400 data-[range-middle]:text-white data-[range-middle]:rounded-none data-[range-middle]:opacity-100",
-          // Sélection unique
+          // Bornes de la plage (Début et Fin) en Bleu Foncé
+          "data-[range-start]:!bg-blue-900 data-[range-start]:!text-white data-[range-start]:rounded-l-md data-[range-start]:opacity-100",
+          "data-[range-end]:!bg-blue-900 data-[range-end]:!text-white data-[range-end]:rounded-r-md data-[range-end]:opacity-100",
+          // Milieu de la plage en Bleu Clair
+          "data-[range-middle]:!bg-blue-400 data-[range-middle]:!text-white data-[range-middle]:rounded-none data-[range-middle]:opacity-100",
+          // Sélection simple ou hors plage
           "data-[selected]:not([data-range-middle]):bg-blue-900 data-[selected]:text-white"
         ),
         [UI.Today]: "text-blue-600 font-black underline underline-offset-4",

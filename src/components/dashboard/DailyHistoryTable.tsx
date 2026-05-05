@@ -31,11 +31,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DayPicker, DateRange } from "react-day-picker";
-import { fr } from "react-day-picker/locale";
+import { Calendar } from "@/components/ui/calendar";
+import { fr } from "date-fns/locale";
 import { format, startOfDay, parseISO, isValid } from "date-fns";
-import { fr as frDateFns } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { DateRange } from "react-day-picker";
 
 import "react-day-picker/dist/style.css";
 
@@ -194,8 +194,8 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
               value={
                 dateRange?.from 
                   ? (dateRange.to 
-                    ? `${format(dateRange.from, "dd LLL y", { locale: frDateFns })} - ${format(dateRange.to, "dd LLL y", { locale: frDateFns })}`
-                    : format(dateRange.from, "dd LLL y", { locale: frDateFns }))
+                    ? `${format(dateRange.from, "dd LLL y", { locale: fr })} - ${format(dateRange.to, "dd LLL y", { locale: fr })}`
+                    : format(dateRange.from, "dd LLL y", { locale: fr }))
                   : ""
               }
               placeholder="Choisir une période"
@@ -204,22 +204,12 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
 
             {open && (
               <div className="absolute z-50 mt-2 bg-card border rounded-xl shadow-2xl p-2 left-0 top-full">
-                <DayPicker
+                <Calendar
                   mode="range"
                   selected={dateRange}
                   onSelect={setDateRange}
                   locale={fr}
                   weekStartsOn={1}
-                  classNames={{
-                    today: `text-blue-600 font-bold underline`,
-                    selected: `text-white`,
-                    range_start: `bg-blue-900 text-white rounded-l-md !opacity-100`,
-                    range_end: `bg-blue-900 text-white rounded-r-md !opacity-100`,
-                    range_middle: `bg-blue-400 text-white !rounded-none !opacity-100`,
-                    day: `h-9 w-9 text-center text-sm p-0 relative focus-within:z-20 font-medium hover:bg-accent rounded-md transition-colors`,
-                    month_caption: `flex justify-center pt-1 relative items-center h-9 mb-4 text-sm font-bold uppercase tracking-widest`,
-                    weekday: `text-muted-foreground w-9 font-black text-[10px] text-center uppercase`,
-                  }}
                 />
               </div>
             )}
@@ -291,7 +281,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
             </TableBody>
             <TableFooter>
               <TableRow className="bg-primary/5 hover:bg-primary/5 border-t-2 border-primary/20">
-                <TableCell colSpan={isGrouped ? 4 : 5} className="text-[10px] font-black uppercase text-primary tracking-widest py-4">Total période</TableCell>
+                <TableCell colSpan={isGrouped ? 4 : 5} className="text-[10px] font-black uppercase text-primary tracking-widest py-4 text-left">Total période</TableCell>
                 <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.se)}</span></TableCell>
                 <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.aps)}</span></TableCell>
                 <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.prod)}</span></TableCell>
