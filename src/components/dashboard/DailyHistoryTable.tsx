@@ -22,8 +22,7 @@ import {
   ChevronRight,
   Rows,
   CalendarDays,
-  FilterX,
-  Calendar as CalendarIcon
+  FilterX
 } from "lucide-react";
 import {
   Select,
@@ -38,7 +37,6 @@ import { format, startOfDay, parseISO, isValid } from "date-fns";
 import { fr as frDateFns } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
-// Import du style par défaut de react-day-picker
 import "react-day-picker/dist/style.css";
 
 interface DailyHistoryTableProps {
@@ -59,7 +57,6 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
   const [open, setOpen] = useState(false);
   const calendarRef = useRef<HTMLDivElement>(null);
 
-  // Fermer si clic extérieur (logique personnalisée fournie)
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
@@ -183,7 +180,6 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
           </div>
         </div>
         
-        {/* Sélecteur de date personnalisé */}
         <div className="flex flex-wrap items-center gap-3 p-3 bg-secondary/10 rounded-2xl border border-border/50">
           <div className="flex items-center gap-2">
             <CalendarDays className="w-4 h-4 text-primary" />
@@ -207,17 +203,13 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
             />
 
             {open && (
-              <div className="absolute z-50 mt-2 bg-white dark:bg-card border rounded-xl shadow-2xl p-2 left-0 top-full">
+              <div className="absolute z-50 mt-2 bg-card border rounded-xl shadow-2xl p-2 left-0 top-full">
                 <DayPicker
                   mode="range"
                   selected={dateRange}
-                  onSelect={(range) => {
-                    setDateRange(range);
-                    // On ne ferme pas automatiquement en mode range pour laisser choisir la fin
-                  }}
+                  onSelect={setDateRange}
                   locale={fr}
                   weekStartsOn={1}
-                  // Anatomie v9 avec styles personnalisés
                   classNames={{
                     today: `text-blue-600 font-bold underline`,
                     selected: `text-white`,
@@ -299,9 +291,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
             </TableBody>
             <TableFooter>
               <TableRow className="bg-primary/5 hover:bg-primary/5 border-t-2 border-primary/20">
-                {/* colSpan corrigé : 3 si groupé, 4 si détaillé */}
-                <TableCell colSpan={isGrouped ? 3 : 4} className="text-[10px] font-black uppercase text-primary tracking-widest py-4">Total période</TableCell>
-                <TableCell /> {/* Pour la colonne Heure Soleil si groupé ? Non, alignons sur les colonnes de chiffres */}
+                <TableCell colSpan={isGrouped ? 4 : 5} className="text-[10px] font-black uppercase text-primary tracking-widest py-4">Total période</TableCell>
                 <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.se)}</span></TableCell>
                 <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.aps)}</span></TableCell>
                 <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.prod)}</span></TableCell>
