@@ -72,7 +72,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
         return null;
       }
 
-      // Format attendu: AAAA-MM-JJ
+      // Format ISO attendu: AAAA-MM-JJ
       const parsed = parseISO(item.Date);
       return isValid(parsed) ? parsed : null;
     } catch (e) {
@@ -98,7 +98,6 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
       const targetDate = startOfDay(itemDate);
 
       if (isGrouped) {
-        // En mode regroupé, on vérifie si le mois du point de données chevauche la plage sélectionnée
         const monthStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
         const nextMonthStart = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 1);
         return (monthStart <= to && nextMonthStart > from);
@@ -313,7 +312,11 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
             </TableBody>
             <TableFooter>
               <TableRow className="bg-primary/5 hover:bg-primary/5 border-t-2 border-primary/20">
-                <TableCell colSpan={isGrouped ? 6 : 7} className="text-[10px] font-black uppercase text-primary tracking-widest py-4">
+                {/* 
+                  Ungrouped: Année(1), Date(2), Couleur(3), SunHours(4), SE(5), APS(6) = 6 cols before Total Prod
+                  Grouped: Année(1), Date(2), SunHours(3), SE(4), APS(5) = 5 cols before Total Prod
+                */}
+                <TableCell colSpan={isGrouped ? 5 : 6} className="text-[10px] font-black uppercase text-primary tracking-widest py-4">
                   Total période
                 </TableCell>
                 <TableCell className={dataColClass}>
