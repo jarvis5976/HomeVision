@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -27,16 +26,14 @@ function DashboardContent() {
   const {
     latestData, historyData, totalHistoryData, solarChartData, solarPowerChartData, solCastChartData, annualData, dailyHistoryData, isSimulated, setIsSimulated, setIsPaused, fetchHistoryStats, fetchSolarChart, fetchSolarPowerChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory
   } = useMQTT();
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [mounted, setMounted] = useState(false);
   const [view, setView] = useState<ViewType>('dashboard');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
     setMounted(true);
-    const initialTheme = localStorage.getItem('homevision-theme') as 'light' | 'dark' || 'dark';
-    setTheme(initialTheme);
-    document.documentElement.classList.toggle('dark', initialTheme === 'dark');
+    // Force light mode
+    document.documentElement.classList.remove('dark');
   }, []);
 
   useEffect(() => { setIsPaused(view === 'history'); }, [view, setIsPaused]);
@@ -51,13 +48,6 @@ function DashboardContent() {
   }, [fetchHistoryStats, fetchSolarChart, fetchSolarPowerChart, fetchSolCastChart, fetchAnnualData, fetchDailyHistory, selectedDate]);
 
   useEffect(() => { if (view === 'history') refreshHistory(); }, [view, refreshHistory]);
-
-  const toggleTheme = () => {
-    const next = theme === 'light' ? 'dark' : 'light';
-    setTheme(next);
-    localStorage.setItem('homevision-theme', next);
-    document.documentElement.classList.toggle('dark', next === 'dark');
-  };
 
   const formatTime = (mins: number | undefined) => {
     if (!mins || mins <= 0) return null;
@@ -94,7 +84,6 @@ function DashboardContent() {
   const forecastDay = latestData?.solCast?.today ?? 0;
   const isGoalReached = realProdDay >= forecastDay;
 
-  // Calculs pour les cartes globales basés sur TotalHistoryData
   const totalProdGlobal = totalHistoryData?.production ?? 0;
   const totalAchatGlobal = totalHistoryData?.achat ?? 0;
   const totalVenteGlobal = totalHistoryData?.vente ?? 0;
@@ -105,7 +94,7 @@ function DashboardContent() {
   const totalConsoGlobal = totalAchatGlobal + totalAutoConsoGlobal;
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
       <header className="h-20 border-b border-border flex items-center justify-between px-4 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
@@ -125,10 +114,6 @@ function DashboardContent() {
             <span className="hidden sm:inline">{view === 'history' ? "Dashboard" : "Historique"}</span>
           </Button>
           
-          <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full w-8 h-8 shrink-0">
-            {theme === 'dark' ? <SunMedium className="w-4 h-4 text-orange-400" /> : <Moon className="w-4 h-4 text-primary" />}
-          </Button>
-
           <div className="flex items-center gap-2 bg-secondary/30 p-1.5 rounded-xl border border-border">
             <Switch id="mode" checked={!isSimulated} onCheckedChange={v => setIsSimulated(!v)} className="scale-75 sm:scale-100" />
             <Label htmlFor="mode" className="text-[10px] font-black uppercase cursor-pointer hidden md:inline">
