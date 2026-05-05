@@ -91,12 +91,15 @@ export interface DailyHistoryItem {
   Année: number;
   Date: string;
   Production_Total: number;
+  Production_SolarEdge?: number;
+  Production_Ecu?: number;
   Vente: number;
   Achat: number;
   Consommation: number;
   Autoconsommation: number;
   SunHours: number;
   Prevision?: number;
+  Borne?: number;
   [key: string]: any;
 }
 
@@ -182,65 +185,20 @@ const BASE_MOCK_DATA: HomeDashboardData = {
   grid: { watts: 7301, sens: "Achat", arrow: "" },
   production: { total: 32, detail: { solarEdge: 0, apSystems: 32 }, percentageProduction: 85 },
   battery: { 
-    watts: 2647, 
-    soc: 83, 
-    stateLabel: "Décharge", 
-    voltage: 50.63, 
-    state: 1, 
-    nextTimeCharge: "22:00",
-    batteryTimeLeft: "2h 45min"
+    watts: 2647, soc: 83, stateLabel: "Décharge", voltage: 50.63, state: 1, 
+    nextTimeCharge: "22:00", batteryTimeLeft: "2h 45min"
   },
   victron: { nextBatteryChargePourc: 90 },
-  energy: { 
-    total: { 
-      all: 4686, 
-      maison: 3365, 
-      annexe: 1289,
-      achat: 24.52,
-      vente: 1.18,
-      production: 7.2
-    }, 
-    detail: {} 
-  },
+  energy: { total: { all: 4686, maison: 3365, annexe: 1289, achat: 24.52, vente: 1.18, production: 7.2 }, detail: {} },
   chauffeEau: { maison: 0, annexe: 1190.9, total: 1190.9, cumulusDouche: 0, cumulusActif: false },
   eau: { total: 1130.5, compteur: 1217.76, maison: 798.63, annexe: 331.88 },
   voiture: {
-    "tesla": {
-      "batteryLevel": 54,
-      "odometer": 64148,
-      "range": 262,
-      "charge": false,
-      "carModel": "Tesla Model Y",
-      "localisation": "not_home"
-    },
-    "volvo": {
-      "batteryLevel": 59,
-      "odometer": 38316,
-      "range": 230,
-      "charge": true,
-      "charger_time_charging_minutes": 45,
-      "carModel": "Volvo XC40",
-      "localisation": "home"
-    }
+    "tesla": { "batteryLevel": 54, "odometer": 64148, "range": 262, "charge": false, "carModel": "Tesla Model Y", "localisation": "not_home" },
+    "volvo": { "batteryLevel": 59, "odometer": 38316, "range": 230, "charge": true, "charger_time_charging_minutes": 45, "carModel": "Volvo XC40", "localisation": "home" }
   },
-  zenFlex: { 
-    couleurJourJLight: "Eco",
-    couleurJourJ1Light: "Sobriété",
-    countSobriete: 12,
-    periode: "HP", 
-    totalHP: 12.5, 
-    totalHC: 8.2 
-  },
+  zenFlex: { couleurJourJLight: "Eco", couleurJourJ1Light: "Sobriété", countSobriete: 12, periode: "HP", totalHP: 12.5, totalHC: 8.2 },
   solCast: { today: 8.75, tomorrow: 8.03 },
-  totalStart: {
-    productionTotal: 22552.7,
-    achatTotal: 94204.51,
-    venteTotal: 2814.01,
-    consoTotal: 113943.2,
-    autoConsoTotal: 113943.2,
-    productionApsTotal: 9381.39,
-    productionSolaredgeTotal: 13171.31
-  }
+  totalStart: { productionTotal: 22552.7, achatTotal: 94204.51, venteTotal: 2814.01, consoTotal: 113943.2, autoConsoTotal: 113943.2, productionApsTotal: 9381.39, productionSolaredgeTotal: 13171.31 }
 };
 
 const MOCK_POWER_CHART_DATA: SolarPowerChartData = [
@@ -260,8 +218,7 @@ const MOCK_SOLAR_HISTORY: SolarChartData = {
     BatterieDecharge: [0.5, 0.3, 0.2, 0.1, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 1.0, 1.2, 1.1, 0.8, 0.6, 0.4],
     Estimation: [0, 0, 0, 0, 0, 0, 0, 0.1, 0.8, 2.0, 3.5, 5.0, 5.5, 5.0, 4.0, 2.5, 1.2, 0.3, 0, 0, 0, 0, 0, 0],
     BatterieSoc: [80, 75, 70, 68, 65, 63, 62, 62, 62, 65, 72, 80, 90, 98, 100, 100, 98, 92, 85, 78, 70, 65, 60, 55],
-    TotalHC: 8.2,
-    TotalHP: 12.5
+    TotalHC: 8.2, TotalHP: 12.5
   }
 };
 
@@ -282,10 +239,10 @@ const MOCK_ANNUAL_DATA: AnnualData = {
 const MOCK_DAILY_HISTORY_DATA: DailyHistoryData = {
   unGroup: {
     byKwh: [
-      { Année: 2024, Date: "2024-03-18", Production_Total: 6.5, Prevision: 7.0, Vente: 0.5, Achat: 30.5, Consommation: 36.5, Autoconsommation: 6.0, SunHours: 4.2 },
-      { Année: 2025, Date: "2025-03-18", Production_Total: 7.2, Prevision: 6.8, Vente: 1.2, Achat: 24.5, Consommation: 30.5, Autoconsommation: 6.0, SunHours: 4.5 },
-      { Année: 2025, Date: "2025-03-19", Production_Total: 12.5, Prevision: 10.0, Vente: 3.2, Achat: 18.5, Consommation: 27.8, Autoconsommation: 9.3, SunHours: 6.2 },
-      { Année: 2025, Date: "2025-03-20", Production_Total: 5.8, Prevision: 8.5, Vente: 0.8, Achat: 28.2, Consommation: 33.2, Autoconsommation: 5.0, SunHours: 3.5 }
+      { Année: 2024, Date: "2024-03-18", Production_Total: 6.5, Production_SolarEdge: 4.0, Production_Ecu: 2.5, Prevision: 7.0, Vente: 0.5, Achat: 30.5, Consommation: 36.5, Autoconsommation: 6.0, SunHours: 4.2 },
+      { Année: 2025, Date: "2025-03-18", Production_Total: 7.2, Production_SolarEdge: 4.8, Production_Ecu: 2.4, Prevision: 6.8, Vente: 1.2, Achat: 24.5, Consommation: 30.5, Autoconsommation: 6.0, SunHours: 4.5 },
+      { Année: 2025, Date: "2025-03-19", Production_Total: 12.5, Production_SolarEdge: 8.5, Production_Ecu: 4.0, Prevision: 10.0, Vente: 3.2, Achat: 18.5, Consommation: 27.8, Autoconsommation: 9.3, SunHours: 6.2 },
+      { Année: 2025, Date: "2025-03-20", Production_Total: 5.8, Production_SolarEdge: 3.8, Production_Ecu: 2.0, Prevision: 8.5, Vente: 0.8, Achat: 28.2, Consommation: 33.2, Autoconsommation: 5.0, SunHours: 3.5 }
     ],
     byPourc: [
       { Année: 2025, Date: "2025-03-18", Production_Total: 100, Vente: 16.6, Achat: 80.3, Consommation: 100, Autoconsommation: 19.7, SunHours: 4.5 },
@@ -294,31 +251,15 @@ const MOCK_DAILY_HISTORY_DATA: DailyHistoryData = {
   },
   group: {
     byKwh: [
-      { Année: 2024, Date: "Mars", Production_Total: 200.5, Vente: 35.2, Achat: 900.1, Consommation: 1155.3, Autoconsommation: 165.3, SunHours: 110 },
-      { Année: 2025, Date: "Mars", Production_Total: 250.5, Vente: 45.2, Achat: 850.1, Consommation: 1055.3, Autoconsommation: 205.3, SunHours: 120 }
+      { Année: 2024, Date: "Mars", Production_Total: 200.5, Production_SolarEdge: 130.0, Production_Ecu: 70.5, Vente: 35.2, Achat: 900.1, Consommation: 1155.3, Autoconsommation: 165.3, SunHours: 110 },
+      { Année: 2025, Date: "Mars", Production_Total: 250.5, Production_SolarEdge: 170.0, Production_Ecu: 80.5, Vente: 45.2, Achat: 850.1, Consommation: 1055.3, Autoconsommation: 205.3, SunHours: 120 }
     ],
     byPourc: [{ Année: 2025, Date: "Mars", Production_Total: 100, Vente: 18, Achat: 80.5, Consommation: 100, Autoconsommation: 19.5, SunHours: 120 }]
   }
 };
 
-const MOCK_TOTAL_HISTORY: TotalHistoryData = {
-  production: 22552.7,
-  achat: 94204.51,
-  vente: 2814.01,
-  consommation: 113943.2,
-  autoConsommation: 113943.2,
-  apSystems: 9381.39
-};
-
-const MOCK_DAILY_HISTORY: HistoryData = {
-  Production: 7.2,
-  SolarEdge: 4.8,
-  Ecu: 2.4,
-  Achat: 24.5,
-  Vente: 1.2,
-  Consommation: 30.5,
-  AutoConsommation: 6.0
-};
+const MOCK_TOTAL_HISTORY: TotalHistoryData = { production: 22552.7, achat: 94204.51, vente: 2814.01, consommation: 113943.2, autoConsommation: 113943.2, apSystems: 9381.39 };
+const MOCK_DAILY_HISTORY: HistoryData = { Production: 7.2, SolarEdge: 4.8, Ecu: 2.4, Achat: 24.5, Vente: 1.2, Consommation: 30.5, AutoConsommation: 6.0 };
 
 export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSimulated, setIsSimulated] = useState(false);
@@ -346,98 +287,54 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!res.ok) throw new Error(`Proxy error!`);
       const data: HomeDashboardData = await res.json();
       setLatestData(data);
-      
       if (data.totalStart) {
-        setTotalHistoryData({
-          production: data.totalStart.productionTotal,
-          achat: data.totalStart.achatTotal,
-          vente: data.totalStart.venteTotal,
-          consommation: data.totalStart.consoTotal,
-          autoConsommation: data.totalStart.autoConsoTotal,
-          apSystems: data.totalStart.productionApsTotal,
-          productionSolaredgeTotal: data.totalStart.productionSolaredgeTotal
-        });
+        setTotalHistoryData({ production: data.totalStart.productionTotal, achat: data.totalStart.achatTotal, vente: data.totalStart.venteTotal, consommation: data.totalStart.consoTotal, autoConsommation: data.totalStart.autoConsoTotal, apSystems: data.totalStart.productionApsTotal, productionSolaredgeTotal: data.totalStart.productionSolaredgeTotal });
       }
-      
       setError(null);
-    } catch (e: any) {
-      if (e.name !== 'AbortError') setError(e.message);
-    } finally {
-      clearTimeout(timeoutId);
-    }
+    } catch (e: any) { if (e.name !== 'AbortError') setError(e.message); } finally { clearTimeout(timeoutId); }
   }, [isSimulated, isPaused]);
 
   const fetchSolarChart = useCallback(async (date: string) => {
-    if (isSimulated) {
-      setSolarChartData(MOCK_SOLAR_HISTORY);
-      return;
-    }
+    if (isSimulated) { setSolarChartData(MOCK_SOLAR_HISTORY); return; }
     try {
       const url = `http://192.168.0.3/Dashboard/assets/Solaire/getSolaire.php`;
-      const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date })
-      });
+      const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date }) });
       if (res.ok) setSolarChartData(await res.json());
     } catch (e) { console.error(e); }
   }, [isSimulated]);
 
   const fetchSolarPowerChart = useCallback(async (date: string) => {
-    if (isSimulated) {
-      setSolarPowerChartData(MOCK_POWER_CHART_DATA);
-      return;
-    }
+    if (isSimulated) { setSolarPowerChartData(MOCK_POWER_CHART_DATA); return; }
     try {
       const url = `http://192.168.0.3/Dashboard/assets/Solaire/getProductDays_Quart.php`;
-      const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date })
-      });
+      const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date }) });
       if (res.ok) setSolarPowerChartData(await res.json());
     } catch (e) { console.error(e); }
   }, [isSimulated]);
 
   const fetchHistoryStats = useCallback(async () => {
-    if (isSimulated) {
-      setHistoryData(MOCK_DAILY_HISTORY);
-      setTotalHistoryData(MOCK_TOTAL_HISTORY);
-      return;
-    }
+    if (isSimulated) { setHistoryData(MOCK_DAILY_HISTORY); setTotalHistoryData(MOCK_TOTAL_HISTORY); return; }
     try {
       const proxy = (u: string) => `/api/proxy?url=${encodeURIComponent(u)}`;
       const hRes = await fetch(proxy('http://192.168.0.3/Dashboard/assets/Solaire/getProductDays.php'));
-      if (hRes.ok) {
-        const hData = await hRes.json();
-        setHistoryData(hData);
-      }
+      if (hRes.ok) setHistoryData(await hRes.json());
     } catch (e) { console.error('Error fetching history stats:', e); }
   }, [isSimulated]);
 
   const fetchSolCastChart = useCallback(async () => { 
-    if (isSimulated) {
-      setSolCastChartData(MOCK_SOLCAST_DATA);
-      return;
-    }
+    if (isSimulated) { setSolCastChartData(MOCK_SOLCAST_DATA); return; }
     const res = await fetch(`/api/proxy?url=${encodeURIComponent('http://192.168.0.3/Dashboard/assets/Solaire/getSolCast.php')}`); 
     if (res.ok) setSolCastChartData(await res.json()); 
   }, [isSimulated]);
 
   const fetchAnnualData = useCallback(async () => { 
-    if (isSimulated) {
-      setAnnualData(MOCK_ANNUAL_DATA);
-      return;
-    }
+    if (isSimulated) { setAnnualData(MOCK_ANNUAL_DATA); return; }
     const res = await fetch(`/api/proxy?url=${encodeURIComponent('http://192.168.0.3/Dashboard/assets/Solaire/getStatByMonths.php')}`); 
     if (res.ok) setAnnualData(await res.json()); 
   }, [isSimulated]);
 
   const fetchDailyHistory = useCallback(async () => { 
-    if (isSimulated) {
-      setDailyHistoryData(MOCK_DAILY_HISTORY_DATA);
-      return;
-    }
+    if (isSimulated) { setDailyHistoryData(MOCK_DAILY_HISTORY_DATA); return; }
     const res = await fetch(`/api/proxy?url=${encodeURIComponent('http://192.168.0.3/Dashboard/assets/Solaire/listeProductDays2.php')}`); 
     if (res.ok) setDailyHistoryData(await res.json()); 
   }, [isSimulated]);
@@ -446,19 +343,14 @@ export const MQTTProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (pollInterval.current) clearInterval(pollInterval.current);
     if (!isPaused) {
       if (isSimulated) {
-        setHistoryData(MOCK_DAILY_HISTORY);
-        setTotalHistoryData(MOCK_TOTAL_HISTORY);
-        setDailyHistoryData(MOCK_DAILY_HISTORY_DATA);
+        setHistoryData(MOCK_DAILY_HISTORY); setTotalHistoryData(MOCK_TOTAL_HISTORY); setDailyHistoryData(MOCK_DAILY_HISTORY_DATA);
         pollInterval.current = setInterval(() => {
           setLatestData(prev => {
             if (!prev) return BASE_MOCK_DATA;
             return { ...prev, grid: { ...prev.grid, watts: (prev.grid?.watts || 7000) + Math.round(Math.random() * 20 - 10) } as any };
           });
         }, 3000);
-      } else {
-        fetchRealData();
-        pollInterval.current = setInterval(fetchRealData, 5000);
-      }
+      } else { fetchRealData(); pollInterval.current = setInterval(fetchRealData, 5000); }
     }
     return () => { if (pollInterval.current) clearInterval(pollInterval.current); };
   }, [isSimulated, isPaused, fetchRealData]);

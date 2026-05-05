@@ -44,15 +44,13 @@ function Calendar({
           buttonVariants({ variant: "ghost" }),
           "h-9 w-9 p-0 font-bold transition-all duration-200 border-none",
           "hover:bg-accent hover:text-accent-foreground",
-          // État sélectionné par défaut
           "data-[selected]:text-white",
-          // Début de plage : Bleu foncé (bg-blue-900)
+          // Début et Fin : Bleu foncé
           "data-[range-start]:bg-blue-900 data-[range-start]:text-white data-[range-start]:opacity-100 data-[range-start]:rounded-l-md",
-          // Fin de plage : Bleu foncé (bg-blue-900)
           "data-[range-end]:bg-blue-900 data-[range-end]:text-white data-[range-end]:opacity-100 data-[range-end]:rounded-r-md",
-          // Milieu de plage : Bleu clair (bg-blue-400)
+          // Milieu de plage : Bleu clair
           "data-[range-middle]:bg-blue-400 data-[range-middle]:text-white data-[range-middle]:rounded-none",
-          // Sélection unique (hors plage)
+          // Sélection unique
           "data-[selected]:not([data-[range-middle]]):bg-blue-900 data-[selected]:text-white"
         ),
         [UI.Today]: "text-blue-600 font-black underline underline-offset-4",
