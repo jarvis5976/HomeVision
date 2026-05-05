@@ -61,19 +61,22 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
 
   const getItemDate = (item: any, grouped: boolean): Date | null => {
     try {
+      const year = item.Année || new Date().getFullYear();
       if (!grouped) {
         const dateStr = item.Date;
         if (dateStr.includes('/')) {
-          const parsed = parse(dateStr, 'dd/MM/yyyy', new Date());
-          return isValid(parsed) ? parsed : null;
+          const parts = dateStr.split('/');
+          if (parts.length === 3) {
+            return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+          }
         } else {
           // Format "18 Mars"
-          const parts = dateStr.split(' ');
+          const parts = dateStr.trim().split(' ');
           const day = parseInt(parts[0]);
           const monthStr = (parts[1] || "").toLowerCase();
           const month = MONTH_MAP[monthStr];
           if (month !== undefined && !isNaN(day)) {
-            return new Date(item.Année || new Date().getFullYear(), month, day);
+            return new Date(year, month, day);
           }
         }
       } else {
@@ -81,7 +84,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
         const monthStr = (item.Date || "").toLowerCase();
         const month = MONTH_MAP[monthStr];
         if (month !== undefined) {
-          return new Date(item.Année || new Date().getFullYear(), month, 1);
+          return new Date(year, month, 1);
         }
       }
     } catch (e) {
@@ -105,7 +108,8 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
       const start = startOfDay(dateRange.from!);
       const end = dateRange.to ? startOfDay(dateRange.to) : start;
 
-      return isWithinInterval(startOfDay(itemDate), { start, end });
+      const targetDate = startOfDay(itemDate);
+      return targetDate >= start && targetDate <= end;
     });
   }, [data, isGrouped, isPercentage, dateRange]);
 
