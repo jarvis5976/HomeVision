@@ -109,13 +109,13 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
 
   const totals = useMemo(() => {
     return currentData.reduce((acc, curr) => ({
-      prod: acc.prod + (curr.Production_Total || 0),
-      achat: acc.achat + (curr.Achat || 0),
-      conso: acc.conso + (curr.Consommation || 0),
-      auto: acc.auto + (curr.Autoconsommation || 0),
-      vente: acc.vente + (curr.Vente || 0),
-      se: acc.se + (curr.Production_SolarEdge || 0),
-      aps: acc.aps + (curr.Production_Ecu || 0),
+      prod: acc.prod + (Number(curr.Production_Total) || 0),
+      achat: acc.achat + (Number(curr.Achat) || 0),
+      conso: acc.conso + (Number(curr.Consommation) || 0),
+      auto: acc.auto + (Number(curr.Autoconsommation) || 0),
+      vente: acc.vente + (Number(curr.Vente) || 0),
+      se: acc.se + (Number(curr.Production_SolarEdge) || 0),
+      aps: acc.aps + (Number(curr.Production_Ecu) || 0),
     }), { prod: 0, achat: 0, conso: 0, auto: 0, vente: 0, se: 0, aps: 0 });
   }, [currentData]);
 
@@ -209,7 +209,6 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
                   selected={dateRange}
                   onSelect={setDateRange}
                   locale={fr}
-                  weekStartsOn={1}
                 />
               </div>
             )}
@@ -273,7 +272,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
                 </TableRow>
               )) : (
                 <TableRow>
-                  <TableCell colSpan={12} className="h-32 text-center text-muted-foreground italic font-medium">
+                  <TableCell colSpan={isGrouped ? 11 : 12} className="h-32 text-center text-muted-foreground italic font-medium">
                     Aucune donnée pour cette période.
                   </TableCell>
                 </TableRow>
@@ -281,7 +280,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
             </TableBody>
             <TableFooter>
               <TableRow className="bg-primary/5 hover:bg-primary/5 border-t-2 border-primary/20">
-                <TableCell colSpan={isGrouped ? 4 : 5} className="text-[10px] font-black uppercase text-primary tracking-widest py-4 text-left">Total période</TableCell>
+                <TableCell colSpan={isGrouped ? 4 : 4} className="text-[10px] font-black uppercase text-primary tracking-widest py-4 text-left">Total période</TableCell>
                 <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.se)}</span></TableCell>
                 <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.aps)}</span></TableCell>
                 <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.prod)}</span></TableCell>
