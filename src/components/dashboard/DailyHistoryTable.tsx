@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useRef, useEffect } from "react";
-import { DailyHistoryData } from "@/hooks/use-mqtt";
+import { DailyHistoryData, DailyHistoryItem } from "@/hooks/use-mqtt";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import {
   Table,
@@ -31,11 +31,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { fr } from "date-fns/locale";
+import { DayPicker, DateRange } from "react-day-picker";
+import { fr } from "react-day-picker/locale";
 import { format, startOfDay, parseISO, isValid } from "date-fns";
+import { fr as frDateFns } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { DateRange } from "react-day-picker";
 
 import "react-day-picker/dist/style.css";
 
@@ -76,6 +76,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
         if (month !== undefined) return new Date(item.Année || new Date().getFullYear(), month, 1);
         return null;
       }
+      // Les dates de simulation sont au format AAAA-MM-JJ
       const parsed = parseISO(item.Date);
       return isValid(parsed) ? parsed : null;
     } catch (e) {
@@ -83,7 +84,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
     }
   };
 
-  const currentData = useMemo(() => {
+  const filteredData = useMemo(() => {
     if (!data) return [];
     const baseData = isGrouped 
       ? (isPercentage ? data.group.byPourc : data.group.byKwh)
@@ -103,7 +104,7 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
   }, [data, isGrouped, isPercentage, dateRange]);
 
   const totals = useMemo(() => {
-    return currentData.reduce((acc, curr) => ({
+    return filteredData.reduce((acc, curr) => ({
       prod: acc.prod + (Number(curr.Production_Total) || 0),
       achat: acc.achat + (Number(curr.Achat) || 0),
       conso: acc.conso + (Number(curr.Consommation) || 0),
@@ -112,15 +113,13 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
       se: acc.se + (Number(curr.Production_SolarEdge) || 0),
       aps: acc.aps + (Number(curr.Production_Ecu) || 0),
     }), { prod: 0, achat: 0, conso: 0, auto: 0, vente: 0, se: 0, aps: 0 });
-  }, [currentData]);
+  }, [filteredData]);
 
-  const totalPages = Math.ceil(currentData.length / pageSize);
+  const totalPages = Math.ceil(filteredData.length / pageSize);
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
-    return currentData.slice(start, start + pageSize);
-  }, [currentData, currentPage, pageSize]);
-
-  if (!data) return null;
+    return filteredData.slice(start, start + pageSize);
+  }, [filteredData, currentPage, pageSize]);
 
   const unit = isPercentage ? "%" : "kWh";
   const renderValue = (val: number | undefined) => {
@@ -128,11 +127,6 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
     return `${val.toFixed(2)} ${unit}`;
   };
 
-  const handlePageChange = (page: number) => setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-  const handlePageSizeChange = (val: string) => {
-    setPageSize(parseInt(val));
-    setCurrentPage(1);
-  };
   const resetFilters = () => {
     setDateRange(undefined);
     setCurrentPage(1);
@@ -151,13 +145,14 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
             </h3>
             <div className="flex items-center gap-2 ml-4">
               <Rows className="w-3.5 h-3.5 text-muted-foreground" />
-              <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+              <Select value={pageSize.toString()} onValueChange={(v) => { setPageSize(parseInt(v)); setCurrentPage(1); }}>
                 <SelectTrigger className="h-8 w-28 text-[10px] font-bold">
                   <SelectValue placeholder="5 lignes" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="5">5 lignes</SelectItem>
                   <SelectItem value="10">10 lignes</SelectItem>
+                  <SelectItem value="20">20 lignes</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -178,28 +173,33 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
         <div className="flex flex-wrap items-center gap-3 p-3 bg-secondary/10 rounded-2xl border border-border/50">
           <div className="flex items-center gap-2">
             <CalendarDays className="w-4 h-4 text-primary" />
-            <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Période d'analyse :</span>
+            <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Période :</span>
           </div>
           
           <div className="relative" ref={calendarRef}>
-            <div
+            <input
+              type="text"
+              readOnly
               onClick={() => setOpen(!open)}
-              className="w-[280px] bg-background border border-primary/20 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary shadow-sm flex items-center h-8"
-            >
-              {dateRange?.from 
-                ? (dateRange.to 
-                  ? `${format(dateRange.from, "dd LLL y", { locale: fr })} - ${format(dateRange.to, "dd LLL y", { locale: fr })}`
-                  : format(dateRange.from, "dd LLL y", { locale: fr }))
-                : "Choisir une période"}
-            </div>
+              value={
+                dateRange?.from
+                  ? dateRange.to
+                    ? `${format(dateRange.from, "P", { locale: frDateFns })} - ${format(dateRange.to, "P", { locale: frDateFns })}`
+                    : format(dateRange.from, "P", { locale: frDateFns })
+                  : ""
+              }
+              placeholder="Choisir une période"
+              className="w-[280px] bg-background border border-border rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary shadow-sm h-8"
+            />
 
             {open && (
-              <div className="absolute z-50 mt-2 bg-card border rounded-xl shadow-2xl p-2 left-0 top-full">
-                <Calendar
+              <div className="absolute z-50 mt-2 bg-white border rounded-xl shadow-2xl p-3 left-0 top-full">
+                <DayPicker
                   mode="range"
                   selected={dateRange}
                   onSelect={setDateRange}
                   locale={fr}
+                  weekStartsOn={1}
                 />
               </div>
             )}
@@ -242,7 +242,9 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
               {paginatedData.length > 0 ? paginatedData.map((row, idx) => (
                 <TableRow key={idx} className="border-border/50">
                   <TableCell className="text-[10px] font-bold">{row.Année}</TableCell>
-                  <TableCell className="text-[10px] font-bold whitespace-nowrap">{isGrouped ? row.Date : format(parseISO(row.Date), "dd/MM/yyyy")}</TableCell>
+                  <TableCell className="text-[10px] font-bold whitespace-nowrap">
+                    {isGrouped ? row.Date : format(parseISO(row.Date), "dd/MM/yyyy")}
+                  </TableCell>
                   {!isGrouped && <TableCell className="text-[10px] font-bold">{row.Couleur || "n/c"}</TableCell>}
                   <TableCell className="text-[10px] font-bold text-center">{row.SunHours}h</TableCell>
                   <TableCell className={dataColClass}>{renderValue(row.Production_SolarEdge)}</TableCell>
@@ -269,19 +271,23 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
                 </TableRow>
               )}
             </TableBody>
-            <TableFooter>
-              <TableRow className="bg-primary/5 hover:bg-primary/5 border-t-2 border-primary/20">
-                <TableCell colSpan={isGrouped ? 4 : 4} className="text-[10px] font-black uppercase text-primary tracking-widest py-4 text-left">Total période</TableCell>
-                <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.se)}</span></TableCell>
-                <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.aps)}</span></TableCell>
-                <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.prod)}</span></TableCell>
-                <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.achat)}</span></TableCell>
-                <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.conso)}</span></TableCell>
-                <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.auto)}</span></TableCell>
-                <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.vente)}</span></TableCell>
-                <TableCell />
-              </TableRow>
-            </TableFooter>
+            {filteredData.length > 0 && (
+              <TableFooter>
+                <TableRow className="bg-primary/5 hover:bg-primary/5 border-t-2 border-primary/20">
+                  <TableCell colSpan={isGrouped ? 4 : 4} className="text-[10px] font-black uppercase text-primary tracking-widest py-4 text-left">
+                    Total période
+                  </TableCell>
+                  <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.se)}</span></TableCell>
+                  <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.aps)}</span></TableCell>
+                  <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.prod)}</span></TableCell>
+                  <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.achat)}</span></TableCell>
+                  <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.conso)}</span></TableCell>
+                  <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.auto)}</span></TableCell>
+                  <TableCell className={dataColClass}><span className="text-[10px] font-black text-primary">{renderValue(totals.vente)}</span></TableCell>
+                  <TableCell />
+                </TableRow>
+              </TableFooter>
+            )}
           </Table>
         </div>
       </CardContent>
@@ -290,8 +296,8 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
         <CardFooter className="flex items-center justify-between border-t border-border/50 py-4">
           <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Page {currentPage} sur {totalPages}</div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="h-8 w-8 p-0"><ChevronLeft className="h-4 w-4" /></Button>
-            <Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="h-8 w-8 p-0"><ChevronRight className="h-4 w-4" /></Button>
+            <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1} className="h-8 w-8 p-0"><ChevronLeft className="h-4 w-4" /></Button>
+            <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages} className="h-8 w-8 p-0"><ChevronRight className="h-4 w-4" /></Button>
           </div>
         </CardFooter>
       )}

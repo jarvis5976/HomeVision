@@ -240,6 +240,7 @@ const MOCK_DAILY_HISTORY_DATA: DailyHistoryData = {
   unGroup: {
     byKwh: [
       { Année: 2024, Date: "2024-03-18", Production_Total: 6.5, Production_SolarEdge: 4.0, Production_Ecu: 2.5, Prevision: 7.0, Vente: 0.5, Achat: 30.5, Consommation: 36.5, Autoconsommation: 6.0, SunHours: 4.2 },
+      { Année: 2024, Date: "2024-03-19", Production_Total: 8.2, Production_SolarEdge: 5.0, Production_Ecu: 3.2, Prevision: 7.5, Vente: 1.0, Achat: 25.5, Consommation: 32.5, Autoconsommation: 7.0, SunHours: 5.1 },
       { Année: 2025, Date: "2025-03-18", Production_Total: 7.2, Production_SolarEdge: 4.8, Production_Ecu: 2.4, Prevision: 6.8, Vente: 1.2, Achat: 24.5, Consommation: 30.5, Autoconsommation: 6.0, SunHours: 4.5 },
       { Année: 2025, Date: "2025-03-19", Production_Total: 12.5, Production_SolarEdge: 8.5, Production_Ecu: 4.0, Prevision: 10.0, Vente: 3.2, Achat: 18.5, Consommation: 27.8, Autoconsommation: 9.3, SunHours: 6.2 },
       { Année: 2025, Date: "2025-03-20", Production_Total: 5.8, Production_SolarEdge: 3.8, Production_Ecu: 2.0, Prevision: 8.5, Vente: 0.8, Achat: 28.2, Consommation: 33.2, Autoconsommation: 5.0, SunHours: 3.5 }
