@@ -98,11 +98,6 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
       const itemDate = getItemDate(item, isGrouped);
       if (!itemDate) return false;
       const targetDate = startOfDay(itemDate);
-      if (isGrouped) {
-        const monthStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
-        const nextMonthStart = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 1);
-        return (monthStart <= to && nextMonthStart > from);
-      }
       return targetDate >= from && targetDate <= to;
     });
   }, [data, isGrouped, isPercentage, dateRange]);
@@ -187,20 +182,16 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
           </div>
           
           <div className="relative" ref={calendarRef}>
-            <input
-              type="text"
-              readOnly
+            <div
               onClick={() => setOpen(!open)}
-              value={
-                dateRange?.from 
-                  ? (dateRange.to 
-                    ? `${format(dateRange.from, "dd LLL y", { locale: fr })} - ${format(dateRange.to, "dd LLL y", { locale: fr })}`
-                    : format(dateRange.from, "dd LLL y", { locale: fr }))
-                  : ""
-              }
-              placeholder="Choisir une période"
-              className="w-[280px] bg-background border border-primary/20 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
-            />
+              className="w-[280px] bg-background border border-primary/20 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary shadow-sm flex items-center h-8"
+            >
+              {dateRange?.from 
+                ? (dateRange.to 
+                  ? `${format(dateRange.from, "dd LLL y", { locale: fr })} - ${format(dateRange.to, "dd LLL y", { locale: fr })}`
+                  : format(dateRange.from, "dd LLL y", { locale: fr }))
+                : "Choisir une période"}
+            </div>
 
             {open && (
               <div className="absolute z-50 mt-2 bg-card border rounded-xl shadow-2xl p-2 left-0 top-full">

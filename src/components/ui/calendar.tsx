@@ -18,7 +18,7 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
+      className={cn("p-3 bg-card", className)}
       classNames={{
         [UI.Months]: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         [UI.Month]: "space-y-4",
@@ -41,9 +41,11 @@ function Calendar({
         [UI.DayButton]: cn(
           buttonVariants({ variant: "ghost" }),
           "h-9 w-9 p-0 font-normal transition-all duration-200 border-none",
-          "hover:bg-accent hover:text-accent-foreground",
-          "aria-selected:bg-primary aria-selected:text-primary-foreground aria-selected:opacity-100",
-          "data-[range-middle]:bg-accent data-[range-middle]:text-accent-foreground data-[range-middle]:rounded-none",
+          "hover:bg-primary/20 hover:text-primary",
+          // Style pour les jours sélectionnés (bornes ou simple)
+          "aria-selected:bg-primary aria-selected:text-primary-foreground aria-selected:opacity-100 aria-selected:font-bold",
+          // Style pour l'intervalle de sélection (middle)
+          "data-[range-middle]:bg-primary/20 data-[range-middle]:text-primary data-[range-middle]:rounded-none",
           "data-[range-start]:rounded-l-md data-[range-end]:rounded-r-md"
         ),
         [UI.Today]: "text-primary font-black underline underline-offset-4",
