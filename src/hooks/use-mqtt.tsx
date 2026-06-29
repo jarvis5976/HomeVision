@@ -95,6 +95,8 @@ export interface DailyHistoryItem {
   Production_Ecu?: number;
   Vente: number;
   Achat: number;
+  AchatHP?: number;
+  AchatHC?: number;
   Consommation: number;
   Autoconsommation: number;
   SunHours: number;
@@ -239,11 +241,11 @@ const MOCK_ANNUAL_DATA: AnnualData = {
 const MOCK_DAILY_HISTORY_DATA: DailyHistoryData = {
   unGroup: {
     byKwh: [
-      { Année: 2024, Date: "2024-03-18", Production_Total: 6.5, Production_SolarEdge: 4.0, Production_Ecu: 2.5, Prevision: 7.0, Vente: 0.5, Achat: 30.5, Consommation: 36.5, Autoconsommation: 6.0, SunHours: 4.2 },
-      { Année: 2024, Date: "2024-03-19", Production_Total: 8.2, Production_SolarEdge: 5.0, Production_Ecu: 3.2, Prevision: 7.5, Vente: 1.0, Achat: 25.5, Consommation: 32.5, Autoconsommation: 7.0, SunHours: 5.1 },
-      { Année: 2025, Date: "2025-03-18", Production_Total: 7.2, Production_SolarEdge: 4.8, Production_Ecu: 2.4, Prevision: 6.8, Vente: 1.2, Achat: 24.5, Consommation: 30.5, Autoconsommation: 6.0, SunHours: 4.5 },
-      { Année: 2025, Date: "2025-03-19", Production_Total: 12.5, Production_SolarEdge: 8.5, Production_Ecu: 4.0, Prevision: 10.0, Vente: 3.2, Achat: 18.5, Consommation: 27.8, Autoconsommation: 9.3, SunHours: 6.2 },
-      { Année: 2025, Date: "2025-03-20", Production_Total: 5.8, Production_SolarEdge: 3.8, Production_Ecu: 2.0, Prevision: 8.5, Vente: 0.8, Achat: 28.2, Consommation: 33.2, Autoconsommation: 5.0, SunHours: 3.5 }
+      { Année: 2024, Date: "2024-03-18", Production_Total: 6.5, Production_SolarEdge: 4.0, Production_Ecu: 2.5, Prevision: 7.0, Vente: 0.5, Achat: 30.5, AchatHP: 18.2, AchatHC: 12.3, Consommation: 36.5, Autoconsommation: 6.0, SunHours: 4.2 },
+      { Année: 2024, Date: "2024-03-19", Production_Total: 8.2, Production_SolarEdge: 5.0, Production_Ecu: 3.2, Prevision: 7.5, Vente: 1.0, Achat: 25.5, AchatHP: 15.1, AchatHC: 10.4, Consommation: 32.5, Autoconsommation: 7.0, SunHours: 5.1 },
+      { Année: 2025, Date: "2025-03-18", Production_Total: 7.2, Production_SolarEdge: 4.8, Production_Ecu: 2.4, Prevision: 6.8, Vente: 1.2, Achat: 24.5, AchatHP: 14.8, AchatHC: 9.7, Consommation: 30.5, Autoconsommation: 6.0, SunHours: 4.5 },
+      { Année: 2025, Date: "2025-03-19", Production_Total: 12.5, Production_SolarEdge: 8.5, Production_Ecu: 4.0, Prevision: 10.0, Vente: 3.2, Achat: 18.5, AchatHP: 11.0, AchatHC: 7.5, Consommation: 27.8, Autoconsommation: 9.3, SunHours: 6.2 },
+      { Année: 2025, Date: "2025-03-20", Production_Total: 5.8, Production_SolarEdge: 3.8, Production_Ecu: 2.0, Prevision: 8.5, Vente: 0.8, Achat: 28.2, AchatHP: 16.9, AchatHC: 11.3, Consommation: 33.2, Autoconsommation: 5.0, SunHours: 3.5 }
     ],
     byPourc: [
       { Année: 2025, Date: "2025-03-18", Production_Total: 100, Vente: 16.6, Achat: 80.3, Consommation: 100, Autoconsommation: 19.7, SunHours: 4.5 },
@@ -252,8 +254,8 @@ const MOCK_DAILY_HISTORY_DATA: DailyHistoryData = {
   },
   group: {
     byKwh: [
-      { Année: 2024, Date: "Mars", Production_Total: 200.5, Production_SolarEdge: 130.0, Production_Ecu: 70.5, Vente: 35.2, Achat: 900.1, Consommation: 1155.3, Autoconsommation: 165.3, SunHours: 110 },
-      { Année: 2025, Date: "Mars", Production_Total: 250.5, Production_SolarEdge: 170.0, Production_Ecu: 80.5, Vente: 45.2, Achat: 850.1, Consommation: 1055.3, Autoconsommation: 205.3, SunHours: 120 }
+      { Année: 2024, Date: "Mars", Production_Total: 200.5, Production_SolarEdge: 130.0, Production_Ecu: 70.5, Vente: 35.2, Achat: 900.1, AchatHP: 540.1, AchatHC: 360.0, Consommation: 1155.3, Autoconsommation: 165.3, SunHours: 110 },
+      { Année: 2025, Date: "Mars", Production_Total: 250.5, Production_SolarEdge: 170.0, Production_Ecu: 80.5, Vente: 45.2, Achat: 850.1, AchatHP: 510.1, AchatHC: 340.0, Consommation: 1055.3, Autoconsommation: 205.3, SunHours: 120 }
     ],
     byPourc: [{ Année: 2025, Date: "Mars", Production_Total: 100, Vente: 18, Achat: 80.5, Consommation: 100, Autoconsommation: 19.5, SunHours: 120 }]
   }

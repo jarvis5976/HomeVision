@@ -257,7 +257,18 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className={dataColClass}>{renderValue(row.Achat)}</TableCell>
+                  <TableCell className={dataColClass}>
+                    <div className="flex flex-col items-center">
+                      <span className="text-[10px] font-black">{renderValue(row.Achat)}</span>
+                      {!isPercentage && (row.AchatHC !== undefined || row.AchatHP !== undefined) && (
+                        <span className="text-[8px] font-bold italic">
+                          <span className="text-emerald-500">{row.AchatHC !== undefined ? row.AchatHC.toFixed(2) : "-"}</span>
+                          <span className="text-muted-foreground"> / </span>
+                          <span className="text-rose-500">{row.AchatHP !== undefined ? row.AchatHP.toFixed(2) : "-"}</span>
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className={dataColClass}>{renderValue(row.Consommation)}</TableCell>
                   <TableCell className={dataColClass}>{renderValue(row.Autoconsommation)}</TableCell>
                   <TableCell className={dataColClass}>{renderValue(row.Vente)}</TableCell>
