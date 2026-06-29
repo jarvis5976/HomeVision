@@ -260,11 +260,11 @@ export function DailyHistoryTable({ data }: DailyHistoryTableProps) {
                   <TableCell className={dataColClass}>
                     <div className="flex flex-col items-center">
                       <span className="text-[10px] font-black">{renderValue(row.Achat)}</span>
-                      {!isPercentage && (row.AchatHC !== undefined || row.AchatHP !== undefined) && (
+                      {!isPercentage && (row.HC !== undefined || row.HP !== undefined) && (
                         <span className="text-[8px] font-bold italic">
-                          <span className="text-emerald-500">{row.AchatHC !== undefined ? row.AchatHC.toFixed(2) : "-"}</span>
+                          <span className="text-emerald-500">{row.HC !== undefined ? Number(row.HC).toFixed(2) : "-"}</span>
                           <span className="text-muted-foreground"> / </span>
-                          <span className="text-rose-500">{row.AchatHP !== undefined ? row.AchatHP.toFixed(2) : "-"}</span>
+                          <span className="text-rose-500">{row.HP !== undefined ? Number(row.HP).toFixed(2) : "-"}</span>
                         </span>
                       )}
                     </div>
